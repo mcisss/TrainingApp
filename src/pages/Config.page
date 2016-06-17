@@ -1,0 +1,230 @@
+<apex:page standardController="Config__c" extensions="ConfigController"  standardStylesheets="false" showHeader="false" sidebar="false"
+   recordSetVar="allconfigs" >
+   <!-- sidebar="false" showHeader="false" -->
+   <style>
+      body {
+      align: center;
+      background-image:url('{!$Resource.backgroundConfig4}')
+      }
+      .radioOpt td, .radioOptinput, .radioOpt label{
+      color:#1;  //666c71; 
+      font-family : Verdana, Geneva, sans-serif;
+      font-size : 10px   
+      position: absolute;
+      }     
+      input[type=radio] { margin-left: 240px;}
+      .radioClass { margin-left: 0px; }
+      h1 {
+      font-size: 200%;
+      font-family: Pier;
+      }
+      h2 {
+      font-size: 140%;
+      font-family: Cambria;
+      }
+      h3 {
+      font-size: 100%;
+      font-family: Constantia;
+      }
+      .table2 {
+      margin-auto;
+      width:45%; 
+      position: absolute;
+      left:750px;
+      }
+      .table3 {  margin-left: 160px;                 
+      table-layout: fixed;
+      width: 200px;
+      border-width: 1px;
+      border-color: #4CAF50;
+      }
+      .table4 {margin-left: 100px;
+      }
+      .table4 th{     margin-left: 240px;                       
+      background-color: #4CAF50;
+      color: white;
+      }
+      .table4 td {
+      border-style: solid;
+      border-color: #4CAF50; #4CAF50;
+      border-width: 1px;
+      }
+      .div1 {
+      border: 2px solid   #C0C0C0; 
+      }           
+      apex.form {
+      background-image:url('{!$Resource.kotek}')
+      }
+   </style>
+   <div align="center" draggable="false">
+      <apex:form id="form" >
+         <br/>
+         <br/>
+         <!-- 
+            // TODO: 
+            Zwięszyć odstęp pomiędzy Weekday a Specific day    <p/>
+            Zwiększyć odstęp między Start time i End time     <p/>
+            Zminiejszyć input fielda Config name, zwiększyć odstęp między tabelami - może trzecia tabela  <p/>
+            może: <p/>
+            kółko po prawej stronie od weekday i specific day <p/>
+            -->
+         <h1> Working hours: {!$User.FirstName} {!$User.LastName} </h1>
+         <!-- <apex:commandLink action="{!commandLinkAction1}" value="show first"  reRender="thePanelWrapper1,thePanelWrapper2" />  
+            <apex:inputField rendered="{!IF(config.Config_type__c ='Specific day',true,false)}" value="{!config.date__c}"  />
+              
+             <apex:outputPanel id="thePanelWrapper1">
+                 <apex:outputPanel id="panel1" rendered="{!rend1}" layout="block">
+                       <apex:commandLink action="{!commandLinkAction}" value="show second"  reRender="thePanelWrapper2,thePanelWrapper1" />
+                 </apex:outputPanel>
+             </apex:outputPanel>
+               
+             <apex:outputPanel id="thePanelWrapper2">
+                 <apex:outputPanel id="panel2" rendered="{!!rend1}" layout="block">
+                     <apex:commandLink action="{!commandLinkAction1}" value="show first"  reRender="thePanelWrapper1,thePanelWrapper2" />
+                 </apex:outputPanel>
+             </apex:outputPanel>
+            
+            -->
+         <br/>
+         <br/>
+         <apex:outputText styleClass="radioOpt">
+            <h2> Set a config </h2>
+         </apex:outputText>
+         <div class="div1">
+            <table border="" class="WizardTable radioOpt" style="width:50%; border-collapse: separate; border-spacing: 1 1em;" >
+               <tr>
+                  <td valign="top" align="centre" style="width:33%; padding-centre: 3px; padding-centre: 2px;" colspan="1">
+                     <div class="Mandatory">
+                        <apex:selectRadio title="Config type:" layout="table" styleClass="radioClass"  value="{!config.Config_type__c}" id="Config_type__c">
+                           <apex:selectOptions value="{!items}"/>
+                        </apex:selectRadio>
+                     </div>
+                  </td>
+               </tr>
+            </table>
+            <table id="dayordate" class="WizardTable table2">
+               <tr>
+                  <td>
+                     <apex:selectList value="{!config.Weekday__c}" size="1" multiselect="false">
+                        <apex:selectOptions value="{!weekdays}"  />
+                     </apex:selectList>
+                  </td>
+                  <td>
+                     <apex:inputField value="{!config.date__c}"> 
+                     </apex:inputField>
+                  </td>
+               </tr>
+            </table>
+            <br/>
+            <br/>
+            <table>
+               <tr>
+                  <th>
+                     <h3> Start time </h3>
+                     <apex:selectList value="{!pomS}" size="1" > 
+                        <apex:selectOptions value="{!WorkingHours}"/>
+                     </apex:selectList>
+                  </th>
+                  <th>
+                     &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  </th>
+                  <th>
+                     <h3> End time </h3>
+                     <apex:selectList value="{!pomE}" size="1">
+                        <apex:selectOptions value="{!WorkingHours}"/>
+                     </apex:selectList>
+                  </th>
+               </tr>
+            </table>
+            <br/>
+            <apex:outputPanel style="float:centre">
+       		   <script>
+               </script>
+               <apex:commandButton id="saveB" action="{!save}" value="Set config" reRender="thePanel" />   <!-- onclick=
+                   "if({!exists}) {if(!confirm('Override existing config?')) return false;}"     -->  
+               <apex:pageMessages />
+            </apex:outputPanel>
+            <p/>
+         </div>
+         <br/>
+         <br/>
+         <br/>
+         <br/>
+         <br/> 
+         <apex:outputText styleClass="radioOpt">
+            <h2> Existing configs </h2>
+         </apex:outputText>
+         <apex:outputPanel id="thePanel">
+            <table style="width:51%" class="WizardTable table3" >
+               <tr>
+                  <th>
+                     <apex:dataTable styleClass="Wizardtable table4"  VALUE="{!wconfigs}" var="con" rowClasses="odd,even" >                       
+                        <apex:column headerValue="Weekday">
+                           <apex:outputField value="{!con.Weekday__c}">
+                           </apex:outputField>
+                        </apex:column>
+                        <apex:column headerValue="Start time">
+            			   <apex:commandLink id="del2" action="{!removeConfig}" onclick="if(!confirm('Are you sure?')) return false;">
+                               <apex:commandButton value="{!dispSTime}"/>
+                              <apex:param value="{!con.Id}" name="configsToDeleteID" assignTo="{!configsToDeleteID}"/>
+                           </apex:commandLink>
+                        </apex:column>
+                        <apex:column headerValue="End time">
+                           <apex:outputText value="{!con.End_time__c}">
+                           </apex:outputText>
+                        </apex:column>   
+                        <apex:column >
+                           <apex:commandLink id="del" action="{!removeConfig}" onclick="if(!confirm('Are you sure?')) return false;">
+                               <apex:commandButton value="Delete"/>
+                              <apex:param value="{!con.Id}" name="configsToDeleteID" assignTo="{!configsToDeleteID}"/>
+                           </apex:commandLink>
+                        </apex:column>
+                     </apex:dataTable>
+                  </th>
+                  <th>
+                     <apex:dataTable styleClass="Wizardtable table4" VALUE="{!sconfigs}" var="con" rowClasses="odd,even">
+                        <apex:column headerValue="Specific day">
+                           <apex:outputField value="{!con.date__c}" >
+                           </apex:outputField>
+                        </apex:column>
+                        <apex:column headerValue="Start time">
+                           <apex:outputText value="{!con.Start_time__c}">
+                           </apex:outputText>
+                        </apex:column>
+                        <apex:column headerValue="End time" >
+                           <apex:outputText value="{!con.End_time__c}">
+                           </apex:outputText>
+                        </apex:column>                  
+                        <apex:column >
+                           <apex:commandLink id="del" action="{!removeConfig}" onclick="if(!confirm('Are you sure?')) return false;">
+                               <apex:commandButton value="Delete"/>
+                              <apex:param value="{!con.Id}" name="configsToDeleteID" assignTo="{!configsToDeleteID}"/>
+                           </apex:commandLink>
+                        </apex:column>
+                     </apex:dataTable>
+                  </th>
+               </tr>
+            </table>
+         </apex:outputPanel>
+         <apex:commandLink action="{!commandLinkAction}" value="Rerender the config list" reRender="thePanel" id="theCommandLink"/>
+         <br/><br/>
+         <br/>
+         <apex:actionFunction action="{!save}" name="rerendsave" reRender="form" >
+         </apex:actionFunction>
+         <script>
+			function jspomS() {
+				CallApexPomS();
+			}
+			function jspomE() {
+				CallApexPomE();
+			}	
+			function dispS () {
+				CallApexString();
+			} 
+		 </script> 
+         	
+      	 <apex:actionFunction name="CallApexPomS" action="{!pomS}"/>
+      	 <apex:actionFunction name="CallApexPomE" action="{!pomE}"/>
+      </apex:form>
+   </div>
+</apex:page>
