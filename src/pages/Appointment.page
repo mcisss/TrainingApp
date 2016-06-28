@@ -1,102 +1,90 @@
 <apex:page standardController="Appointment__c" extensions="AppointmentController"  standardStylesheets="false" showHeader="false" sidebar="false"
    recordSetVar="allappoints"  id="apage">
-<!-- TODO
-Checking whether the client exists (js script checking email) after changing the inputField email
-
-
-Later
-getDentists
-Calendar
-Send an email to the dentist after creating an appointment
-
-
-jakby co:
-tu jest kalendarz
-http://www.w3schools.com/howto/howto_css_calendar.asp
--->
-  <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" />
-  <script>
-	j$ = jQuery.noConflict();
-  	j$(document).ready(function() {
- 		j$('[id*=datePick').hide();
- 		j$('[id*=appointmentDetails').hide();
-	});
-		
-	function clickSetAnAppointment () {
-	   	j$('[id*=datePick').show();
-	   	j$('[id*=appointmentDetails').show();
-	   	j$('[id*=setAnAppointment').hide();
-  	}
-  </script>
-  
-  <head>
-    <style>
-    body {
-  		text-align:center;
-	    background-image:url('{!$Resource.skyshipE4}');
-	   	margin: auto;
-  	}
-  	.divc {
-		    width: 500px;
-		    height: 100px;
-		    border: 3px solid #73AD21;
-		 }
-	.pblocktable {
-	margin: auto;
-	text-align:center;
-	}
-	table.detailList {
-        width: 50% !important;
-        text-align: center;
-        margin: 0 auto;
-        font: Verdana;
-        font-size: 20px;
-    }
-		 
-    </style>
-  </head>
-  <div>
-	  <apex:form >
-	    <h1 id="setAnAppointment" onclick="clickSetAnAppointment();">Set an appointment</h1>
-	
-		<div id="datePick">
-			<h2>Please click on your appointment date. Days with available terms for a selected dentist are marked in green.</h2>
-		
-		
-		</div>
-		
-		
-		
-		<table>
-			
-		</table>
-		
-		<apex:pageBlock id="appointmentDetails">
-			<apex:pageBlockSection title="My Content Section" columns="2" >
-				 <apex:outputField value="{!appointment.Date__c}" > </apex:outputField>
-				 <apex:inputText value="{!client.First_name__c}"/>
-	             <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Start time">
-	                   <apex:selectOptions value="{!WorkingHours}"/>
-	                </apex:selectList>
-				 <apex:inputText value="{!client.Second_name__c}"/>
-	
-		 	  	 <apex:selectList styleClass="sellist" value="{!pomE}" size="1" Label="End time">
-	                   <apex:selectOptions value="{!WorkingHours}"/>
-	                </apex:selectList>
-		 	     <apex:inputField value="{!client.Email__c}"/>
-		 	      
-		 	     <apex:inputTextarea value="{!appointment.Description__c}" /> 
-				 <apex:inputField value="{!client.Phone_number__c}"/>
-		  	</apex:pageBlockSection>
-		</apex:pageBlock>
-		
-		<apex:actionFunction name="callCheckClientExists" action="{!checkClientExists}" rerender=""/>
-		
-		<apex:commandLink value="costam" action="{!checkClientExists}" reRender="tPanel"/>
-	  	 <!-- -->
-	  	<apex:outputPanel id="tPanel">
-		 	    <apex:pageMessages />
-		</apex:outputPanel>
-	  </apex:form>
-  </div>
+   <!-- TODO
+      Checking whether the client exists (js script checking email) after changing the inputField email
+      
+      
+      Later
+      getDentists
+      Calendar
+      Send an email to the dentist after creating an appointment
+      
+      
+      jakby co:
+      tu jest kalendarz
+      http://www.w3schools.com/howto/howto_css_calendar.asp
+      -->
+   <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" />
+   <script>
+      j$ = jQuery.noConflict();
+       	j$(document).ready(function() {
+      		j$('[id*=datePick').hide();
+      		j$('[id*=appointmentDetails').hide();
+      });
+      	
+      function clickSetAnAppointment () {
+         	j$('[id*=datePick').show();
+         	j$('[id*=appointmentDetails').show();
+         	j$('[id*=setAnAppointment').hide();
+       	}
+       
+   </script>
+   <head>
+      <style>
+         body {
+         text-align:center;
+         background-image:url('{!$Resource.skyshipE4}');
+         margin: auto;
+         }
+         .divc {
+         width: 500px;
+         height: 100px;
+         border: 3px solid #73AD21;
+         }
+         .pblocktable {
+         margin: auto;
+         text-align:center;
+         }
+         table.detailList {
+         width: 50% !important;
+         text-align: center;
+         margin: 0 auto;
+         font: Verdana;
+         font-size: 20px;
+         border-spacing: 20px;
+         }
+      </style>
+   </head>
+   <div>
+      <apex:form >
+         <h1 id="setAnAppointment" onclick="clickSetAnAppointment();">Set an appointment</h1>
+         <div id="datePick">
+            <h2>Please click on your appointment date. Days with available terms for a selected dentist are marked in green.</h2>
+         </div>
+         <table>
+         </table>
+         <apex:pageBlock id="appointmentDetails">
+            <apex:pageBlockSection title="My Content Section" columns="2" >
+               <apex:outputField value="{!appointment.Date__c}" > </apex:outputField>
+               <apex:inputText value="{!client.First_name__c}"/>
+               <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Start time">
+                  <apex:selectOptions value="{!WorkingHours}"/>
+               </apex:selectList>
+               <apex:inputText value="{!client.Second_name__c}"/>
+               <apex:selectList styleClass="sellist" value="{!pomE}" size="1" Label="End time">
+                  <apex:selectOptions value="{!WorkingHours}"/>
+               </apex:selectList>
+               <apex:inputField value="{!client.Email__c}"/>
+               <apex:inputTextarea value="{!appointment.Description__c}" />
+               <apex:inputField value="{!client.Phone_number__c}"/>
+            </apex:pageBlockSection>
+         </apex:pageBlock>
+         <apex:actionFunction name="callCheckClientExists" action="{!checkClientExists}" rerender=""/>
+         <apex:commandLink value="costam" action="{!checkClientExists}" reRender="tPanel"/>
+         <!-- -->
+         <apex:outputPanel id="tPanel">
+            <apex:pageMessages />
+         </apex:outputPanel>
+      </apex:form>
+   </div>
 </apex:page>

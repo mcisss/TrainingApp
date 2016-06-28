@@ -15,23 +15,18 @@ public class ConfigController {
 
     }
     
-	//commit 28.06
-	
-	//Strategy: first done good, then beauty
- 
     //TODO:
     
-    //      sprawdzić rozwiązanie 2 DatePicker.pickDate  https://developer.salesforce.com/forums/?id=906F000000097bvIAA
-	//      on the other site - don't let non-dentists to access the config page
+	//      on other site - don't let non-dentists to access the config page
 	
     // optionally: do not show old configs i.e. those with date < NOW();
     
     
     public Config__c config { get; set; }
-    public List<Config__c> configs {get;set;}
-    public String configsToDeleteID {get;set;}
     public String pomS {get;set;}
     public String pomE {get;set;}
+    public String pomW {get;set;}
+    public String configsToDeleteID {get;set;}
     public Decimal ValueToFormat {get;set;}
     
 
@@ -41,15 +36,14 @@ public class ConfigController {
             [SELECT Id, Name, Active__c, date__c, 
         Start_time__c, End_time__c, Weekday__c, Dentist__c FROM Config__c];
     }      
-    
     public PageReference save() {
-        config.Start_time__c = Decimal.valueOf(pomS);
-        config.End_time__c = Decimal.valueOf(pomE);
-        if (config.Weekday__c == 'Choose weekday' && config.date__c == null) {
+        if (pomW == 'Choose weekday' && config.date__c == null) {    // Default Weekday__c selection option - 'Choose weekday' - denotes the Specific day type of config. In other cases the config type is Weekday
         	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Config not saved. Please specify the weekday or date'));
         	return null;
         }
-  
+        config.Start_time__c = Decimal.valueOf(pomS);
+        config.End_time__c = Decimal.valueOf(pomE);
+  		config.Weekday__c = pomW;
         if ( !overlapcheck() ) {   // validation checks  
         	try {
         	upsert config;
@@ -63,11 +57,10 @@ public class ConfigController {
         }
         return null;       
     }
-
     public void removeConfig(){
         delete [SELECT Id FROM Config__c WHERE Id=:configsToDeleteID];
     }
-    public List<SelectOption> getWeekdays()
+    public List<SelectOption> getWeekdays() // provides Weekdays selection options
     {
        List<SelectOption> options = new List<SelectOption>();
        Schema.DescribeFieldResult fieldResult = Config__c.Weekday__c.getDescribe();
@@ -78,7 +71,7 @@ public class ConfigController {
        }       
        return options;
     }     
-    public List<SelectOption> getWorkingHours() {  
+    public List<SelectOption> getWorkingHours() {    // provides Hours selection options
         List<SelectOption> options = new List<SelectOption>(); 
         String hour, inminutes;
         options.add(new SelectOption('0000','--:--'));
@@ -87,26 +80,25 @@ public class ConfigController {
             inminutes = string.valueOf(  integer.valueOf(hour.substring(0,2))*60 
             		  				   + integer.valueOf(hour.substring(3,5)	 )
                       );
-            options.add(new SelectOption(inminutes,hour));  // value bez : label z musi być string  !!!!!!!!!!
+            options.add(new SelectOption(inminutes,hour));
         }   
         return options; 
     }  
-    public String getFrommintohours2() {
+    public String getFrommintohours2() {   // converts from int to String in HH:MM time format
         String hours = string.valueOf(Math.floor(ValueToFormat/60));
         if (hours.length() == 1) {
         	hours = '0' + hours;
         }
         return hours + ':00';
     }
-    public List<Config__c> getWconfigs () {
+    public List<Config__c> getWconfigs () {   // provides weekday configs
         return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
             Weekday__c, Dentist__c, Delete__c FROM Config__c WHERE date__c =:null ORDER BY Weekday__c, Start_time__c];
     }
-     public List<Config__c> getSconfigs () {
+     public List<Config__c> getSconfigs () {   // provides specific day configs
         return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
             Weekday__c, Dentist__c, Delete__c FROM Config__c WHERE date__c !=:null ORDER BY date__c, Start_time__c];
     }
- 
     public Boolean overlapcheck () { // checks whether the hours chosen do not overlap with other configs
         List<Config__c> w_or_s_configs = new List<Config__c>();  
         String config_type;
@@ -123,11 +115,15 @@ public class ConfigController {
         for (Config__c con : w_or_s_configs) {      
             if( config_type == 'w') {
                 if( config.Weekday__c == con.Weekday__c) {
-                    return overinsidepom (con);
+                    if (overinsidepom (con) ) {
+                    	return true;
+                    }
                 }    
             } else if (config_type == 's') { 
             	if(config.date__c == con.date__c) {
-            		return overinsidepom (con);
+            		if (overinsidepom (con) ) {
+                    	return true;
+                    }
             	}
             }
         }
@@ -149,12 +145,13 @@ public class ConfigController {
         }
         return false;
     }
-    public void ChangeConfigTypeW () {
+    public PageReference ChangeConfigTypeW () {   // performed when the config type changes
     	config.date__c = null;
-    	config.Weekday__c = 'Choose weekday';
+    	return null;
     }
-    public void ChangeConfigTypeS () {
-    	config.Weekday__c = 'Choose weekday';
+    public PageReference ChangeConfigTypeS () {   // performed when the config type changes
+    	pomW = 'Choose weekday';
+    	return null;
     }
 	public void doNothing() {
 	}
