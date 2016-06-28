@@ -14,13 +14,15 @@ public class ConfigController {
     public ConfigController() {
 
     }
+    
+	//commit 28.06
 	
 	//Strategy: first done good, then beauty
  
-    //TODO: sprawdzić rozwiązanie 2 DatePicker.pickDate  https://developer.salesforce.com/forums/?id=906F000000097bvIAA
-    //		validation rules: data w kontrolerze required i message - tu Grzegorz 
-    //  	handling exceptions:  
-	// on the other site - don't let non-dentists to access the config page
+    //TODO:
+    
+    //      sprawdzić rozwiązanie 2 DatePicker.pickDate  https://developer.salesforce.com/forums/?id=906F000000097bvIAA
+	//      on the other site - don't let non-dentists to access the config page
 	
     // optionally: do not show old configs i.e. those with date < NOW();
     
@@ -35,24 +37,19 @@ public class ConfigController {
 
     public ConfigController(ApexPages.StandardSetController stdController) {   
         String name = ApexPages.currentPage().getParameters().get('id');   
-        pomE = 'fkfa';
-        
         config = (Name == null) ? new Config__c():
-            [SELECT Id, Name, Active__c, Config_type__c, date__c, 
+            [SELECT Id, Name, Active__c, date__c, 
         Start_time__c, End_time__c, Weekday__c, Dentist__c FROM Config__c];
-   		config.Config_type__c = String.valueof(getConfigTypes().get(0).getLabel());
     }      
     
     public PageReference save() {
         config.Start_time__c = Decimal.valueOf(pomS);
         config.End_time__c = Decimal.valueOf(pomE);
-        if (config.Config_type__c == 'Specific day' && config.date__c == null) {
-        	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Config not saved. Please specify the date'));
+        if (config.Weekday__c == 'Choose weekday' && config.date__c == null) {
+        	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Config not saved. Please specify the weekday or date'));
         	return null;
         }
-        if (config.Config_type__c == 'Weekday' && config.date__c != null ) {
-        	config.date__c = null;
-        }
+  
         if ( !overlapcheck() ) {   // validation checks  
         	try {
         	upsert config;
@@ -70,17 +67,6 @@ public class ConfigController {
     public void removeConfig(){
         delete [SELECT Id FROM Config__c WHERE Id=:configsToDeleteID];
     }
-
-    public List<SelectOption> getConfigTypes() {
-        List<SelectOption> options = new List<SelectOption>(); 
-        Schema.DescribeFieldResult fieldResult = Config__c.Config_type__c.getDescribe();
-        List<Schema.PicklistEntry> ple = fieldResult.getPicklistValues();
-        for( Schema.PicklistEntry f : ple)
-        {
-           options.add(new SelectOption(f.getLabel(), f.getValue()));
-        }       
-        return options; 
-    }
     public List<SelectOption> getWeekdays()
     {
        List<SelectOption> options = new List<SelectOption>();
@@ -95,7 +81,7 @@ public class ConfigController {
     public List<SelectOption> getWorkingHours() {  
         List<SelectOption> options = new List<SelectOption>(); 
         String hour, inminutes;
-        options.add(new SelectOption('9999','--:--'));
+        options.add(new SelectOption('0000','--:--'));
         for (Integer i = 0 ; i <24 ; i++) {
             hour = string.valueOf(Time.newInstance(i, 0, 0, 0)).substring(0,5);
             inminutes = string.valueOf(  integer.valueOf(hour.substring(0,2))*60 
@@ -113,18 +99,18 @@ public class ConfigController {
         return hours + ':00';
     }
     public List<Config__c> getWconfigs () {
-        return [SELECT Id, Name, Active__c, Config_type__c, date__c, Start_time__c, End_time__c,
-            Weekday__c, Dentist__c, Delete__c FROM Config__c WHERE Config_type__c =:'Weekday' ORDER BY Weekday__c, Start_time__c];
+        return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
+            Weekday__c, Dentist__c, Delete__c FROM Config__c WHERE date__c =:null ORDER BY Weekday__c, Start_time__c];
     }
      public List<Config__c> getSconfigs () {
-        return [SELECT Id, Name, Active__c, Config_type__c, date__c, Start_time__c, End_time__c,
-            Weekday__c, Dentist__c, Delete__c FROM Config__c WHERE Config_type__c !=:'Weekday'ORDER BY date__c, Start_time__c];
+        return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
+            Weekday__c, Dentist__c, Delete__c FROM Config__c WHERE date__c !=:null ORDER BY date__c, Start_time__c];
     }
  
     public Boolean overlapcheck () { // checks whether the hours chosen do not overlap with other configs
         List<Config__c> w_or_s_configs = new List<Config__c>();  
         String config_type;
-        if ( config.Config_type__c == 'Weekday' ) {
+        if ( config.date__c == null ) {
             w_or_s_configs = getWconfigs(); 
             config_type = 'w';
         }   else {
@@ -157,13 +143,19 @@ public class ConfigController {
                 return true; 
             }
         }
-        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Bylem tu'));
         if ( timee[0] <= con.Start_time__c && timee[1] >= con.End_time__c ) {
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'The chosen working hours encapsulate the other config\'s hours on the selected day'));
             return true; 
         }
         return false;
     }
-    
-    // OLD FUNCTIONS:
+    public void ChangeConfigTypeW () {
+    	config.date__c = null;
+    	config.Weekday__c = 'Choose weekday';
+    }
+    public void ChangeConfigTypeS () {
+    	config.Weekday__c = 'Choose weekday';
+    }
+	public void doNothing() {
+	}
 }
