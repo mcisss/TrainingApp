@@ -42,10 +42,10 @@
           //j$('[id*=setConfig').show();
       }
        function setConfigMouseenter () {
-        j$('[id*=setConfig').css({"color": "rgb(0,0,50)"});
+        j$('[id*=setConfig').css({"color": "rgb(0,0,190)"});
       }
       function setConfigMouseleave () {
-        j$('[id*=setConfig').css({"color": "rgb(0,85,0)"});
+        j$('[id*=setConfig').css({"color": "rgb(0,0,100)"});
       }
       function setConfigWTypeMouseenter () {
         //j$('[id*=chooseWConfig').css({"color": "rgb(90,0,0)"});
@@ -69,42 +69,35 @@
          background-image:url('{!$Resource.binary}');  
          margin: auto;
          }
+         h1 {
+         font-size: 46px;
+         font-family: Futura, Pier, Constantia;
+         }
+         h2 {
+         font-size: 34px;
+         font-family: Futura, Cambria, Constantia;
+         }
+         h3 {
+         font-size: 22px;
+         font-family: Futura, Cambria, Constantia;
+         }
+         .message{
+           background-color: #DFF;
+         }
          .messageTable {
-         font-size: 20px;
+         font-size: 16px;
          margin: auto  !important;
+           background-color: rbg(0,0,100) !important;
          }
-         .radioOpt {
-         }
-         .radioOpt td{
-         padding: 0px 50px;
-         }
-         .radioOpt, .radioOpt td, .radioOptinput, .radioOpt label{
-         text-align:center;
-         margin: auto;
-         font-family : Constantia, Verdana, Geneva, sans-serif;
-         font-size : 40px;  
-         width: 680px; 
-         }     
-         #thePanel {
+         .messagePanel {
          width: 300px;
          text-align:center;
          margin: auto;
          }
-         #radioB {
-         position: static;
-         text-align:center;
-         margin: auto;
-         width: 1000px;
+         .msgIcon {
+         display: none;
          }
-         #radioS {
-         position: static;
-         text-align:center;
-         margin: auto;
-         }
-         .sellist {
-         font-size: 18px;
-         }
-         .inputf {
+         .inputOrSelList {
          font-size: 18px;
          }
          .saveB {
@@ -112,18 +105,6 @@
          height: 20px;
          font-family : Constantia;
          font-size: 18px;
-         }
-         h1 {
-         font-size: 56px;
-         font-family: Pier, Constantia;
-         }
-         h2 {
-         font-size: 40px;
-         font-family: Cambria, Constantia;
-         }
-         h3 {
-         font-size: 22px;
-         font-family: Cambria, Constantia;
          }
          .middle {
          text-align:center;
@@ -135,32 +116,28 @@
          text-align:center;
          margin: auto;
          }    
-         #setConfig {
-         color: rgb(0,85,0);
+         .clickableSomething {
+         color: rgb(0,0,100);
          cursor: pointer;
          }
-         .WeekdayString {
-         color: rgb(0,95,0);
-         cursor: pointer;
-         }
-         .SpecificDString {
+         .importantclick2 {
          color: rgb(0,0,140);  //rgb(245,245,0);
          cursor: pointer;
          }
-         .table3 {  
-         font-size : 22px;  
+         .table1 {  
          margin: auto;
+         font-size : 22px;  
          width: 900px;
          border-spacing: 20px;
          display: inline:
          }
-         .table4 {
+         .table2 {
          overflow-y: auto;
          overflow: hidden;
          margin: auto;
          text-align:center;
          }
-         .table4 th{   
+         .table2 th{   
          background-color: rgb(0,0,130);
          color: white;
          width: 200px;
@@ -169,7 +146,7 @@
          //border: 1px solid rgb(0,155,0);
          border-spacing: 30px;
          }
-         .table4 td {
+         .table2 td {
          border-style: solid;
          border-color: rgb(0,0,130); #FFFF20; #4CAF50;
          border-width: 2px;
@@ -177,12 +154,11 @@
          width: 200px;
          margin: auto;
          border-spacing: 30px;
-         color: rgb(000,250);  /* or 100 - dark blue */
          } 
          /*      
-         .table4 tr:nth-child(even){background-color: rgb(90,255,90)
+         .table2 tr:nth-child(even){background-color: rgb(90,255,90)
          }
-         .table4 tr:nth-child(odd){background-color: rgb(40,125,40)
+         .table2 tr:nth-child(odd){background-color: rgb(40,125,40)
          }
          */
       </style>
@@ -196,7 +172,7 @@
          <br/>
          <br/>
          <apex:outputPanel >
-            <h2 id="setConfig" onclick="clicksetconfig ();" onmouseover="setConfigMouseenter ();"
+            <h2 id="setConfig" class="clickableSomething" onclick="clicksetconfig ();" onmouseover="setConfigMouseenter ();"
                onmouseout="setConfigMouseleave ();" >Set a config 
             </h2>
          </apex:outputPanel>
@@ -204,10 +180,10 @@
             <br/>
             <h3> Config Type: </h3>
             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-            <h3 id="chooseWConfig" class="WeekdayString" onclick="clickWeekdayC();" onmouseover="setConfigWTypeMouseenter ();"
+            <h3 id="chooseWConfig" class="importantclick2" onclick="clickWeekdayC();" onmouseover="setConfigWTypeMouseenter ();"
                onmouseout="setConfigWTypeMouseleave ();" >Weekday</h3>
             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-            <h3 id="chooseSConfig" class="SpecificDString" onclick="clickSpecificC();" onmouseover="setConfigSTypeMouseenter ();"
+            <h3 id="chooseSConfig" class="importantclick2" onclick="clickSpecificC();" onmouseover="setConfigSTypeMouseenter ();"
                onmouseout="setConfigSTypeMouseleave ();" >Specific day</h3>
             <div class="configDetails2" rendered="false">
                <br/>
@@ -216,7 +192,7 @@
                      <th>
                         <div id="divselectweekday">
                            <apex:outputPanel id="thePanelW">
-                              <apex:selectList id="selectweekday" styleClass="inputf" value="{!pomW}" size="1" multiselect="false">
+                              <apex:selectList id="selectweekday" styleClass="inputOrSelList" value="{!pomW}" size="1" multiselect="false">
                                  <apex:selectOptions value="{!weekdays}"  />
                               </apex:selectList>
                            </apex:outputPanel>
@@ -259,17 +235,17 @@
             <p/>
          </div>
          <br/>
-         <apex:outputPanel id="thePanel" styleClass="middle">
+         <apex:outputPanel id="thePanel" styleClass="messagePanel, middle">
             <apex:pageMessages />
          </apex:outputPanel>
          <br/>
-         <apex:outputText styleClass="radioOpt">
+         <apex:outputText >
             <h2> Configs </h2>
          </apex:outputText>
          <apex:outputPanel id="configsTable">
-            <table class="table3" >
+            <table class="table1" >
                <th style="vertical-align: top;">
-                  <apex:dataTable styleClass="Wizardtable table4" id="tabW" VALUE="{!wconfigs}" var="con" rowClasses="odd,even" cellspacing="10">
+                  <apex:dataTable styleClass="Wizardtable table2" id="tabW" VALUE="{!wconfigs}" var="con" rowClasses="odd,even" cellspacing="10">
                      <apex:column headerValue="Weekday">
                         <apex:outputField value="{!con.Weekday__c}">
                         </apex:outputField>
@@ -292,7 +268,7 @@
                <th style="width: 100px;">
                </th>
                <th style="vertical-align: top;">
-                  <apex:dataTable styleClass="Wizardtable table4" id="tabS" VALUE="{!sconfigs}" var="con" rowClasses="odd,even" cellspacing="10">
+                  <apex:dataTable styleClass="Wizardtable table2" id="tabS" VALUE="{!sconfigs}" var="con" rowClasses="odd,even" cellspacing="10">
                      <apex:column headerValue="Specific day">
                         <apex:outputField value="{!con.date__c}" >
                         </apex:outputField>
