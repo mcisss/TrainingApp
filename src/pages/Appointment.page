@@ -1,4 +1,4 @@
-<apex:page standardController="Appointment__c" extensions="AppointmentController"  standardStylesheets="false" showHeader="false" sidebar="false"
+<apex:page standardController="Appointment__c" extensions="AppointmentController"  standardStylesheets="true" showHeader="false" sidebar="false"
    recordSetVar="allappoints"  id="apage">
    <!-- TODO
       Checking whether the client exists (js script checking email) after changing the inputField email
@@ -20,6 +20,7 @@
        	j$(document).ready(function() {
       		j$('[id*=datePick').hide();
       		j$('[id*=appointmentDetails').hide();
+      		//tmm();
       });
       	
       function clickSetAnAppointment () {
@@ -53,6 +54,92 @@
          font-size: 20px;
          border-spacing: 20px;
          }
+         
+         
+         
+         #divcalendar {
+         width: 800px;
+         margin: auto;
+         }
+         
+         ul {list-style-type: none;}
+        .month {
+		    padding: 70px 25px;
+		    width: 100%;
+		    background: #1abc9c;
+		}
+		
+		.month ul {
+		    margin: 0;
+		    padding: 0;
+		}
+		
+		.month ul li {
+		    color: white;
+		    font-size: 24px;
+		    text-transform: uppercase;
+		    letter-spacing: 3px;
+		}
+		
+		.month .prev {
+		    float: left;
+		    padding-top: 15px;
+		}
+		
+		.month .next {
+		    float: right;
+		    padding-top: 15px;
+		} 
+         
+         .weekdays {
+	    margin: 0;
+	    padding: 10px 0;
+	    background-color: #ddd;
+		}
+
+		.weekdays li {
+	    display: inline-block;
+	    width: 13.6%;
+	    color: #666;
+	    text-align: center;
+	    font-size: 16px;
+		}
+		
+		.days {
+		    padding: 10px 0;
+		    background: #eee;
+		    margin: 0;
+		}
+		
+		.days li {
+		    list-style-type: none;
+		    display: inline-block;
+		    width: 13.6%;
+		    text-align: center;
+		    margin-bottom: 5px;
+		    font-size:16px;
+		    color: #777;
+		}
+		
+		.days li .active {
+		    padding: 5px;
+		    background: #1abc9c;
+		    color: white !important
+		}
+				
+				
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	
+		
+		
       </style>
    </head>
    <div>
@@ -60,12 +147,71 @@
          <h1 id="setAnAppointment" onclick="clickSetAnAppointment();">Set an appointment</h1>
          <div id="datePick">
             <h2>Please click on your appointment date. Days with available terms for a selected dentist are marked in green.</h2>
+         	<apex:selectList id="selectDentist" styleClass="selDent" value="{!dentistId}" size="1" multiselect="false">
+               <apex:selectOptions value="{!dentists}"  />
+            </apex:selectList>
+            
+            <div id="divcalendar">
+            	<div class="month">
+				  <ul>
+				    <li class="prev">❮</li>
+				    <li class="next">❯</li>
+				    <li style="text-align:center">
+				      August<br/>
+				      <span style="font-size:18px">2016</span>
+				    </li>
+				  </ul>
+				</div>
+            
+	            <ul class="weekdays">
+				  <li>Mo</li>
+				  <li>Tu</li>
+				  <li>We</li>
+				  <li>Th</li>
+				  <li>Fr</li>
+				  <li>Sa</li>
+				  <li>Su</li>
+				</ul>
+				  <ul class="days"> 
+				  <li>1</li>
+				  <li>2</li>
+				  <li>3</li>
+				  <li>4</li>
+				  <li>5</li>
+				  <li>6</li>
+				  <li>7</li>
+				  <li>8</li>
+				  <li>9</li>
+				  <li><span class="active">10</span></li>
+				  <li>11</li>
+				  <li>12</li>
+				  <li>13</li>
+				  <li>14</li>
+				  <li>15</li>
+				  <li>16</li>
+				  <li>17</li>
+				  <li>18</li>
+				  <li>19</li>
+				  <li>20</li>
+				  <li>21</li>
+				  <li>22</li>
+				  <li>23</li>
+				  <li>24</li>
+				  <li>25</li>
+				  <li>26</li>
+				  <li>27</li>
+				  <li>28</li>
+				  <li>29</li>
+				  <li>30</li>
+				  <li>31</li>
+				</ul>
+            </div>
          </div>
          <table>
          </table>
          <apex:pageBlock id="appointmentDetails">
             <apex:pageBlockSection title="My Content Section" columns="2" >
-               <apex:outputField value="{!appointment.Date__c}" > </apex:outputField>
+               <apex:inputField value="{!appointment.Date__c}"  showDatePicker="true"> </apex:inputField>
                <apex:inputText value="{!client.First_name__c}"/>
                <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Start time">
                   <apex:selectOptions value="{!WorkingHours}"/>
@@ -77,14 +223,18 @@
                <apex:inputField value="{!client.Email__c}"/>
                <apex:inputTextarea value="{!appointment.Description__c}" />
                <apex:inputField value="{!client.Phone_number__c}"/>
+               <apex:outputPanel id="tPanel">
+            	 <apex:pageMessages />
+        	   </apex:outputPanel>
+               <apex:commandLink styleClass="saveB" action="{!save}" style="text-decoration: none;"
+                  reRender="tPanel">
+                  <apex:commandButton id="saveB" value="Set appointment"/>
+               </apex:commandLink>
             </apex:pageBlockSection>
          </apex:pageBlock>
          <apex:actionFunction name="callCheckClientExists" action="{!checkClientExists}" rerender=""/>
          <apex:commandLink value="costam" action="{!checkClientExists}" reRender="tPanel"/>
-         <!-- -->
-         <apex:outputPanel id="tPanel">
-            <apex:pageMessages />
-         </apex:outputPanel>
+         <apex:actionFunction name="tmm" action="{!tm}" rerender="tPanel" />
       </apex:form>
    </div>
 </apex:page>

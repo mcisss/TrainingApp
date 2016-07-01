@@ -11,13 +11,20 @@ public with sharing class AppointmentController {
 	    
 	public Appointment__c appointment {get;set;}
     public Client__c client {get;set;}
+    public User dentist {get;set;}
+    
     
     public List<Appointment__c> configs {get;set;}
     public String appointmentsToDeleteID {get;set;}
     public String pomS {get;set;}
     public String pomE {get;set;}
     public Decimal ValueToFormat {get;set;}
-    public String dentistID {get;set;}
+    public String dentistId {get;set;}
+    
+    public DateTime d {get;set;}
+    public String monthName {get;set;}
+    public String year {get;set;}
+    public String daynb {get;set;}
     
        
     public AppointmentController(ApexPages.StandardSetController stdController) {   
@@ -37,9 +44,31 @@ public with sharing class AppointmentController {
         else {
         	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'client don\'t EXIST'));
         }
+        /*
+        GregorianCalendar now = new GregorianCalendar();
+        Integer month = now.get(Calendar.MONTH); 
+		Integer weekday = now.get(Calendar.DAY_OF_WEEK);
+        */
         
+        // Date dateToday = Date.today;
+        d = datetime.now();
+		monthName= d.format('MMMMM');
+		monthName= d.format('YYYY');
+		
+		
+        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,' '+monthName));
+        
+        Date dd= date.today();
+        Date i = dd.toStartOfMonth();
+        //String monthName2 = dd.format('YYYY');
+        
+        //Date z = d;
+        
+        //daysInMonth(year, month)
+        
+        //newInstance(2008, 1, 1) 
     }      
-      public PageReference save() {
+    public PageReference save() {
 	     if ( 1 == 1 ) {  // validation checks   
 	        try {
 	        	upsert appointment;
@@ -55,33 +84,40 @@ public with sharing class AppointmentController {
     }
     public List<SelectOption> getDentists () {
     	List<SelectOption> options = new List<SelectOption>();
-    	List<User> Dentistss = [SELECT Name FROM User 
-    							WHERE Id=:[SELECT Id FROM Profile WHERE Name=:'Dentist'][0].Id
-    							//WHERE Profile.Id IN (SELECT Id FROM Profile WHERE Name=:'Dentist')
+    	List<User> ul = [SELECT Name FROM User 
+    							WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')
     						   ];
-    	for (User u : Dentistss) {
-            options.add(new SelectOption(u.Name,u.Name));
-        }   
+        for (User u: ul) {
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'id= '+u.Id +'name= ' + u.Name));
+        	options.add(new SelectOption(u.Id,u.Name));
+        }
         return options; 
     }
-   /*
    
    
    
-    public List<Client> getClient () { return null;}
-    
+    public List<Client__c> getClient () { return null;}
     
     public void tm () {
-        List<User> denti = [SELECT Name FROM User 
-    							WHERE Id=:[SELECT Id FROM Profile WHERE Name=:'Dentist'][0].Id
+       List<User> ul = [SELECT Name FROM User 
+    							WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')
     						   ];
-       if (denti[0].Profile.Name == 'Dentist')
-       {
-       	   ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'TAK'));
-       } 
-       ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'NIE'));
+       for (User u: ul) {
+           ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'id= '+u.Id +'name= ' + u.Name));
+       }
     }
-    */
+  
+	public void tm2 () {
+		List<User> ul = [select Name from user];
+		// where id=:userinfo.getuserid()
+		for( User u: ul) {
+			//getUserInfoResult result = u.getUserInfo();
+			
+			//ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'Cos '+result.getUserFullName()));
+		}
+	}
+  
+    
     
     public List<SelectOption> getWorkingHours() {  
         List<SelectOption> options = new List<SelectOption>(); 
@@ -111,8 +147,8 @@ public with sharing class AppointmentController {
 	    		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Not this client'));
 	    	}
     	}
-    	
     }
+    
     /*
     public Boolean checkClientExists () {
     	for ( Client__c cl : [SELECT Email__c from Client__c LIMIT 1]) {
