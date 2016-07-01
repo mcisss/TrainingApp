@@ -1,0 +1,321 @@
+<apex:page docType="html-5.0" standardController="DenS_Config__c" extensions="DenS_ConfigController"  standardStylesheets="true" showHeader="false" sidebar="false"
+   recordSetVar="allconfigs"  id="cpage">
+   <!-- sidebar="false" showHeader="false" -->
+   <!-- 
+      TODO:
+      Entime is not specified
+      Startime is not specified
+      wszystko niżej w lepszych miejscach, dobrane kolory, tabela szersza, bardziej płaskie komorki, zamiast przycisku pole do kliknięcia
+      -zamiast przycisku po prostu najechanie na/clicknięcie na pole cos spowoduje
+      <apex:includeScript value="{!URLFOR($Resource.jquery300, 'jquery-3.0.0.js')}" />
+      <apex:includeScript value="{!URLFOR($Resource.jqueryConfig, 'jqueryConfig.js')}" />   -->
+   <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" />
+   <script>
+      j$ = jQuery.noConflict();
+      j$(document).ready(function() {
+        j$('[class*=configDetails').hide();
+      });
+        function clicksetconfig () {
+        j$('[class*=configDetails').show();
+        j$('[class*=configDetails2').hide();
+        j$('[id*=setConfig').hide();
+      }
+      function clickWeekdayC() {
+        callChangeConfigTypeW();
+        j$('[class*=configDetails2').show();
+        j$('[id*=divselectweekday').show();
+        j$('[id*=divselectdate').hide();
+        j$('[id*=chooseWConfig').css({"border-style": "solid", "border-color": "rgb(0,0,255)/*rgb(0,185,0)*/", "border-width": "5px 1px 5px 1px", "border-radius": "10px"});
+        j$('[id*=chooseSConfig').css({"border-style": "none"});
+      }
+      function clickSpecificC() {
+          callChangeConfigTypeS();
+          j$('[class*=configDetails2').show();
+        j$('[id*=divselectweekday').hide();
+        j$('[id*=divselectdate').show();
+        j$('[class*=dateFormat').show();
+        j$('[id*=chooseSConfig').css({"border": "3px solid rgb(0,0,255) /*rgb(255,255,155)*/", "border-width": "5px 1px 5px 1px", "border-radius": "10px"});
+        j$('[id*=chooseWConfig').css({"border-style": "none"});
+      }
+      function hideconfigDetails() {
+          //j$('[class*=configDetails').hide();
+          //j$('[id*=setConfig').show();
+      }
+       function setConfigMouseenter () {
+        j$('[id*=setConfig').css({"color": "rgb(0,0,50)"});
+      }
+      function setConfigMouseleave () {
+        j$('[id*=setConfig').css({"color": "rgb(0,85,0)"});
+      }
+      function setConfigWTypeMouseenter () {
+        //j$('[id*=chooseWConfig').css({"color": "rgb(90,0,0)"});
+      }
+      function setConfigWTypeMouseleave () {
+        //j$('[id*=chooseWConfig').css({"color": "rgb(0,85,0)"});
+      }
+         function setConfigSTypeMouseenter () {
+        //j$('[id*=chooseSConfig').css({"color": "rgb(90,0,0)"});
+      }
+      function setConfigSTypeMouseleave () {
+        //j$('[id*=chooseSConfig').css({"color": "rgb(0,85,0)"});
+      }
+      
+   </script>
+   <head>
+      <!-- <link rel="stylesheet" href="{!URLFOR($Resource.stylesDentaS, 'stylesDentaS.css')}"/>   -->
+      <style>
+         body {
+         text-align:center;
+         background-image:url('{!$Resource.binary}');  
+         margin: auto;
+         }
+         .messageTable {
+         font-size: 20px;
+         margin: auto  !important;
+         }
+         .radioOpt {
+         }
+         .radioOpt td{
+         padding: 0px 50px;
+         }
+         .radioOpt, .radioOpt td, .radioOptinput, .radioOpt label{
+         text-align:center;
+         margin: auto;
+         font-family : Constantia, Verdana, Geneva, sans-serif;
+         font-size : 40px;  
+         width: 680px; 
+         }     
+         #thePanel {
+         width: 300px;
+         text-align:center;
+         margin: auto;
+         }
+         #radioB {
+         position: static;
+         text-align:center;
+         margin: auto;
+         width: 1000px;
+         }
+         #radioS {
+         position: static;
+         text-align:center;
+         margin: auto;
+         }
+         .sellist {
+         font-size: 18px;
+         }
+         .inputf {
+         font-size: 18px;
+         }
+         .saveB {
+         width: 100px;
+         height: 20px;
+         font-family : Constantia;
+         font-size: 18px;
+         }
+         h1 {
+         font-size: 56px;
+         font-family: Pier, Constantia;
+         }
+         h2 {
+         font-size: 40px;
+         font-family: Cambria, Constantia;
+         }
+         h3 {
+         font-size: 22px;
+         font-family: Cambria, Constantia;
+         }
+         .middle {
+         text-align:center;
+         margin: auto;
+         }
+         .configDetails {
+         width: 1000px;
+         position: static;
+         text-align:center;
+         margin: auto;
+         }    
+         #setConfig {
+         color: rgb(0,85,0);
+         cursor: pointer;
+         }
+         .WeekdayString {
+         color: rgb(0,95,0);
+         cursor: pointer;
+         }
+         .SpecificDString {
+         color: rgb(0,0,140);  //rgb(245,245,0);
+         cursor: pointer;
+         }
+         .table3 {  
+         font-size : 22px;  
+         margin: auto;
+         width: 900px;
+         border-spacing: 20px;
+         display: inline:
+         }
+         .table4 {
+         overflow-y: auto;
+         overflow: hidden;
+         margin: auto;
+         text-align:center;
+         }
+         .table4 th{   
+         background-color: rgb(0,0,130);
+         color: white;
+         width: 200px;
+         margin: auto;
+         text-align:center;
+         //border: 1px solid rgb(0,155,0);
+         border-spacing: 30px;
+         }
+         .table4 td {
+         border-style: solid;
+         border-color: rgb(0,0,130); #FFFF20; #4CAF50;
+         border-width: 2px;
+         background-color: rgb(70,150,250);
+         width: 200px;
+         margin: auto;
+         border-spacing: 30px;
+         color: rgb(000,250);  /* or 100 - dark blue */
+         } 
+         /*      
+         .table4 tr:nth-child(even){background-color: rgb(90,255,90)
+         }
+         .table4 tr:nth-child(odd){background-color: rgb(40,125,40)
+         }
+         */
+      </style>
+   </head>
+   <div class="divall">
+      <apex:form id="cform" >
+         <br/>
+         <br/>
+         <br/>
+         <h1> Working hours of {!$User.FirstName} {!$User.LastName} </h1>
+         <br/>
+         <br/>
+         <apex:outputPanel >
+            <h2 id="setConfig" onclick="clicksetconfig ();" onmouseover="setConfigMouseenter ();"
+               onmouseout="setConfigMouseleave ();" >Set a config 
+            </h2>
+         </apex:outputPanel>
+         <div class="configDetails">
+            <br/>
+            <h3> Config Type: </h3>
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+            <h3 id="chooseWConfig" class="WeekdayString" onclick="clickWeekdayC();" onmouseover="setConfigWTypeMouseenter ();"
+               onmouseout="setConfigWTypeMouseleave ();" >Weekday</h3>
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+            <h3 id="chooseSConfig" class="SpecificDString" onclick="clickSpecificC();" onmouseover="setConfigSTypeMouseenter ();"
+               onmouseout="setConfigSTypeMouseleave ();" >Specific day</h3>
+            <div class="configDetails2" rendered="false">
+               <br/>
+               <table class="middle">
+                  <tr>
+                     <th>
+                        <div id="divselectweekday">
+                           <apex:outputPanel id="thePanelW">
+                              <apex:selectList id="selectweekday" styleClass="inputf" value="{!pomW}" size="1" multiselect="false">
+                                 <apex:selectOptions value="{!weekdays}"  />
+                              </apex:selectList>
+                           </apex:outputPanel>
+                        </div>
+                     </th>
+                     <th>
+                        <div id="divselectdate">
+                           <apex:outputPanel id="thePanelS">
+                              <apex:inputField id="selectdate" styleClass="inputf" value="{!config.date__c}" showDatePicker="true"> 
+                              </apex:inputField>
+                           </apex:outputPanel>
+                        </div>
+                     </th>
+                     <th>
+                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                     </th>
+                     <th>
+                        <h3>Start time </h3>
+                        <apex:selectList styleClass="sellist" value="{!pomS}" size="1" >
+                           <apex:selectOptions value="{!WorkingHours}"/>
+                        </apex:selectList>
+                     </th>
+                     <th>
+                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                     </th>
+                     <th>
+                        <h3>End time </h3>
+                        <apex:selectList styleClass="sellist" value="{!pomE}" size="1">
+                           <apex:selectOptions value="{!WorkingHours}"/>
+                        </apex:selectList>
+                     </th>
+                  </tr>
+               </table>
+               <br/>
+               <apex:commandLink styleClass="saveB" action="{!save}" style="text-decoration: none;"
+                  reRender="thePanel,configsTable">
+                  <apex:commandButton id="saveB" value="Set config"/>
+               </apex:commandLink>
+            </div>
+            <p/>
+         </div>
+         <br/>
+         <apex:outputPanel id="thePanel" styleClass="middle">
+            <apex:pageMessages />
+         </apex:outputPanel>
+         <br/>
+         <apex:outputText styleClass="radioOpt">
+            <h2> Configs </h2>
+         </apex:outputText>
+         <apex:outputPanel id="configsTable">
+            <table class="table3" >
+               <th style="vertical-align: top;">
+                  <apex:dataTable styleClass="Wizardtable table4" id="tabW" VALUE="{!wconfigs}" var="con" rowClasses="odd,even" cellspacing="10">
+                     <apex:column headerValue="Weekday">
+                        <apex:outputField value="{!con.Weekday__c}">
+                        </apex:outputField>
+                     </apex:column>
+                     <apex:column headerValue="Start time">
+                        <c:out TimeInMinutes="{!con.Start_time__c}" />
+                     </apex:column>
+                     <apex:column headerValue="End time">
+                        <c:out TimeInMinutes="{!con.End_time__c}" />
+                     </apex:column>
+                     <apex:column >
+                        <apex:commandLink action="{!removeConfig}"
+                           style="text-decoration: none;">
+                           <apex:commandButton value="Delete"/>
+                           <apex:param value="{!con.Id}" name="configsToDeleteID" assignTo="{!configsToDeleteID}"/>
+                        </apex:commandLink>
+                     </apex:column>
+                  </apex:dataTable>
+               </th>
+               <th style="width: 100px;">
+               </th>
+               <th style="vertical-align: top;">
+                  <apex:dataTable styleClass="Wizardtable table4" id="tabS" VALUE="{!sconfigs}" var="con" rowClasses="odd,even" cellspacing="10">
+                     <apex:column headerValue="Specific day">
+                        <apex:outputField value="{!con.date__c}" >
+                        </apex:outputField>
+                     </apex:column>
+                     <apex:column headerValue="Start time ">
+                        <c:out TimeInMinutes="{!con.Start_time__c}" />
+                     </apex:column>
+                     <apex:column headerValue="End time " >
+                        <c:out TimeInMinutes="{!con.End_time__c}" />
+                     </apex:column>
+                     <apex:column >
+                        <apex:commandLink action="{!removeConfig}"
+                           style="text-decoration: none;">
+                           <apex:commandButton value="Delete"/>
+                           <apex:param value="{!con.Id}" name="configsToDeleteID" assignTo="{!configsToDeleteID}"/>
+                        </apex:commandLink>
+                     </apex:column>
+                  </apex:dataTable>
+               </th>
+            </table>
+         </apex:outputPanel>
+         <apex:actionFunction action="{!changeConfigTypeW}"  name="callChangeConfigTypeW" rerender="thePanel, thePanelW, thePanelS" />
+         <apex:actionFunction action="{!changeConfigTypeS}" name="callChangeConfigTypeS" rerender="thePanel, thePanelW, thePanelS" />
+      </apex:form>
+   </div>
+</apex:page>
