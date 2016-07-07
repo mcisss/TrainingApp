@@ -44,7 +44,7 @@ public class DenS_ConfigController {
         config.Start_time__c = Decimal.valueOf(pomS);
         config.End_time__c = Decimal.valueOf(pomE);
         config.Weekday__c = pomW;
-        if ( !overlapcheck() ) {   // validation checks  
+        if ( !overlapcheck(config) ) {   // validation checks  
             try {
             upsert config;
             config = new DenS_Config__c();
@@ -99,7 +99,7 @@ public class DenS_ConfigController {
         return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
             Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c !=:null ORDER BY date__c, Start_time__c];
     }
-    public Boolean overlapcheck () { // checks whether the hours chosen do not overlap with other configs
+    public Boolean overlapcheck (DenS_Config__c config) { // checks whether the hours chosen do not overlap with other configs
         List<DenS_Config__c> w_or_s_configs = new List<DenS_Config__c>();  
         String config_type;
         if ( config.date__c == null ) {

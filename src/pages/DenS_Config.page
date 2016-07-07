@@ -41,11 +41,11 @@
           //j$('[class*=configDetails').hide();
           //j$('[id*=setConfig').show();
       }
-       function setConfigMouseenter () {
-        j$('[id*=setConfig').css({"color": "rgb(0,0,190)"});
+      function clickableMouseenter () {
+        j$('[class*=clickable').css({"color": "rgb(0,0,190)"});
       }
-      function setConfigMouseleave () {
-        j$('[id*=setConfig').css({"color": "rgb(0,0,100)"});
+      function clickableMouseleave () {
+        j$('[class*=clickable').css({"color": "rgb(0,0,100)"});
       }
       function setConfigWTypeMouseenter () {
         //j$('[id*=chooseWConfig').css({"color": "rgb(90,0,0)"});
@@ -81,9 +81,6 @@
          font-size: 22px;
          font-family: Futura, Cambria, Constantia;
          }
-         .message{
-           background-color: #DFF;
-         }
          .messageTable {
          font-size: 16px;
          margin: auto  !important;
@@ -116,7 +113,7 @@
          text-align:center;
          margin: auto;
          }    
-         .clickableSomething {
+         .clickable {
          color: rgb(0,0,100);
          cursor: pointer;
          }
@@ -161,6 +158,11 @@
          .table2 tr:nth-child(odd){background-color: rgb(40,125,40)
          }
          */
+         .message{
+           background-color: #DFF;
+           margin:auto;
+           width: 700px;
+         }
       </style>
    </head>
    <div class="divall">
@@ -172,8 +174,8 @@
          <br/>
          <br/>
          <apex:outputPanel >
-            <h2 id="setConfig" class="clickableSomething" onclick="clicksetconfig ();" onmouseover="setConfigMouseenter ();"
-               onmouseout="setConfigMouseleave ();" >Set a config 
+            <h2 id="setConfig" class="clickable" onclick="clicksetconfig ();" onmouseover="clickableMouseenter ();"
+               onmouseout="clickableMouseleave ();" >Set a config 
             </h2>
          </apex:outputPanel>
          <div class="configDetails">
@@ -257,7 +259,7 @@
                         <c:out TimeInMinutes="{!con.End_time__c}" />
                      </apex:column>
                      <apex:column >
-                        <apex:commandLink action="{!removeConfig}"
+                        <apex:commandLink action="{!removeConfig}" reRender="configsTable"
                            style="text-decoration: none;">
                            <apex:commandButton value="Delete"/>
                            <apex:param value="{!con.Id}" name="configsToDeleteID" assignTo="{!configsToDeleteID}"/>
@@ -280,7 +282,7 @@
                         <c:out TimeInMinutes="{!con.End_time__c}" />
                      </apex:column>
                      <apex:column >
-                        <apex:commandLink action="{!removeConfig}"
+                        <apex:commandLink action="{!removeConfig}" reRender="configsTable"
                            style="text-decoration: none;">
                            <apex:commandButton value="Delete"/>
                            <apex:param value="{!con.Id}" name="configsToDeleteID" assignTo="{!configsToDeleteID}"/>
