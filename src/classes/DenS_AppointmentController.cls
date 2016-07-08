@@ -18,9 +18,8 @@ public with sharing class DenS_AppointmentController {
     public DenS_Appointment__c appointment {get;set;}
     public Client__c client {get;set;}
     public User dentist {get;set;}
+    public CalendarDetails calendarDetails {get;set;}
     
-    
-    public List<DenS_Appointment__c> configs {get;set;}
     public String appointmentsToDeleteID {get;set;}
     public String pomS {get;set;}
     public String pomE {get;set;}
@@ -28,23 +27,19 @@ public with sharing class DenS_AppointmentController {
     
     public DateTime dateTimeDummy {get;set;}
     public Date dateDummy {get;set;}
+    public Date dateToday {get;set;}
     public String yearToday {get;set;}
     public String monthToday {get;set;}
     public String dayOfTheWeekToday {get;set;}
-    public Integer dayOfTheMonthToday {get;set;}    
-    public Integer nbOfNullSpaces1 {get;set;}
-    public Integer nbOfNullSpaces2 {get;set;}
-    
-    public String monthDisplay {get;set;}
-    public String yearDisplay {get;set;}
+    public Integer dayOfTheMonthToday {get;set;}
        
     public List<DenS_Config__c> wconfigs {get;set;}   
     public List<DenS_Config__c> sconfigs {get;set;} 
     
     public String w {get;set;}
     public String chosenDayDummy {get;set;}
-    public List<String> daysToDisplay {get;set;}
-    public List<String> redDays {get;set;}
+    
+    public List<List<Decimal>> freeTerms {get;set;}
     
     public DenS_AppointmentController(ApexPages.StandardSetController stdController) {   
         String name = ApexPages.currentPage().getParameters().get('id');   
@@ -71,54 +66,50 @@ public with sharing class DenS_AppointmentController {
         wconfigs = DenS_ConfigController.getWconfigs();
         sconfigs = DenS_ConfigController.getSconfigs();
         
+        calendarDetails = new CalendarDetails ();
         
-        if (w == null){        
-	        dateTimeDummy = datetime.now(); //.addMonths(-5); 
-	        dateDummy = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
-	        monthToday = dateTimeDummy.format('MMMMM');
-	        yearToday = dateTimeDummy.format('YYYY');
-	        dayOfTheWeekToday = dateTimeDummy.format('EEE').substring(0,2);
-	        dayOfTheMonthToday = dateTimeDummy.day();
-	        
-	        setDisplayMonthAndYear ();
-        }         
-        Date dd = date.today();
-        Date i = dd.toStartOfMonth();
+        if (dateTimeDummy == null){        
+            dateTimeDummy = datetime.now(); //.addMonths(-5); 
+            dateDummy = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
+            dateToday = dateDummy;
+            monthToday = dateTimeDummy.format('MMMMM');
+            yearToday = dateTimeDummy.format('YYYY');
+            dayOfTheWeekToday = dateTimeDummy.format('EEE').substring(0,2);
+            dayOfTheMonthToday = dateTimeDummy.day();
+            
+            appointment.Date__c = date.newInstance(2016, 7, 21);
+        }     
         
-        List<String> ff = getDaysToHighlight();
-        appointment.Date__c = date.newInstance(2016, 7, 21);
-        List<List<Decimal>> ff2 =  getFreeTerms ();
-        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'' + ff2 ));  //'days to highlight:'+ff + 'month' + dateTimeDummy.month()));
+        setDisplayMonthAndYear ();    
+        setFreeTerms (appointment.Date__c);
     }      
     //==========MODIFIERS========================
     public void setDisplayMonthAndYear () {
-        monthDisplay = dateTimeDummy.format('MMMMM');  
-        yearDisplay = dateTimeDummy.format('YYYY');
-    	Date myDate = date.newInstance(2000, 10, 2); //Monday
-        nbOfNullSpaces1 = getDayOfTheWeek();
-        nbOfNullSpaces2 = 31 - date.daysInMonth(dateTimeDummy.year(), dateTimeDummy.month());
-        daysToDisplay = getDaysOfTheMonth ();              //calculate daysToDisplay for calendar rendering
-        for (Integer i=0 ; i < nbOfNullSpaces1 ; i++) {
-        	daysToDisplay.add(0,' ');
+        calendarDetails.monthDisplay = dateTimeDummy.format('MMMMM');  
+        calendarDetails.yearDisplay = dateTimeDummy.format('YYYY');
+        Date myDate = date.newInstance(2000, 10, 2); //Monday
+        calendarDetails.nbOfNullSpaces1 = getDayOfTheWeek();
+        calendarDetails.nbOfNullSpaces2 = 31 - date.daysInMonth(dateTimeDummy.year(), dateTimeDummy.month());
+        calendarDetails.daysToDisplay = getDaysOfTheMonth ();              //calculate daysToDisplay for calendar rendering
+        for (Integer i=0 ; i < calendarDetails.nbOfNullSpaces1 ; i++) {
+            calendarDetails.daysToDisplay.add(0,' ');
         }
-        for (Integer i=0 ; i < nbOfNullSpaces2 ; i++) {
-        	daysToDisplay.set(daysToDisplay.size()-1-i, null);
+        for (Integer i=0 ; i < calendarDetails.nbOfNullSpaces2 ; i++) {
+            calendarDetails.daysToDisplay.set(calendarDetails.daysToDisplay.size()-1-i, null);
         }
-        //greendays
-        
-        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'' +daysToDisplay.get(0)+ daysToDisplay.get(30)+ monthDisplay + + yearDisplay+ ' ' + nbOfNullSpaces1 + ' ' +nbOfNullSpaces2));
+        daysToHighlight();
     }
     public PageReference addMonth() {
-    	dateTimeDummy = dateTimeDummy.addMonths(1);
-    	dateDummy = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
-    	setDisplayMonthAndYear();
-    	return null;
+        dateTimeDummy = dateTimeDummy.addMonths(1);
+        dateDummy = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
+        setDisplayMonthAndYear();
+        return null;
     }
     public PageReference subtractMonth() {
-    	dateTimeDummy = dateTimeDummy.addMonths(-1);
-    	dateDummy = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
-    	setDisplayMonthAndYear();
-    	return null;
+        dateTimeDummy = dateTimeDummy.addMonths(-1);
+        dateDummy = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
+        setDisplayMonthAndYear();
+        return null;
     }
     public PageReference save() {
          if ( 1 == 1 ) {  // validation checks   
@@ -141,92 +132,118 @@ public with sharing class DenS_AppointmentController {
     ///=============MODIFIERS-END========================  
     //==========GETTERS========================   
  
- 	public List<String> getDaysToHighlight() {
- 		Set<String> days = new Set<String>();
- 		List<String> daysl = new List<String> ();
- 		for ( DenS_Config__c con : sconfigs) {
- 			if ( con.date__c.month() == dateTimeDummy.month() && con.date__c.year() == dateTimeDummy.year() ) {//( startDate <= con.date__c && con.date__c <= date.newinstance(dateTimeDummy.year(), dateTimeDummy.month(), date.daysInMonth(dateTimeDummy.year(), dateTimeDummy.month() )  ) ) {
- 				//if ( con.Start_time__c  ) { }
- 					//overlapcheck (config);
- 					// check czy sa zajete
- 					String conDay = String.valueOf( con.date__c.day() + nbOfNullSpaces1 - 1 );
- 					days.add(conDay);
- 				
- 			}
- 		}
- 		daysl.addall(days);
- 		return daysl;
- 	}
- 	
- 	
- 	public List<List<Decimal>> getFreeTerms () {
- 		List<DenS_Appointment__c> appointments = getAppointments ();
- 		List<List<Decimal>> configTermsInt = new List<List<Decimal>>  ();
- 		List<List<Decimal>> freeTermsInt = new List<List<Decimal>>  ();
- 		List<List<Decimal>> termsTakenInt = new List<List<Decimal>> ();
-		Integer w = 1;
- 		for ( DenS_Config__c con : sconfigs) {  //getting config terms
- 			if ( appointment.Date__c == con.date__c ) { 
- 				List<Decimal> term = new List<Decimal> ();
- 				term.add(con.Start_time__c);
- 				term.add(con.End_time__c);
- 				configTermsInt.add(term);
- 				w = 0;
- 			}
- 		}
- 		if( w == 1 ) {
-	 		for ( DenS_Config__c con : wconfigs) {
-	 			Datetime appDatetime = appointment.Date__c; 
-	 			if (  appDatetime.format('EEE').substring(0,2) == con.Weekday__c.substring(0,2) ) {
-	 				List<Decimal> term = new List<Decimal> ();
-	 				term.add(con.Start_time__c);
- 					term.add(con.End_time__c);
- 					configTermsInt.add(term);
-	 			}
-	 		}
- 		}
- 		for (DenS_Appointment__c appoint : appointments) {  //getting appointment terms
- 			if ( appointment.Date__c == appoint.Date__c ) {
- 				List<Decimal> term = new List<Decimal> ();
- 				term.add(appoint.Start_time__c);
- 				term.add(appoint.End_time__c);
- 				termsTakenInt.add(term);
- 			}
- 		}
- 		for (List<Decimal> configTerm : configTermsInt ) {	//getting free terms on the selected day  term[0] - start time  term[1] - end time
- 			for ( List<Decimal> takenTerm : termsTakenInt ) {
- 				if ( configTerm[1] > takenTerm[0] ) {
- 					if ( configTerm[0] <= takenTerm[0] )	{
- 						if ( configTerm[0] == takenTerm[0] ) {
- 							configTerm[0] = takenTerm[1];
- 							if ( !( configTerm[0] == configTerm[1] ) ) {
- 								freeTermsInt.add(configTerm);
-	 						}
- 						}
-	 					else if (configTerm[1] == takenTerm[1] ) { 
-	 						configTerm[1] = takenTerm[0];
-	 						if ( !( configTerm[0] == configTerm[1] ) ) {
-	 							freeTermsInt.add(configTerm);
-	 						}
-	 					}
-	 					else {
-	 						List<Decimal> term = new List<Decimal> ();
-	 						term[0] = configTerm[0];
-	 						term[1] = takenTerm[0];
-	 						freeTermsInt.add(term);
-	 						configTerm[0] = takenTerm[1];
-	 						freeTermsInt.add(configTerm);
- 						}
- 					}
- 				}
- 			}
- 		}
- 		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'freeterms' + freeTermsInt));
- 		return configTermsInt;
- 	}
- 	
- 	public Boolean overlapcheckAppointment (DenS_Appointment__c appointment) { // checks whether the hours chosen do not overlap with other configs
-        /*
+    public void daysToHighlight() {
+        Set<String> days = new Set<String>();
+        List<String> daysl = new List<String> ();
+        Set<String> daysr = new Set<String>();
+        List<String> daysrl = new List<String> ();
+        for ( DenS_Config__c con : sconfigs) {
+            if ( con.date__c.month() == dateTimeDummy.month() && con.date__c.year() == dateTimeDummy.year() ) {//( startDate <= con.date__c && con.date__c <= date.newinstance(dateTimeDummy.year(), dateTimeDummy.month(), date.daysInMonth(dateTimeDummy.year(), dateTimeDummy.month() )  ) ) {
+                //if ( con.Start_time__c  ) { }
+                    //overlapcheck (config);
+                    // check czy sa zajete
+                    String conDay = String.valueOf( con.date__c.day() + calendarDetails.nbOfNullSpaces1 - 1 );
+                    days.add(conDay);
+                	//if () { daysr.add() }
+            }
+        }
+        daysl.addall(days);
+        calendarDetails.greendays = daysl;
+        daysrl.addall(daysr);
+    }
+    public void setFreeTerms (Date appointmentDate) {
+        List<DenS_Appointment__c> appointments = getAppointments ();
+        List<List<Decimal>> configTermsInt = new List<List<Decimal>>  ();
+        List<List<Decimal>> freeTermsInt = new List<List<Decimal>>  ();
+        List<List<Decimal>> termsTakenInt = new List<List<Decimal>> ();
+        Integer w = 1;
+        for ( DenS_Config__c con : sconfigs) {  //getting config terms
+            if ( appointmentDate == con.date__c ) { 
+                List<Decimal> term = new List<Decimal> ();
+                term.add(con.Start_time__c);
+                term.add(con.End_time__c);
+                configTermsInt.add(term);
+                w = 0;
+            }
+        }
+        if( w == 1 ) {
+            for ( DenS_Config__c con : wconfigs) {
+                Datetime appDatetime = appointmentDate; 
+                if (  appDatetime.format('EEE').substring(0,2) == con.Weekday__c.substring(0,2) ) {
+                    List<Decimal> term = new List<Decimal> ();
+                    term.add(con.Start_time__c);
+                    term.add(con.End_time__c);
+                    configTermsInt.add(term);
+                }
+            }
+        }
+        for (DenS_Appointment__c appoint : appointments) {  //getting appointment terms
+            if ( appointmentDate == appoint.Date__c ) {
+                List<Decimal> term = new List<Decimal> ();
+                term.add(appoint.Start_time__c);
+                term.add(appoint.End_time__c);
+                termsTakenInt.add(term);
+            }
+        }
+        if ( termsTakenInt.isEmpty () ) {
+            	freeTerms = configTermsInt;
+        }
+        else {
+	        for (List<Decimal> configTerm : configTermsInt ) {  //getting free terms on the selected day  term[0] - start time  term[1] - end time
+	            for ( List<Decimal> takenTerm : termsTakenInt ) {
+	            	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'drugi for'));
+	                if ( configTerm[1] <= takenTerm[0] || configTerm[0] >= takenTerm[1] ) {
+	                	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING, 'fiu fiu ' + configTerm[1] ));
+	                	freeTermsInt.add(configTerm);	
+	                }
+	                else {
+	                    if ( configTerm[0] <= takenTerm[0] )    {
+	                    	freeTermsInt.add(configTerm);	
+	                    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING, 'fiu fiu ' + configTerm[1] ));
+	                    }
+	                    else {
+	                    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'drugi if'));
+	                        if ( configTerm[0] == takenTerm[0] ) {
+	                        	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'trzeci if'));
+	                            configTerm[0] = takenTerm[1];
+	                            if ( !( configTerm[0] == configTerm[1] ) ) {
+	                                freeTermsInt.add(configTerm);
+	                                 ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'petla1'));
+	                            }
+	                        }
+	                        else if (configTerm[1] == takenTerm[1] ) { 
+	                            configTerm[1] = takenTerm[0];
+	                            if ( !( configTerm[0] == configTerm[1] ) ) {
+	                            	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'petla2'));
+	                               freeTermsInt.add(configTerm);
+	                            }
+	                        }
+	                        else {
+	                            List<Decimal> term = new List<Decimal> ();
+	                            term.add(configTerm[0]);
+	                            term.add(takenTerm[0]);
+	                            if ( !( term[0] == term[1] ) ) {
+	                            	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'petla3'));
+	                            	freeTermsInt.add(term);
+	                            }
+	                            configTerm[0] = takenTerm[1];
+	                            if ( !( configTerm[0] == configTerm[1] ) ) {
+	                            	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'petla3b'));
+	                            	freeTermsInt.add(configTerm);
+	                            }
+	                        }
+	                    }
+	                }
+	            }
+	        }
+        }
+        freeTerms = freeTermsInt;
+        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'conifgterms08.07.teraz' + configTermsInt + 'freeterms08.07.teraz' + freeTermsInt));
+        
+    }
+    /*
+    public Boolean overlapcheckAppointment (DenS_Appointment__c appointment) { // checks whether the hours chosen do not overlap with other configs
+        
         dostać wconfigi
         sconfigi
         sprawdzic czy są configi ze specific date
@@ -237,10 +254,10 @@ public with sharing class DenS_AppointmentController {
         sprawdzic dostępne godziny 
         
         możesz wyświetlić wolne godziny
-        */
+        
         List<List<Decimal>> freeTerms = getFreeTerms ();
         List<Decimal> appointmentTerm = new List<Decimal>();
-     	appointmentTerm.add(appointment.Start_time__c);
+        appointmentTerm.add(appointment.Start_time__c);
         appointmentTerm.add(appointment.End_time__c);
         for (List<Decimal> freeTermTime : freeTerms) {
             if ( appointmentTerm[0] >= freeTermTime[0] && appointmentTerm[1] <= freeTermTime[1] ) {
@@ -249,20 +266,17 @@ public with sharing class DenS_AppointmentController {
         }
         ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'Start or end time do not match the currently available terms'));
         return false;
+        
     }
- 	
- 	
- 	public String getDaysToHighlight2() {
- 		return getDaysToHighlight().get(0);
- 	}
+    */
  
- 	public List<Integer> getCalendarCells () {
-		 Integer[] myList = new List<Integer>();
-		 for (Integer i = 1 ; i <36 ; i++) {		  
-		 	myList.add(i);
- 		 }
- 		 return myList;
- 	}
+    public List<Integer> getCalendarCells () {
+         Integer[] myList = new List<Integer>();
+         for (Integer i = 1 ; i <36 ; i++) {          
+            myList.add(i);
+         }
+         return myList;
+    }
     public List<SelectOption> getDentists () {
         List<SelectOption> options = new List<SelectOption>();
         List<User> ul = [SELECT Name FROM User 
@@ -297,16 +311,13 @@ public with sharing class DenS_AppointmentController {
     }
   
     public static String[] getDaysOfTheWeek () {
-		String[] dayst = new List<String> {'Mo','Tu','We','Th','Fr','Sa','Su'};
-		return dayst;
-	}
-	public String[] getDaysOfTheMonth () {
-		String[] dayst = new List<String> {'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31'}; //{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
-		return dayst;
-	}
-	public String[] getDaysToDisplay () {
-		return daysToDisplay;
-	}
+        String[] dayst = new List<String> {'Mo','Tu','We','Th','Fr','Sa','Su'};
+        return dayst;
+    }
+    public String[] getDaysOfTheMonth () {
+        String[] dayst = new List<String> {'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31'}; //{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+        return dayst;
+    }
     public List<SelectOption> getWorkingHours() {  
         List<SelectOption> options = new List<SelectOption>(); 
         String hour, inminutes;
@@ -321,28 +332,28 @@ public with sharing class DenS_AppointmentController {
         return options; 
     }
     public static List<DenS_Appointment__c> getAppointments () {
-    	return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
-         	    FROM DenS_Appointment__c ORDER BY Date__c, Start_time__c];
+        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
+                FROM DenS_Appointment__c ORDER BY Date__c, Start_time__c];
     }
     ///=============GETTERS-END========================  
 
     //==========Helpers=============================
     
     public void dayChosen () {
-    	appointment.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy));
-    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'     chosen day:      ' + appointment.Date__c ) );
+        appointment.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy));
+        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'     chosen day:      ' + appointment.Date__c ) );
     }
     
     public Integer getDayOfTheWeek () {
-    	String[] dayss = new List<String> {'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su' };
-    	Datetime firstDayOfTheMonth = dateDummy.toStartOfMonth (); 
-    	String dayOfTheWeek = firstDayOfTheMonth.format('EEE').substring(0,2);
-    	for (Integer i=0 ; i<dayss.size() ; i++){
-    		if (dayss[i]==dayOfTheWeek) {
-    			return i;	
-    		}		
-    	}	
-    	return 10;
+        String[] dayss = new List<String> {'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su' };
+        Datetime firstDayOfTheMonth = dateDummy.toStartOfMonth (); 
+        String dayOfTheWeek = firstDayOfTheMonth.format('EEE').substring(0,2);
+        for (Integer i=0 ; i<dayss.size() ; i++){
+            if (dayss[i]==dayOfTheWeek) {
+                return i;   
+            }       
+        }   
+        return 10;
     }
     
     public void checkClientExists () {
@@ -358,16 +369,16 @@ public with sharing class DenS_AppointmentController {
     
     /*
     public void getHighlightedLis () {
-    	Integer[] availdays = new Integer>() ; 
-    	sconfigs = [SELECT Id, Name, date__c, Start_time__c, End_time__c,
+        Integer[] availdays = new Integer>() ; 
+        sconfigs = [SELECT Id, Name, date__c, Start_time__c, End_time__c,
             Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c >=:dateDummy ORDER BY date__c, Start_time__c];
-    	List<DenS_Appointment__c> appoints = getAppointments ();
-    	
-    	for (DenS_Config__c con: sconfigs) {
-    		if(dummyDate.toStartOfMonth() <= con.date__c) {
-    			availdays.add(con.date__c.day());
-    		}
-    	}
+        List<DenS_Appointment__c> appoints = getAppointments ();
+        
+        for (DenS_Config__c con: sconfigs) {
+            if(dummyDate.toStartOfMonth() <= con.date__c) {
+                availdays.add(con.date__c.day());
+            }
+        }
     }
     */
     public String frommintohoursA(Integer ValueToFormat1) {   // converts from int to String in HH:MM time format

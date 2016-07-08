@@ -1,7 +1,13 @@
 <apex:page standardController="DenS_Appointment__c" extensions="DenS_AppointmentController"  standardStylesheets="true" showHeader="false" sidebar="false"
    recordSetVar="allappoints"  id="apage">
    <!-- TODO
+      Spetember novermber december - different formatting there
+      
+      
       Checking whether the client exists (js script checking email) after changing the inputField email
+      
+      
+      
       
       
       Later
@@ -15,39 +21,6 @@
       http://www.w3schools.com/howto/howto_css_calendar.asp
       -->
    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" />
-   <script>
-      j$ = jQuery.noConflict();
-        j$(document).ready(function() {
-            j$('[id*=datePick').hide();
-            j$('[id*=appointmentDetails').hide();
-      });
-      function clickSetAnAppointment () {
-            j$('[id*=datePick').show();
-            j$('[id*=setAnAppointment').hide();
-            greenDays ();
-      }
-      function showAppointmentDetails () {
-      		j$('[id*=appointmentDetails').show();
-      }
-      function greenDays () {
-      		var arr = "{!daysToHighlight}";
-      		arr = arr.slice(1,arr.length-1);
-      		arr = arr.split(', ');
-      		var idbeg = "apage\\:forma\\:datePickPageBlock\\:datePickPageBlockSection\\:daysBlock\\:day\\:";
-      		var idend = "\\:dayl";
-      		arr.forEach(function(entry) {
-      			var tem = '[id*=' + idbeg + entry + idend;
-    			j$(tem).addClass("greenBack clickable");
-            });
-      }
-      
-       function clickableMouseenter () {
-        j$('[class*=clickable').css({"color": "rgb(0,0,190)"});
-      }
-      function clickableMouseleave () {
-        j$('[class*=clickable').css({"color": "rgb(0,0,100)"});
-      }
-   </script>
    <head>
       <style>
          /* style na:
@@ -287,7 +260,7 @@
          margin: 0px 0px 0px;
          background-image:url('{!$Resource.binary_pbsubsection2}'); 
          }
-         .pbSubsection {  /* tu można wstawic tlo         	background-color: transparent;
+         .pbSubsection {  /* tu można wstawic tlo           background-color: transparent;
          */  margin: 0px 0px 0px;
          background-image:url('{!$Resource.binary_pbsubsection2}'); 
          }
@@ -359,8 +332,29 @@
          }
       </style>
    </head>
+   <script>
+   	  j$ = jQuery.noConflict();
+      j$(document).ready(function() {
+            j$('[id*=datePick').hide();
+            j$('[id*=appointmentDetails').hide();
+      });
+      function clickSetAnAppointment () {
+            j$('[id*=datePick').show();
+            j$('[id*=setAnAppointment').hide();
+            greenDays ();
+      }
+      function showAppointmentDetails () {
+            j$('[id*=appointmentDetails').show();
+      }
+       function clickableMouseenter () {
+        j$('[class*=clickable').css({"color": "rgb(0,0,190)"});
+      }
+      function clickableMouseleave () {
+        j$('[class*=clickable').css({"color": "rgb(0,0,100)"});
+      }
+   </script>
    <div>
-      <apex:form id="forma">
+   <apex:form id="forma">
          <br/>
          <br/>
          <br/>
@@ -375,36 +369,53 @@
                         <apex:selectOptions value="{!dentists}"  />
                      </apex:selectList>
                      <apex:outputPanel id="calendar">
-			            <div id="divcalendar">
-			            	<div class="month"> 
-							  <ul>
-							    <li class="prev">&#10094;</li>
-							    <li class="next">&#10095;</li>
-							    <li>
-							      {!monthDisplay}<br/>
-							      <span style="font-size:18px">{!yearDisplay}</span>
-							    </li>
-							  </ul>
-							</div>
-							<div id="daysCal" class='daysCal'>
-					            <apex:pageBlockSection id="daysBlock" columns="7" >
-						            	<apex:repeat id="day" value="{!daysToDisplay}"  var="day">
-							            	<apex:commandLink id="dayl" styleClass="divCal" value="{!day}" rerender="tPanel, appointmentDetails" action="{!dayChosen}">
-						            		 	<apex:param value="{!day}" name="chosenDayDummy" assignto="{!chosenDayDummy}"> </apex:param>
-								            </apex:commandLink>
-							            </apex:repeat>
-					            </apex:pageBlockSection>
-				            </div>
-				            <apex:dataTable VALUE="{!wconfigs}" var="con"> 
-				            	<div> <h5>{!con.Weekday__c}</h5> </div>
-				            </apex:dataTable>
-			            </div>
-			         </apex:outputPanel> 
+                     	<script>
+                     		 function greenDays () {
+					                arr = "{!calendarDetails.greendays}";
+					                arr = arr.slice(1,arr.length-1);
+					                arr = arr.split(', ');
+					                idbeg = "apage\\:forma\\:datePickPageBlock\\:datePickPageBlockSection\\:daysBlock\\:day\\:";
+					                idend = "\\:dayl";
+					                arr.forEach(function(entry) {
+					                   tem = '[id*=' + idbeg + entry + idend;
+					                   j$(tem).addClass("greenBack clickable");
+					                });
+					          }
+                     	</script>
+                        <div id="divcalendar">
+                            <div class="month"> 
+                              <ul>
+                              	 <li class="next" onclick="greenDays();">fdddun</li>
+                                <li class="prev" onclick="callSubtractMonth();">&#10094;</li>
+                                <li class="next" onclick="callAddMonth();">&#10095;</li>
+                                <li>
+                                  {!calendarDetails.monthDisplay}<br/>
+                                  <span style="font-size:18px">{!calendarDetails.yearDisplay}</span>
+                                </li>
+                               
+                              </ul>
+                            </div>
+                            <div id="daysCal" class='daysCal'>
+                                <apex:pageBlockSection id="daysBlock" columns="7" >
+                                        <apex:repeat id="day" value="{!calendarDetails.daysToDisplay}"  var="day">
+                                        	
+                                            <apex:commandLink  id="dayl" styleClass="divCal" value="{!day}" rerender="tPanel, appointmentDetails" action="{!dayChosen}">
+                                                <apex:param value="{!day}" name="chosenDayDummy" assignto="{!chosenDayDummy}"> </apex:param>
+                                            </apex:commandLink>
+                                        </apex:repeat>
+                                </apex:pageBlockSection>
+                            </div>
+                            <apex:dataTable VALUE="{!wconfigs}" var="con"> 
+                                <div> <h5>{!con.Weekday__c}</h5> </div>
+                            </apex:dataTable>
+                        </div>
+                     </apex:outputPanel> 
             </apex:pageBlockSection>
             </apex:pageBlock>  
          </div>
          <apex:pageBlock id="appointmentDetails">
-         	<apex:dataTable styleClass="Wizardtable table3" id="availTermsTable" VALUE="{!freeTerms}" var="te" rowClasses="odd,even" cellspacing="10">
+         	<h4>Available hours:</h4>
+            <apex:dataTable styleClass="Wizardtable table3" id="availTermsTable" VALUE="{!freeTerms}" var="te" rowClasses="odd,even" cellspacing="10">
                      <apex:column headerValue="Start time">
                         <c:out TimeInMinutes="{!te[0]}" />
                      </apex:column>
@@ -437,8 +448,8 @@
          </apex:outputPanel>
          <apex:actionFunction name="callCheckClientExists" action="{!checkClientExists}" rerender=""/>
          <apex:commandLink value="costam" action="{!checkClientExists}" reRender="tPanel"/>
-         <apex:actionFunction action="{!addMonth}"  name="callAddMonth" rerender="calendar, tPanel" oncomplete="renderCalendar ();"/>
-         <apex:actionFunction action="{!subtractMonth}"  name="callSubtractMonth" rerender="calendar, tPanel" oncomplete="renderCalendar ();" />
+         <apex:actionFunction action="{!addMonth}"  name="callAddMonth" rerender="calendar, tPanel" oncomplete="greenDays ();"/>
+         <apex:actionFunction action="{!subtractMonth}"  name="callSubtractMonth" rerender="calendar, tPanel" oncomplete="greenDays ();" />
          <apex:actionFunction action="{!dayChosen}"  name="callDayChosen" rerender="tPanel" oncomplete="showAppointmentDetails ();" />
          <apex:actionFunction action="{!doNothing}"  name="callDummyFunction" rerender="calendar, tPanel" />
       </apex:form>
