@@ -1,7 +1,7 @@
 public with sharing class DenS_AppointmentController {
         
     public DenS_AppointmentController() {
-    }
+    } 
         
         
     //TODO

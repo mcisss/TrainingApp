@@ -7,4 +7,4 @@ public with sharing class CalendarDetails {
     public List<String> greenDays {get;set;}
     public List<String> redDays {get;set;}
     public String chosenDay {get;set;}
-}
+} 
