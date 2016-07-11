@@ -38,6 +38,7 @@
          text-align: center;
          vertical-align: middle;
          cursor: default;
+         font-weight: 800;
          }
          .daysCal {
          border: 3px solid black;
@@ -322,13 +323,13 @@
          }
          .greenBack {
          background-color: rgb(0,250,0) !important;
-         color: rgb(0,120,0) !important;
+         color: rgb(0,0,0) !important;
          font-weight: 900;
          }
          .redBack {
-         background-color: rgb(170,50,50);
-         color: rgb(70,0,0);
-         font-weight: 900;
+         background-color: rgb(220,0,0);
+         color: rgb(0,0,0);
+         opacity: 0.6;
          }
       </style>
    </head>
@@ -337,11 +338,13 @@
       j$(document).ready(function() {
             j$('[id*=datePick').hide();
             j$('[id*=appointmentDetails').hide();
+            /* if more than one dentist 
+            j$('[id*=calendar').hide();
+             */
       });
       function clickSetAnAppointment () {
             j$('[id*=datePick').show();
             j$('[id*=setAnAppointment').hide();
-            greenDays ();
       }
       function showAppointmentDetails () {
             j$('[id*=appointmentDetails').show();
@@ -357,7 +360,7 @@
    <apex:form id="forma">
          <br/>
          <br/>
-         <br/>
+         <br/> 
          <h1 id="setAnAppointment" class="clickable" onmouseover="clickableMouseenter ();"
             onmouseout="clickableMouseleave ();" onclick="clickSetAnAppointment();">Set an appointment</h1>
          <div id="datePick">
@@ -365,23 +368,11 @@
             <p/>
                <apex:pageBlock id="datePickPageBlock">
                   <apex:pageBlockSection id="datePickPageBlockSection" columns="2">
-                     <apex:selectList id="selectDentist" styleClass="inputOrSelList" value="{!dentistId}" size="1" multiselect="false">
+                     <apex:selectList id="selectDentist" styleClass="inputOrSelList" value="{!dentistId}" 
+                     				  size="1" multiselect="false" onchange="rerenderCalendar ();">
                         <apex:selectOptions value="{!dentists}"  />
                      </apex:selectList>
                      <apex:outputPanel id="calendar">
-                     	<script>
-                     		 function greenDays () {
-					                arr = "{!calendarDetails.greendays}";
-					                arr = arr.slice(1,arr.length-1);
-					                arr = arr.split(', ');
-					                idbeg = "apage\\:forma\\:datePickPageBlock\\:datePickPageBlockSection\\:daysBlock\\:day\\:";
-					                idend = "\\:dayl";
-					                arr.forEach(function(entry) {
-					                   tem = '[id*=' + idbeg + entry + idend;
-					                   j$(tem).addClass("greenBack clickable");
-					                });
-					          }
-                     	</script>
                         <div id="divcalendar">
                             <div class="month"> 
                               <ul>
@@ -397,10 +388,10 @@
                             </div>
                             <div id="daysCal" class='daysCal'>
                                 <apex:pageBlockSection id="daysBlock" columns="7" >
-                                        <apex:repeat id="day" value="{!calendarDetails.daysToDisplay}"  var="day">
-                                        	
-                                            <apex:commandLink  id="dayl" styleClass="divCal" value="{!day}" rerender="tPanel, appointmentDetails" action="{!dayChosen}">
-                                                <apex:param value="{!day}" name="chosenDayDummy" assignto="{!chosenDayDummy}"> </apex:param>
+                                        <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">
+                                            <apex:commandLink  id="dayl" action="{!dayChosen}" styleClass="{!day.styleClass}"
+                                            				   value="{!day.dayToDisplay}" rerender="tPanel, appointmentDetails">
+                                            <apex:param value="{!day.dayToDisplay}" name="chosenCalendarDay" assignto="{!chosenDayDummy}"> </apex:param>
                                             </apex:commandLink>
                                         </apex:repeat>
                                 </apex:pageBlockSection>
@@ -411,15 +402,15 @@
                         </div>
                      </apex:outputPanel> 
             </apex:pageBlockSection>
-            </apex:pageBlock>  
+            </apex:pageBlock>   
          </div>
          <apex:pageBlock id="appointmentDetails">
          	<h4>Available hours:</h4>
-            <apex:dataTable styleClass="Wizardtable table3" id="availTermsTable" VALUE="{!freeTerms}" var="te" rowClasses="odd,even" cellspacing="10">
+            <apex:dataTable styleClass="Wizardtable table3" id="availTermsTable" VALUE="{!chosenCalendarDay.freeTerms}" var="te" rowClasses="odd,even" cellspacing="10">
                      <apex:column headerValue="Start time">
                         <c:out TimeInMinutes="{!te[0]}" />
                      </apex:column>
-                     <apex:column headerValue="End time">
+                     <apex:column headerValue="End time"> 
                         <c:out TimeInMinutes="{!te[1]}" />
                      </apex:column>
             </apex:dataTable>
@@ -439,19 +430,17 @@
                <apex:commandLink id="dummy" value=""/>
                <apex:commandLink styleClass="saveB, floatRight" action="{!save}" style="text-decoration: none;"
                   reRender="tPanel">
-                  <apex:commandButton id="saveB" value="Set appointment"/>
+                  <apex:commandButton id="saveB" action="{!save}" value="Set appointment"/>
                </apex:commandLink>
             </apex:pageBlockSection>
          </apex:pageBlock>
          <apex:outputPanel id="tPanel">
             <apex:pageMessages />
          </apex:outputPanel>
-         <apex:actionFunction name="callCheckClientExists" action="{!checkClientExists}" rerender=""/>
-         <apex:commandLink value="costam" action="{!checkClientExists}" reRender="tPanel"/>
-         <apex:actionFunction action="{!addMonth}"  name="callAddMonth" rerender="calendar, tPanel" oncomplete="greenDays ();"/>
-         <apex:actionFunction action="{!subtractMonth}"  name="callSubtractMonth" rerender="calendar, tPanel" oncomplete="greenDays ();" />
+         <apex:actionFunction action="{!addMonth}"  name="callAddMonth" rerender="calendar, tPanel" />
+         <apex:actionFunction action="{!subtractMonth}"  name="callSubtractMonth" rerender="calendar, tPanel" />
          <apex:actionFunction action="{!dayChosen}"  name="callDayChosen" rerender="tPanel" oncomplete="showAppointmentDetails ();" />
-         <apex:actionFunction action="{!doNothing}"  name="callDummyFunction" rerender="calendar, tPanel" />
+         <apex:actionFunction action="{!doNothing}"  name="rerenderCalendar" rerender="calendar, tPanel" />
       </apex:form>
    </div>
 </apex:page>
