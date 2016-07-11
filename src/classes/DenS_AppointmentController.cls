@@ -278,6 +278,10 @@ public with sharing class DenS_AppointmentController {
         }
         ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'     chosen day:      ' + chosenDayDummy + chosenCalendarDay  +  appointment.Date__c) );
     }
+    
+    public void setPomE () {
+    	pomE = String.valueOf(Integer.valueOf(pomS)+60);
+    }
     /*
     public Boolean overlapcheckAppointment (DenS_Appointment__c appointment) { // checks whether the hours chosen do not overlap with other configs
         
@@ -319,7 +323,8 @@ public with sharing class DenS_AppointmentController {
         options.add(new SelectOption('Treatment','Treatment'));
         return options; 
     }
-   public List<SelectOption> getAvailTerms () {
+    /*
+    public List<SelectOption> getAvailTerms () {
         List<SelectOption> options = new List<SelectOption>();
         for ( Integer i = 0 ; i < chosenCalendarDay.freeTerms.size() ; i++ ) {
         	Integer k = (chosenCalendarDay.freeTerms[i][1]-chosenCalendarDay.freeTerms[i][0]).intValue() /60;
@@ -341,7 +346,7 @@ public with sharing class DenS_AppointmentController {
         }
         return options; 
     }
-    /*
+    */
     public List<SelectOption> getPossibleTerms () {  //only hours
     	List<SelectOption> options = new List<SelectOption>();
         for ( Integer i = 0 ; i < chosenCalendarDay.freeTerms.size() ; i++ ) {
@@ -353,7 +358,6 @@ public with sharing class DenS_AppointmentController {
         }
         return options; 
     }
-    */
     public List<Client__c> getClient () { 
     	//TODO
     	return null;

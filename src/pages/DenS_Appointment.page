@@ -349,6 +349,10 @@
       }
       function showAppointmentDetails () {
             j$('[id*=appointmentDetails').show();
+            
+      }
+      function toggleDescription () {
+      		j$('[class*=description').toggle();
       }
       function showVisitDuration() {
       		j$('[id*=vDuration').show();
@@ -421,20 +425,25 @@
             <apex:pageBlockSection columns="2" >
                <apex:outputField value="{!appointment.Date__c}"  > </apex:outputField>
                <apex:inputText value="{!client.FirstName}"/>
-               <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Start time" onchange="showVisitDuration">
-                  <apex:selectOptions value="{!availTerms}"/>
+               <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Selected term" onchange="{!setPomE}">
+                  <apex:selectOptions value="{!possibleTerms}"/>
                </apex:selectList>
                <apex:inputText value="{!client.LastName}"/>
-               <apex:selectList id = "vDuration" styleClass="sellist" value="{!pomE}" size="1" Label="Visit duration">
-                  <apex:selectOptions value="{!PossibleEndTimes}"/>
-               </apex:selectList>
-               <apex:inputField value="{!client.Email}"/>
-               <apex:inputTextarea value="{!appointment.Description__c}" />
-               <apex:inputField value="{!client.Phone}"/>
-               <apex:selectList styleClass="inputOrSelList" value="{!appointmentType}" 
-               	  	  size="1" multiselect="false">
+               <apex:selectList styleClass="inputOrSelList" value="{!appointmentType}" onchange="toggleDescription();"
+               	  	  			size="1" multiselect="false">
                   <apex:selectOptions value="{!appointmentTypes}"  />
                </apex:selectList>
+               <!-- 
+               <apex:selectList id = "vDuration" styleClass="sellist" value="{!pomE}" size="1" Label="Visit duration">
+                  <apex:selectOptions value="{!WorkingHours}"/>
+               </apex:selectList>
+                -->
+               <apex:inputField value="{!client.Email}"/>
+               <div id="appDescription" class = "description" >
+              	 <apex:inputTextarea  value="{!appointment.Description__c}" />
+               </div>
+               <apex:inputField value="{!client.Phone}"/>
+               <apex:commandLink />
                <apex:commandLink styleClass="saveB, floatRight" action="{!save}" style="text-decoration: none;"
                   reRender="tPanel">
                   <apex:commandButton id="saveB" action="{!save}" value="Set appointment"/>
