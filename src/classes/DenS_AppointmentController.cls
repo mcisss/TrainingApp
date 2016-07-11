@@ -33,7 +33,7 @@ public with sharing class DenS_AppointmentController {
         
         
     public DenS_Appointment__c appointment {get;set;}
-    public Client__c client {get;set;}
+    public Contact client {get;set;}
     public User dentist {get;set;}
     public CalendarDetails calendarDetails {get;set;}
     public String chosenDayDummy {get;set;}
@@ -64,19 +64,20 @@ public with sharing class DenS_AppointmentController {
         appointment = (name == null) ? new  DenS_Appointment__c():
             [SELECT Id, Name, Client__c, Date__c, Dentist__c, Description__c, 
         Start_time__c, End_time__c, Status__c FROM  DenS_Appointment__c];
-        dentistId='00558000000HJSsAAO';  // if of Rzeznik z przychodni - the only one dentist
-        // tutaj zrobimy checka chwilowo
-        client = [SELECT Id, Name, First_name__c, Second_name__c, Email__c, Phone_number__c from Client__c LIMIT 1][0];
-        appointment.Client__c = [SELECT Id, Name, Email__c from Client__c LIMIT 1][0].Id;
         
-        if (client.id == appointment.Client__c) {
+        dentistId='no';
+        //dentistId='00558000000HJSsAAO';  // id of Rzeznik z przychodni - the only one dentist
+        client = new Contact (); 
+        // client = [SELECT Id, Name, FirstName, LastName, Email, Phone from Contact LIMIT 1][0];  //example of Contact
+        
+        if (client.Id == appointment.Client__c) {
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'client EXISTS1'));
         }
         else {
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'client don\'t EXIST'));
         }
-        wconfigs = DenS_ConfigController.getWconfigs(dentistId);
-        sconfigs = DenS_ConfigController.getSconfigs(dentistId);
+        
+        //
         
         calendarDetails = new CalendarDetails ();
         
@@ -92,10 +93,10 @@ public with sharing class DenS_AppointmentController {
             appointment.Date__c = date.newInstance(2016, 7, 21);
         }     
         
-        setDisplayMonthAndYear ();  
+      
     }       
     //==========MODIFIERS========================
-    public void setDisplayMonthAndYear () {
+    public void setDisplayMonthAndYear () {  
         calendarDetails.monthDisplay = dateTimeDummy.format('MMMMM');  
         calendarDetails.yearDisplay = dateTimeDummy.format('YYYY');
         Date myDate = date.newInstance(2000, 10, 2); //Monday
@@ -110,13 +111,19 @@ public with sharing class DenS_AppointmentController {
             daysToDisplay.remove(daysToDisplay.size()-1-i);
         }
         calendarDetails.calendarDays.clear();
+        wconfigs = DenS_ConfigController.getWconfigs(dentistId);
+        sconfigs = DenS_ConfigController.getSconfigs(dentistId);
         for (Integer i=0 ; i < daysToDisplay.size() ; i++) {  //daysToDisplay.size()
 	    	CalendarDay cDay = new CalendarDay(String.valueOf(daysToDisplay[i]));
+	    	cDay.styleClass = 'divCal';
 	    	if ( i >= calendarDetails.nbOfNullSpaces1 ) {
 	    		cday.cDate = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), i+1 - calendarDetails.nbOfNullSpaces1);
-	    		setFreeTerms(cDay); // sets styleClass too
+	    		if ( dentistId != 'no' ) {
+	    			setFreeTerms(cDay); // sets styleClass too
+	    		}
 	    	}
 	        calendarDetails.calendarDays.add(cDay);
+	        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'DentistId=' + dentistId));
 	        //ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'cDay.cDate=' + cDay.cDate));	
         }
     }
@@ -135,14 +142,10 @@ public with sharing class DenS_AppointmentController {
     public PageReference save() {
     	
          if ( 1 == 1 ) {  // validation checks   
-         	//appointment.Client__c =
-         	if ( !checkEmailExists () ) {
-    			// create new Client
+         	if ( !checkEmailExists () ) {  // create new Client if does not exist in the Contact database
+    			insert client;  
     		}
-    		else {
-    			// appointment.Client__c =
-    		}
-    		appointment.Client__c = 	'00358000007DbzkAAC'; //appointment.Client__c = client.id; // 	'00358000007DbzkAAC';  
+    		appointment.Client__c = client.Id; 
          	appointment.Dentist__c = dentistId;
          	appointment.Status__c = 'Awaiting acceptance';
          	appointment.Start_time__c = Decimal.valueOf(pomS);
@@ -165,7 +168,7 @@ public with sharing class DenS_AppointmentController {
     }
     
     ///=============MODIFIERS-END========================  
-    //==========GETTERS========================   
+    //==========SETTERS========================   
  
     public void setFreeTerms (CalendarDay calendarDay) {  // if there are no configs on this day no color, if there are configs and available terms -green / no available terms - red
         List<DenS_Appointment__c> appointments = getAppointments ();
@@ -244,6 +247,17 @@ public with sharing class DenS_AppointmentController {
         }
         //ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + configTermsInt));
     }
+    
+    public void dayChosen () {
+    	appointment.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy) );
+        for (CalendarDay cDay : calendarDetails.calendarDays) {
+        	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'day:  ' + cDay.cDate) );
+        	if ( cDay.dayToDisplay == chosenDayDummy ) {
+        		chosenCalendarDay = cDay;
+        	}
+        }
+        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'     chosen day:      ' + chosenDayDummy + chosenCalendarDay  +  appointment.Date__c) );
+    }
     /*
     public Boolean overlapcheckAppointment (DenS_Appointment__c appointment) { // checks whether the hours chosen do not overlap with other configs
         
@@ -263,12 +277,16 @@ public with sharing class DenS_AppointmentController {
     }
     */
  
+ 	///=============SETTERS-END========================
+
+ 	//==========GETTERS========================   
+ 
     public List<SelectOption> getDentists () {
         List<SelectOption> options = new List<SelectOption>();
         List<User> ul = [SELECT Name FROM User 
                                 WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')
                                ];
-        //options.add(new SelectOption('','Select a dentist'));
+        options.add(new SelectOption('no','Select a dentist'));
         for (User u: ul) {
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'id= '+u.Id +'name= ' + u.Name));
             options.add(new SelectOption(u.Id,u.Name));
@@ -306,21 +324,6 @@ public with sharing class DenS_AppointmentController {
     }
     ///=============GETTERS-END========================  
 
-	//==========Setters=============================
-	
-	public void dayChosen () {
-    	appointment.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy) );
-        for (CalendarDay cDay : calendarDetails.calendarDays) {
-        	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'day:  ' + cDay.cDate) );
-        	if ( cDay.dayToDisplay == chosenDayDummy ) {
-        		chosenCalendarDay = cDay;
-        	}
-        }
-        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'     chosen day:      ' + chosenDayDummy + chosenCalendarDay  +  appointment.Date__c) );
-    }
-	
-	///=============SETTERS-END========================
-
     //==========Helpers=============================
     
     public Integer getDayOfTheWeek () {
@@ -334,9 +337,9 @@ public with sharing class DenS_AppointmentController {
         }   
         return 10;
     }
-    public Boolean checkEmailExists () {
-        for ( Client__c cl : [SELECT Email__c from Client__c LIMIT 1]) {
-            if (client.Email__c == cl.Email__c) {
+    public Boolean checkEmailExists () { 
+        for ( Contact cl : [SELECT Email from Contact]) {
+            if (client.Email == cl.Email) {
                 ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Client exists'));
             	return true;
             }

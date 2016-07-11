@@ -16,7 +16,12 @@ public class DenS_ConfigController {
     }
     
     //TODO:
-    
+    // check if the person is a dentist - on other site
+    /*
+    List<Profile> PROFILE = [SELECT Id, Name FROM Profile WHERE Id=:userinfo.getProfileId() LIMIT 1];
+    if ( PROFILE.isEmpty() ) don't show the site
+                               
+    */
     //      on other site - don't let non-dentists to access the config page
     
     // optionally: do not show old configs i.e. those with date < NOW();
@@ -41,6 +46,7 @@ public class DenS_ConfigController {
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Config not saved. Please specify the weekday or date'));
             return null;
         }
+        config.Dentist__c = '00558000000HJSsAAO';  // should be = userinfo.getProfileId();    //Rzeznik z przychodni - the only one dentist
         config.Start_time__c = Decimal.valueOf(pomS);
         config.End_time__c = Decimal.valueOf(pomE);
         config.Weekday__c = pomW;

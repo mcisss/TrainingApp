@@ -1,7 +1,7 @@
 <apex:page standardController="DenS_Appointment__c" extensions="DenS_AppointmentController"  standardStylesheets="true" showHeader="false" sidebar="false"
    recordSetVar="allappoints"  id="apage">
    <!-- TODO
-      Spetember novermber december - different formatting there
+      css - some months get down
       
       
       Checking whether the client exists (js script checking email) after changing the inputField email
@@ -338,13 +338,14 @@
       j$(document).ready(function() {
             j$('[id*=datePick').hide();
             j$('[id*=appointmentDetails').hide();
-            /* if more than one dentist 
             j$('[id*=calendar').hide();
-             */
       });
       function clickSetAnAppointment () {
             j$('[id*=datePick').show();
             j$('[id*=setAnAppointment').hide();
+      }
+      function showCalendar () {
+       		j$('[id*=calendar').show();
       }
       function showAppointmentDetails () {
             j$('[id*=appointmentDetails').show();
@@ -369,7 +370,7 @@
                <apex:pageBlock id="datePickPageBlock">
                   <apex:pageBlockSection id="datePickPageBlockSection" columns="2">
                      <apex:selectList id="selectDentist" styleClass="inputOrSelList" value="{!dentistId}" 
-                     				  size="1" multiselect="false" onchange="rerenderCalendar ();">
+                     				  size="1" multiselect="false" onchange="callSetDisplayMonthAndYear ();">
                         <apex:selectOptions value="{!dentists}"  />
                      </apex:selectList>
                      <apex:outputPanel id="calendar">
@@ -416,17 +417,17 @@
             </apex:dataTable>
             <apex:pageBlockSection columns="2" >
                <apex:outputField value="{!appointment.Date__c}"  > </apex:outputField>
-               <apex:inputText value="{!client.First_name__c}"/>
+               <apex:inputText value="{!client.FirstName}"/>
                <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Start time">
                   <apex:selectOptions value="{!WorkingHours}"/>
                </apex:selectList>
-               <apex:inputText value="{!client.Second_name__c}"/>
+               <apex:inputText value="{!client.LastName}"/>
                <apex:selectList styleClass="sellist" value="{!pomE}" size="1" Label="End time">
                   <apex:selectOptions value="{!WorkingHours}"/>
                </apex:selectList>
-               <apex:inputField value="{!client.Email__c}"/>
+               <apex:inputField value="{!client.Email}"/>
                <apex:inputTextarea value="{!appointment.Description__c}" />
-               <apex:inputField value="{!client.Phone_number__c}"/>
+               <apex:inputField value="{!client.Phone}"/>
                <apex:commandLink id="dummy" value=""/>
                <apex:commandLink styleClass="saveB, floatRight" action="{!save}" style="text-decoration: none;"
                   reRender="tPanel">
@@ -437,6 +438,7 @@
          <apex:outputPanel id="tPanel">
             <apex:pageMessages />
          </apex:outputPanel>
+         <apex:actionFunction action="{!setDisplayMonthAndYear}"  name="callSetDisplayMonthAndYear" rerender="calendar, tPanel" oncomplete="showCalendar ();" />
          <apex:actionFunction action="{!addMonth}"  name="callAddMonth" rerender="calendar, tPanel" />
          <apex:actionFunction action="{!subtractMonth}"  name="callSubtractMonth" rerender="calendar, tPanel" />
          <apex:actionFunction action="{!dayChosen}"  name="callDayChosen" rerender="tPanel" oncomplete="showAppointmentDetails ();" />
