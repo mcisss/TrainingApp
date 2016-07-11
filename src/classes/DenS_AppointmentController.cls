@@ -9,6 +9,7 @@ public with sharing class DenS_AppointmentController {
         
     //TODO
     // save button
+    // wybór z dostępnychn terminow
     // po udanym savie pojawia się strona ApplikationInfo
     // inne wymagania np:
     // latwe:
@@ -43,7 +44,8 @@ public with sharing class DenS_AppointmentController {
     public String appointmentsToDeleteID {get;set;}
     public String pomS {get;set;}
     public String pomE {get;set;}
-    public String dentistId {get;set;}
+    public static String dentistId {get;set;}
+    public String appointmentType {get;set;}
     
     public DateTime dateTimeDummy {get;set;}
     public Date dateDummy {get;set;}
@@ -59,14 +61,19 @@ public with sharing class DenS_AppointmentController {
     
     public String w {get;set;}
     
+    public List<Integer> visitDuration {get;set;}
+    public Integer chosenVisitNb {get;set;}
+    
     public DenS_AppointmentController(ApexPages.StandardSetController stdController) {   
         String name = ApexPages.currentPage().getParameters().get('id');   
         appointment = (name == null) ? new  DenS_Appointment__c():
             [SELECT Id, Name, Client__c, Date__c, Dentist__c, Description__c, 
         Start_time__c, End_time__c, Status__c FROM  DenS_Appointment__c];
         
+        chosenCalendarDay = new CalendarDay();
+        visitDuration = new List<Integer> ();
+        pomS='120';
         dentistId='no';
-        //dentistId='00558000000HJSsAAO';  // id of Rzeznik z przychodni - the only one dentist
         client = new Contact (); 
         // client = [SELECT Id, Name, FirstName, LastName, Email, Phone from Contact LIMIT 1][0];  //example of Contact
         
@@ -140,17 +147,26 @@ public with sharing class DenS_AppointmentController {
         return null;
     }
     public PageReference save() {
-    	
-         if ( 1 == 1 ) {  // validation checks   
+         if ( 1 == 1 ) {  // validation checks 
          	if ( !checkEmailExists () ) {  // create new Client if does not exist in the Contact database
-    			insert client;  
+    			if ( client.LastName == null || client.FirstName == null || client.Phone == null  ) {
+         		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.Error,'Please enter	 your first name, last name and the phone number'));
+         		return null;
+         		} 
+    			insert client; 
     		}
-    		appointment.Client__c = client.Id; 
+    		appointment.Client__c = [SELECT Id, Email from Contact WHERE Email =: client.Email][0].Id;
          	appointment.Dentist__c = dentistId;
          	appointment.Status__c = 'Awaiting acceptance';
          	appointment.Start_time__c = Decimal.valueOf(pomS);
          	appointment.End_time__c = Decimal.valueOf(pomE);
-         	// appointment type
+         	if (1 == 1) {
+         		appointment.RecordTypeId = '012580000000o0yAAA';
+         	}
+         	else {
+         		appointment.RecordTypeId = '012580000000o13AAA'; 
+         	}              // [select Id from RecordType where Name = 'Treatment'][0].Id;// appointment type
+         	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'record type id' + appointment.RecordTypeId));
             try {
                 upsert appointment;
                 appointment = new DenS_Appointment__c();
@@ -293,6 +309,45 @@ public with sharing class DenS_AppointmentController {
         }
         return options; 
     }
+    public List<SelectOption> getAppointmentTypes () {
+        List<SelectOption> options = new List<SelectOption>();
+        options.add(new SelectOption('Consultation','Consultation'));
+        options.add(new SelectOption('Treatment','Treatment'));
+        return options; 
+    }
+   public List<SelectOption> getAvailTerms () {
+        List<SelectOption> options = new List<SelectOption>();
+        for ( Integer i = 0 ; i < chosenCalendarDay.freeTerms.size() ; i++ ) {
+        	Integer k = (chosenCalendarDay.freeTerms[i][1]-chosenCalendarDay.freeTerms[i][0]).intValue() /60;
+        	for (Integer j = 0 ; j < k ; j++) {
+        		options.add(new SelectOption(String.valueOf(chosenCalendarDay.freeTerms[i][0]),
+        									 fromMinToHoursA(chosenCalendarDay.freeTerms[i][0] + j*60)));
+        	}
+        }
+        return options; 
+    }
+    public List<SelectOption> getPossibleEndTimes () {
+    	List<SelectOption> options = new List<SelectOption>();
+        options = getAvailTerms();
+     	   options.remove(0);
+        Decimal lastValue = Decimal.valueOf(options[options.size()-1].getValue());
+        lastValue += 60;
+        options.add(new SelectOption( String.valueOf(lastValue), fromMinToHoursA(lastValue) ));
+        return options; 
+    }
+    /*
+    public List<SelectOption> getPossibleTerms () {  //only hours
+    	List<SelectOption> options = new List<SelectOption>();
+        for ( Integer i = 0 ; i < chosenCalendarDay.freeTerms.size() ; i++ ) {
+        	Integer k = (chosenCalendarDay.freeTerms[i][1]-chosenCalendarDay.freeTerms[i][0]).intValue() /60;
+        	for (Integer j = 0 ; j < k ; j++) {
+        		options.add(new SelectOption(String.valueOf(chosenCalendarDay.freeTerms[i][0]),
+        									 fromMinToHoursA(chosenCalendarDay.freeTerms[i][0] +j*60)+' - '+fromMinToHoursA(chosenCalendarDay.freeTerms[i][1]+j*60)));
+        	}
+        }
+        return options; 
+    }
+    */
     public List<Client__c> getClient () { 
     	//TODO
     	return null;
@@ -318,9 +373,9 @@ public with sharing class DenS_AppointmentController {
         }   
         return options; 
     }
-    public static List<DenS_Appointment__c> getAppointments () {
+    public static List<DenS_Appointment__c> getAppointments () {   //
         return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
-                FROM DenS_Appointment__c ORDER BY Date__c, Start_time__c];
+                FROM DenS_Appointment__c WHERE Dentist__c =: dentistId ORDER BY Date__c, Start_time__c];
     }
     ///=============GETTERS-END========================  
 
@@ -346,7 +401,7 @@ public with sharing class DenS_AppointmentController {
         }
         return false;
     }
-    public String frommintohoursA(Integer ValueToFormat1) {   // converts from int to String in HH:MM time format
+    public static String fromMinToHoursA(Decimal ValueToFormat1) {   // converts from int to String in HH:MM time format
         String hours = string.valueOf(Math.floor(ValueToFormat1/60));
         if (hours.length() == 1) {
             hours = '0' + hours;

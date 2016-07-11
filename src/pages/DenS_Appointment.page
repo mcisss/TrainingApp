@@ -350,7 +350,10 @@
       function showAppointmentDetails () {
             j$('[id*=appointmentDetails').show();
       }
-       function clickableMouseenter () {
+      function showVisitDuration() {
+      		j$('[id*=vDuration').show();
+      }
+      function clickableMouseenter () {
         j$('[class*=clickable').css({"color": "rgb(0,0,190)"});
       }
       function clickableMouseleave () {
@@ -418,17 +421,20 @@
             <apex:pageBlockSection columns="2" >
                <apex:outputField value="{!appointment.Date__c}"  > </apex:outputField>
                <apex:inputText value="{!client.FirstName}"/>
-               <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Start time">
-                  <apex:selectOptions value="{!WorkingHours}"/>
+               <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Start time" onchange="showVisitDuration">
+                  <apex:selectOptions value="{!availTerms}"/>
                </apex:selectList>
                <apex:inputText value="{!client.LastName}"/>
-               <apex:selectList styleClass="sellist" value="{!pomE}" size="1" Label="End time">
-                  <apex:selectOptions value="{!WorkingHours}"/>
+               <apex:selectList id = "vDuration" styleClass="sellist" value="{!pomE}" size="1" Label="Visit duration">
+                  <apex:selectOptions value="{!PossibleEndTimes}"/>
                </apex:selectList>
                <apex:inputField value="{!client.Email}"/>
                <apex:inputTextarea value="{!appointment.Description__c}" />
                <apex:inputField value="{!client.Phone}"/>
-               <apex:commandLink id="dummy" value=""/>
+               <apex:selectList styleClass="inputOrSelList" value="{!appointmentType}" 
+               	  	  size="1" multiselect="false">
+                  <apex:selectOptions value="{!appointmentTypes}"  />
+               </apex:selectList>
                <apex:commandLink styleClass="saveB, floatRight" action="{!save}" style="text-decoration: none;"
                   reRender="tPanel">
                   <apex:commandButton id="saveB" action="{!save}" value="Set appointment"/>
