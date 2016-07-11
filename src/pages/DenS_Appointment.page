@@ -46,7 +46,7 @@
          }
          body {
          text-align:center;
-         background-image:url('{!$Resource.binary}');  
+         //background-image:url('{!$Resource.binary}');  
          margin: auto;
          }
          h1 {
@@ -259,11 +259,11 @@
          }
          .pbBody {
          margin: 0px 0px 0px;
-         background-image:url('{!$Resource.binary_pbsubsection2}'); 
+         // background-image:url('{!$Resource.binary_pbsubsection2}'); 
          }
          .pbSubsection {  /* tu można wstawic tlo           background-color: transparent;
          */  margin: 0px 0px 0px;
-         background-image:url('{!$Resource.binary_pbsubsection2}'); 
+         // background-image:url('{!$Resource.binary_pbsubsection2}'); 
          }
          /*
          .apexp {
@@ -373,7 +373,7 @@
          <h1 id="setAnAppointment" class="clickable" onmouseover="clickableMouseenter ();"
             onmouseout="clickableMouseleave ();" onclick="clickSetAnAppointment();">Set an appointment</h1>
          <div id="datePick">
-            <h4>Please click on your appointment date. Days with available terms for a selected dentist are marked in green.</h4>
+            <h4>Choose your dentist and click on your appointment date</h4>
             <p/>
                <apex:pageBlock id="datePickPageBlock">
                   <apex:pageBlockSection id="datePickPageBlockSection" columns="2">
@@ -385,16 +385,23 @@
                         <div id="divcalendar">
                             <div class="month"> 
                               <ul>
-                              	 <li class="next" onclick="greenDays();">fdddun</li>
                                 <li class="prev" onclick="callSubtractMonth();">&#10094;</li>
                                 <li class="next" onclick="callAddMonth();">&#10095;</li>
                                 <li>
                                   {!calendarDetails.monthDisplay}<br/>
                                   <span style="font-size:18px">{!calendarDetails.yearDisplay}</span>
                                 </li>
-                               
                               </ul>
                             </div>
+                            <ul class="weekdays">
+							  <li>Mo</li>
+							  <li>Tu</li>
+							  <li>We</li>
+							  <li>Th</li>
+							  <li>Fr</li>
+							  <li>Sa</li>
+							  <li>Su</li>
+							</ul>
                             <div id="daysCal" class='daysCal'>
                                 <apex:pageBlockSection id="daysBlock" columns="7" >
                                         <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">
@@ -430,8 +437,8 @@
                   <apex:selectOptions value="{!possibleTerms}"/>
                </apex:selectList>
                <apex:inputText value="{!client.LastName}"/>
-               <apex:selectList styleClass="inputOrSelList" value="{!appointmentType}" onchange="toggleDescription();"
-               	  	  			size="1" multiselect="false">
+               <apex:selectList styleClass="inputOrSelList" value="{!appointmentType}" 
+               	  	  			size="1" multiselect="false">       <!-- onchange="toggleDescription();" does not work -->
                   <apex:selectOptions value="{!appointmentTypes}"  />
                </apex:selectList>
                <apex:inputField value="{!client.Email}"/>

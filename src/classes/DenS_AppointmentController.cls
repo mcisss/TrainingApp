@@ -4,13 +4,14 @@ public with sharing class DenS_AppointmentController {
     } 
     // lastly - Appointment saved
     
-        
     //TODO
     // po udanym savie pojawia się strona ApplikationInfo
     // średnie:
     // 5-minutowa blokada dla innych klientów po kliknięciu terminu
     // mail informujący o konieczności potwierdzenia wizyty, po tym jak lekarz ją ztwierdził otrzymuje drugi email informujący że zatwierdził
     // W przypadku gdy wizyta ma miejsce w niedzielę lub po godzinie 20.00 wymagane jest potwierdzenie zarówny dentysty jak i właściciela salonu dentystycznego. 
+    // when tired: take care of looks
+    // two things (to ask(?)) - description does not disappear style of days changes for some months : January, February, April, May, July, October, December
     
     //DONE:
     // save button
@@ -68,19 +69,8 @@ public with sharing class DenS_AppointmentController {
         
         chosenCalendarDay = new CalendarDay();
         visitDuration = new List<Integer> ();
-        pomS='120';
         dentistId='no';
         client = new Contact (); 
-        // client = [SELECT Id, Name, FirstName, LastName, Email, Phone from Contact LIMIT 1][0];  //example of Contact
-        
-        if (client.Id == appointment.Client__c) {
-            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'client EXISTS1'));
-        }
-        else {
-            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'client don\'t EXIST'));
-        }
-        
-        //
         
         calendarDetails = new CalendarDetails ();
         
@@ -126,8 +116,6 @@ public with sharing class DenS_AppointmentController {
 	    		}
 	    	}
 	        calendarDetails.calendarDays.add(cDay);
-	        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'DentistId=' + dentistId));
-	        //ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'cDay.cDate=' + cDay.cDate));	
         }
     }
     public PageReference addMonth() {
@@ -143,43 +131,40 @@ public with sharing class DenS_AppointmentController {
         return null;
     }
     public PageReference save() {
-         if ( 1 == 1 ) {  // validation checks 
-         	if ( !checkEmailExists () ) {  // create new Client if does not exist in the Contact database
-    			if ( client.LastName == null || client.FirstName == null || client.Phone == null  ) {
-         		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.Error,'Please enter	 your first name, last name and the phone number'));
-         		return null;
-         		} 
-    			insert client; 
-    		}
-    		Contact clientPom = [SELECT Id, FirstName, LastName, Email FROM Contact WHERE Email =: client.Email][0];
-    		User dentistPom = [SELECT Id, FirstName, LastName FROM User WHERE Id=:dentistId][0];
-    		appointment.Client__c = clientPom.Id;
-         	appointment.Dentist__c = dentistId;
-         	appointment.Status__c = 'Awaiting acceptance';
-         	appointment.Start_time__c = Decimal.valueOf(pomS);
-         	appointment.End_time__c = Decimal.valueOf(pomS)+60;
-         	appointment.Name = '' + dentistPom.FirstName.substring(0,1) + dentistPom.LastName.substring(0,1) + '_'
-         				       + clientPom.FirstName.substring(0,1) + clientPom.LastName.substring(0,1) + '_' 
-         				       + String.ValueOf(dateTimeDummy.year()) + String.ValueOf(dateTimeDummy.month()) + String.ValueOf(dateTimeDummy.day()) + '_'
-         				       + fromMinToHoursA(Decimal.valueOf(pomS)).substring(0,2) + fromMinToHoursA(Decimal.valueOf(pomS)).substring(3);
-         	if (1 == 1) {
-         		appointment.RecordTypeId = '012580000000o0yAAA';
-         	}
-         	else {
-         		appointment.RecordTypeId = '012580000000o13AAA'; 
-         	}              // [select Id from RecordType where Name = 'Treatment'][0].Id;// appointment type
-         	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'record type id' + appointment.RecordTypeId));
-            try {
-                upsert appointment;
-                appointment = new DenS_Appointment__c();
-                ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Appointment saved'));
-            } catch (DmlException e) {
-                ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Appointment not saved. One of the following occurred:\n1. The start time is not earlier than the end time.\n2. Config date should be in the future'));
-                System.debug('The following exception has occurred: ' + e.getMessage());
-                return null;
-            } 
-         }
-         return null;
+     	if ( !checkEmailExists () ) {  // create new Client if does not exist in the Contact database
+			if ( client.LastName == null || client.FirstName == null || client.Phone == null  ) {
+     		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.Error,'Please enter	 your first name, last name and the phone number'));
+     		return null;
+     		} 
+			insert client; 
+		}
+		Contact clientPom = [SELECT Id, FirstName, LastName, Email FROM Contact WHERE Email =: client.Email][0];
+		User dentistPom = [SELECT Id, FirstName, LastName FROM User WHERE Id=:dentistId][0];
+		appointment.Client__c = clientPom.Id;
+     	appointment.Dentist__c = dentistId;
+     	appointment.Status__c = 'Awaiting acceptance';
+     	appointment.Start_time__c = Decimal.valueOf(pomS);
+     	appointment.End_time__c = Decimal.valueOf(pomS)+60;
+     	appointment.Name = '' + dentistPom.FirstName.substring(0,1) + dentistPom.LastName.substring(0,1) + '_'
+     				       + clientPom.FirstName.substring(0,1) + clientPom.LastName.substring(0,1) + '_' 
+     				       + String.ValueOf(dateTimeDummy.year()) + String.ValueOf(dateTimeDummy.month()) + String.ValueOf(dateTimeDummy.day()) + '_'
+     				       + fromMinToHoursA(Decimal.valueOf(pomS)).substring(0,2) + fromMinToHoursA(Decimal.valueOf(pomS)).substring(3);
+     	if ( appointmentType == 'Treatment') {
+     		appointment.RecordTypeId = '012580000000o0yAAA';
+     	}
+     	else {
+     		appointment.RecordTypeId = '012580000000o13AAA'; 
+     	}
+        try {
+            upsert appointment;
+            appointment = new DenS_Appointment__c();
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Appointment saved'));
+        } catch (DmlException e) {
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Appointment date should be in the future'));
+            System.debug('The following exception has occurred: ' + e.getMessage());
+            return null;
+        } 
+        return null;
     }
     public void removeAppointment(){
         delete [SELECT Id FROM DenS_Appointment__c WHERE Id=:appointmentsToDeleteID];
@@ -193,75 +178,79 @@ public with sharing class DenS_AppointmentController {
         List<List<Decimal>> configTermsInt = new List<List<Decimal>>  ();
         List<List<Decimal>> termsTakenInt = new List<List<Decimal>> ();
         Integer w = 1;
-        for ( DenS_Config__c con : sconfigs) {  //getting config terms 
-            if ( calendarday.cDate == con.date__c ) { 
-                List<Decimal> term = new List<Decimal> ();
-                term.add(con.Start_time__c);
-                term.add(con.End_time__c);
-                configTermsInt.add(term);
-                w = 0;
-            }
-        }
-        if( w == 1 ) {  						//getting config terms continuation
-            for ( DenS_Config__c con : wconfigs) {   
-                Datetime appDatetime = calendarday.cDate; 
-                if (  appDatetime.format('EEE').substring(0,2) == con.Weekday__c.substring(0,2) ) {
-                    List<Decimal> term = new List<Decimal> ();
-                    term.add(con.Start_time__c);
-                    term.add(con.End_time__c);
-                    configTermsInt.add(term);
-                }
-            }
-        }
-        if ( configTermsInt.isEmpty() ) {
+        if ( calendarday.cDate <= date.today() ) {
         	calendarDay.styleClass = 'divCal';
-        	return;
-        }
-        for (DenS_Appointment__c appoint : appointments) {  //getting appointment terms
-            if ( calendarday.cDate == appoint.Date__c ) {
-                List<Decimal> term = new List<Decimal> ();
-                term.add(appoint.Start_time__c);
-                term.add(appoint.End_time__c);
-                termsTakenInt.add(term);
-            }
-        }
-        if ( termsTakenInt.isEmpty () ) {
-            	calendarDay.freeTerms = configTermsInt;
         }
         else {
-        	// for loop does refresh the condition so it works properly BTW it would work properly anyway since configs are sorted ascendingly by time
-	        for ( Integer i = 0 ; i < configTermsInt.size() ; i++) {  //getting free terms on the selected day  term[0] - start time  term[1] - end time
-	            for ( List<Decimal> takenTerm : termsTakenInt ) {
-	            	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'drugi for'));
-	                if ( configTermsInt[i][1] <= takenTerm[0] || configTermsInt[i][0] >= takenTerm[1] ) {   // appointment outside of config
-	                }
-	                else {																					// appointment inside config 
-	                	if ( configTermsInt[i][0] == takenTerm[0] && configTermsInt[i][1] == takenTerm[1] ) {   
-	                		configTermsInt.remove(i);
-	                	}
-                        else if ( configTermsInt[i][0] == takenTerm[0] ) {
-                            configTermsInt[i][0] = takenTerm[1];
-                        }
-                        else if (configTermsInt[i][1] == takenTerm[1] ) { 
-                            configTermsInt[i][1] = takenTerm[0];
-                        }
-                        else {
-                            List<Decimal> term = new List<Decimal> ();
-                            term.add(configTermsInt[i][0]);
-                            term.add(takenTerm[0]);
-                            configTermsInt[i][0] = takenTerm[1];
-                            configTermsInt.add(i, term);
-                        }
+	        for ( DenS_Config__c con : sconfigs) {  //getting config terms 
+	            if ( calendarday.cDate == con.date__c ) { 
+	                List<Decimal> term = new List<Decimal> ();
+	                term.add(con.Start_time__c);
+	                term.add(con.End_time__c);
+	                configTermsInt.add(term);
+	                w = 0;
+	            }
+	        }
+	        if( w == 1 ) {  						//getting config terms continuation
+	            for ( DenS_Config__c con : wconfigs) {   
+	                Datetime appDatetime = calendarday.cDate; 
+	                if (  appDatetime.format('EEE').substring(0,2) == con.Weekday__c.substring(0,2) ) {
+	                    List<Decimal> term = new List<Decimal> ();
+	                    term.add(con.Start_time__c);
+	                    term.add(con.End_time__c);
+	                    configTermsInt.add(term);
 	                }
 	            }
 	        }
-        }
-        calendarDay.freeTerms = configTermsInt;
-        if( calendarDay.freeTerms.isEmpty() ) {
-        	calendarDay.styleClass = 'divCal redBack';
-        }
-        else {
-        	calendarDay.styleClass = 'divCal greenBack clickable';
+	        if ( configTermsInt.isEmpty() ) {
+	        	calendarDay.styleClass = 'divCal';
+	        	return;
+	        }
+	        for (DenS_Appointment__c appoint : appointments) {  //getting appointment terms
+	            if ( calendarday.cDate == appoint.Date__c ) {
+	                List<Decimal> term = new List<Decimal> ();
+	                term.add(appoint.Start_time__c);
+	                term.add(appoint.End_time__c);
+	                termsTakenInt.add(term);
+	            }
+	        }
+	        if ( termsTakenInt.isEmpty () ) {
+	            	calendarDay.freeTerms = configTermsInt;
+	        }
+	        else {
+	        	// for loop does refresh the condition so it works properly BTW it would work properly anyway since configs are sorted ascendingly by time
+		        for ( Integer i = 0 ; i < configTermsInt.size() ; i++) {  //getting free terms on the selected day  term[0] - start time  term[1] - end time
+		            for ( List<Decimal> takenTerm : termsTakenInt ) {
+		                if ( configTermsInt[i][1] <= takenTerm[0] || configTermsInt[i][0] >= takenTerm[1] ) {   // appointment outside of config
+		                }
+		                else {																					// appointment inside config 
+		                	if ( configTermsInt[i][0] == takenTerm[0] && configTermsInt[i][1] == takenTerm[1] ) {   
+		                		configTermsInt.remove(i);
+		                	}
+	                        else if ( configTermsInt[i][0] == takenTerm[0] ) {
+	                            configTermsInt[i][0] = takenTerm[1];
+	                        }
+	                        else if (configTermsInt[i][1] == takenTerm[1] ) { 
+	                            configTermsInt[i][1] = takenTerm[0];
+	                        }
+	                        else {
+	                            List<Decimal> term = new List<Decimal> ();
+	                            term.add(configTermsInt[i][0]);
+	                            term.add(takenTerm[0]);
+	                            configTermsInt[i][0] = takenTerm[1];
+	                            configTermsInt.add(i, term);
+	                        }
+		                }
+		            }
+		        }
+	        }
+	        calendarDay.freeTerms = configTermsInt;
+	        if( calendarDay.freeTerms.isEmpty() ) {
+	        	calendarDay.styleClass = 'divCal redBack';
+	        }
+	        else {
+	        	calendarDay.styleClass = 'divCal greenBack clickable';
+	        }
         }
         //ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + configTermsInt));
     }
@@ -269,12 +258,10 @@ public with sharing class DenS_AppointmentController {
     public void dayChosen () {
     	appointment.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy) );
         for (CalendarDay cDay : calendarDetails.calendarDays) {
-        	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'day:  ' + cDay.cDate) );
         	if ( cDay.dayToDisplay == chosenDayDummy ) {
         		chosenCalendarDay = cDay;
         	}
         }
-        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'     chosen day:      ' + chosenDayDummy + chosenCalendarDay  +  appointment.Date__c) );
     }
     
  	///=============SETTERS-END========================
@@ -288,7 +275,6 @@ public with sharing class DenS_AppointmentController {
                                ];
         options.add(new SelectOption('no','Select a dentist'));
         for (User u: ul) {
-            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'id= '+u.Id +'name= ' + u.Name));
             options.add(new SelectOption(u.Id,u.Name));
         }
         return options; 
@@ -344,7 +330,6 @@ public with sharing class DenS_AppointmentController {
     public Boolean checkEmailExists () { 
         for ( Contact cl : [SELECT Email from Contact]) {
             if (client.Email == cl.Email) {
-                ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Client exists'));
             	return true;
             }
         }
