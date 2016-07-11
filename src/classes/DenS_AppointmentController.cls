@@ -155,6 +155,10 @@ public with sharing class DenS_AppointmentController {
          		} 
     			insert client; 
     		}
+    		if( Decimal.valueOf(pomS) >= Decimal.valueOf(pomE) ) {
+    			ApexPages.addmessage(new ApexPages.message(ApexPages.severity.Error,'Start time should be earlier than the end time'));
+         		return null;
+    		}
     		appointment.Client__c = [SELECT Id, Email from Contact WHERE Email =: client.Email][0].Id;
          	appointment.Dentist__c = dentistId;
          	appointment.Status__c = 'Awaiting acceptance';
@@ -328,11 +332,13 @@ public with sharing class DenS_AppointmentController {
     }
     public List<SelectOption> getPossibleEndTimes () {
     	List<SelectOption> options = new List<SelectOption>();
-        options = getAvailTerms();
-     	   options.remove(0);
-        Decimal lastValue = Decimal.valueOf(options[options.size()-1].getValue());
-        lastValue += 60;
-        options.add(new SelectOption( String.valueOf(lastValue), fromMinToHoursA(lastValue) ));
+        for ( Integer i = 0 ; i < chosenCalendarDay.freeTerms.size() ; i++ ) {
+        	Integer k = (chosenCalendarDay.freeTerms[i][1]-chosenCalendarDay.freeTerms[i][0]).intValue() /60;
+        	for (Integer j = 1 ; j <= k ; j++) {
+        		options.add(new SelectOption(String.valueOf(chosenCalendarDay.freeTerms[i][0]),
+        									 fromMinToHoursA(chosenCalendarDay.freeTerms[i][0] + j*60)));
+        	}
+        }
         return options; 
     }
     /*
