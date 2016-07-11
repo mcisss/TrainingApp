@@ -3,29 +3,27 @@ public with sharing class DenS_AppointmentController {
     public DenS_AppointmentController() {
     } 
     // lastly - Appointment saved
-    // dodałem pole select a dentist do dentists zeby zapisywalo samo dentist id 
-    // 1. trzeba zrobic zeby calendar sie pojawial po wybraniu innego dentysty niz z dentistId ==''  
-    // innymi słowy brać config od dentistId   
+    
         
     //TODO
-    // save button
-    // wybór z dostępnychn terminow
     // po udanym savie pojawia się strona ApplikationInfo
-    // inne wymagania np:
-    // latwe:
-    // klient wybiera typ wizyty (konsultacja, leczenie), opis pojawia się po wybraniu typu wizyty „leczenie”
-    // Każda instancja wizyty powinna mieć unikalną nazwę składającą się z inicjałów dentysty, inicjałów klienta oraz daty z godziną: AB_MK_20160812_1530 – nazwa ta jest tworzona podczas tworzenia wizyty.
     // średnie:
     // 5-minutowa blokada dla innych klientów po kliknięciu terminu
     // mail informujący o konieczności potwierdzenia wizyty, po tym jak lekarz ją ztwierdził otrzymuje drugi email informujący że zatwierdził
     // W przypadku gdy wizyta ma miejsce w niedzielę lub po godzinie 20.00 wymagane jest potwierdzenie zarówny dentysty jak i właściciela salonu dentystycznego. 
     
     //DONE:
+    // save button
+    // wybor z dostępnychn terminow na pickliscie
+    // taking configs by dentistId   
+    // latwe:
+    // klient wybiera typ wizyty (konsultacja, leczenie), opis pojawia się po wybraniu typu wizyty „leczenie”
+    // Każda instancja wizyty powinna mieć unikalną nazwę składającą się z inicjałów dentysty, inicjałów klienta oraz daty z godziną: AB_MK_20160812_1530 – nazwa ta jest tworzona podczas tworzenia wizyty.
     // issues with calendar including daysToDisplay, setFreeTermsFunction, cleaning up the code, making it work dayChosen function with appointment.Date__c saving
     // 
     
     // maybe:
-    // automatyczne start time i endtime jako picklisty (bo mamy calendarDay.freeTerms )
+    // 
     
     //  przydatne
     //  get user type: List<Profile> PROFILE = [SELECT Id, Name FROM Profile WHERE Id=:userinfo.getProfileId() LIMIT 1];
@@ -39,11 +37,9 @@ public with sharing class DenS_AppointmentController {
     public CalendarDetails calendarDetails {get;set;}
     public String chosenDayDummy {get;set;}
     public CalendarDay chosenCalendarDay {get;set;}
-     public CalendarDay calendarDay {get;set;}
     
     public String appointmentsToDeleteID {get;set;}
     public String pomS {get;set;}
-    public String pomE {get;set;}
     public static String dentistId {get;set;}
     public String appointmentType {get;set;}
     
@@ -155,15 +151,17 @@ public with sharing class DenS_AppointmentController {
          		} 
     			insert client; 
     		}
-    		if( Decimal.valueOf(pomS) >= Decimal.valueOf(pomE) ) {
-    			ApexPages.addmessage(new ApexPages.message(ApexPages.severity.Error,'Start time should be earlier than the end time'));
-         		return null;
-    		}
-    		appointment.Client__c = [SELECT Id, Email from Contact WHERE Email =: client.Email][0].Id;
+    		Contact clientPom = [SELECT Id, FirstName, LastName, Email FROM Contact WHERE Email =: client.Email][0];
+    		User dentistPom = [SELECT Id, FirstName, LastName FROM User WHERE Id=:dentistId][0];
+    		appointment.Client__c = clientPom.Id;
          	appointment.Dentist__c = dentistId;
          	appointment.Status__c = 'Awaiting acceptance';
          	appointment.Start_time__c = Decimal.valueOf(pomS);
-         	appointment.End_time__c = Decimal.valueOf(pomE);
+         	appointment.End_time__c = Decimal.valueOf(pomS)+60;
+         	appointment.Name = '' + dentistPom.FirstName.substring(0,1) + dentistPom.LastName.substring(0,1) + '_'
+         				       + clientPom.FirstName.substring(0,1) + clientPom.LastName.substring(0,1) + '_' 
+         				       + String.ValueOf(dateTimeDummy.year()) + String.ValueOf(dateTimeDummy.month()) + String.ValueOf(dateTimeDummy.day()) + '_'
+         				       + fromMinToHoursA(Decimal.valueOf(pomS)).substring(0,2) + fromMinToHoursA(Decimal.valueOf(pomS)).substring(3);
          	if (1 == 1) {
          		appointment.RecordTypeId = '012580000000o0yAAA';
          	}
@@ -279,28 +277,6 @@ public with sharing class DenS_AppointmentController {
         ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'     chosen day:      ' + chosenDayDummy + chosenCalendarDay  +  appointment.Date__c) );
     }
     
-    public void setPomE () {
-    	pomE = String.valueOf(Integer.valueOf(pomS)+60);
-    }
-    /*
-    public Boolean overlapcheckAppointment (DenS_Appointment__c appointment) { // checks whether the hours chosen do not overlap with other configs
-        
-       	czy pomS i pomE naleza do dostepnych godzin
-        
-        List<List<Decimal>> freeTerms = getFreeTerms ();
-        List<Decimal> appointmentTerm = new List<Decimal>();
-        appointmentTerm.add(appointment.Start_time__c);
-        appointmentTerm.add(appointment.End_time__c);
-        for (List<Decimal> freeTermTime : freeTerms) {
-            if ( appointmentTerm[0] >= freeTermTime[0] && appointmentTerm[1] <= freeTermTime[1] ) {
-                return true; 
-            }
-        }
-        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'Start or end time do not match the currently available terms'));
-        return false;
-    }
-    */
- 
  	///=============SETTERS-END========================
 
  	//==========GETTERS========================   
@@ -323,37 +299,13 @@ public with sharing class DenS_AppointmentController {
         options.add(new SelectOption('Treatment','Treatment'));
         return options; 
     }
-    /*
-    public List<SelectOption> getAvailTerms () {
-        List<SelectOption> options = new List<SelectOption>();
-        for ( Integer i = 0 ; i < chosenCalendarDay.freeTerms.size() ; i++ ) {
-        	Integer k = (chosenCalendarDay.freeTerms[i][1]-chosenCalendarDay.freeTerms[i][0]).intValue() /60;
-        	for (Integer j = 0 ; j < k ; j++) {
-        		options.add(new SelectOption(String.valueOf(chosenCalendarDay.freeTerms[i][0]),
-        									 fromMinToHoursA(chosenCalendarDay.freeTerms[i][0] + j*60)));
-        	}
-        }
-        return options; 
-    }
-    public List<SelectOption> getPossibleEndTimes () {
-    	List<SelectOption> options = new List<SelectOption>();
-        for ( Integer i = 0 ; i < chosenCalendarDay.freeTerms.size() ; i++ ) {
-        	Integer k = (chosenCalendarDay.freeTerms[i][1]-chosenCalendarDay.freeTerms[i][0]).intValue() /60;
-        	for (Integer j = 1 ; j <= k ; j++) {
-        		options.add(new SelectOption(String.valueOf(chosenCalendarDay.freeTerms[i][0]),
-        									 fromMinToHoursA(chosenCalendarDay.freeTerms[i][0] + j*60)));
-        	}
-        }
-        return options; 
-    }
-    */
     public List<SelectOption> getPossibleTerms () {  //only hours
     	List<SelectOption> options = new List<SelectOption>();
         for ( Integer i = 0 ; i < chosenCalendarDay.freeTerms.size() ; i++ ) {
         	Integer k = (chosenCalendarDay.freeTerms[i][1]-chosenCalendarDay.freeTerms[i][0]).intValue() /60;
         	for (Integer j = 0 ; j < k ; j++) {
         		options.add(new SelectOption(String.valueOf(chosenCalendarDay.freeTerms[i][0]),
-        									 fromMinToHoursA(chosenCalendarDay.freeTerms[i][0] +j*60)+' - '+fromMinToHoursA(chosenCalendarDay.freeTerms[i][1]+j*60)));
+        									 fromMinToHoursA(chosenCalendarDay.freeTerms[i][0] +j*60)+' - '+fromMinToHoursA(chosenCalendarDay.freeTerms[i][0]+(j+1)*60)));
         	}
         }
         return options; 
@@ -369,19 +321,6 @@ public with sharing class DenS_AppointmentController {
     public String[] getDaysOfTheMonth () {
         String[] dayst = new List<String> {'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31'}; //{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
         return dayst;
-    }
-    public List<SelectOption> getWorkingHours() {  
-        List<SelectOption> options = new List<SelectOption>(); 
-        String hour, inminutes;
-        options.add(new SelectOption('9999','--:--'));
-        for (Integer i = 0 ; i <24 ; i++) {
-            hour = string.valueOf(Time.newInstance(i, 0, 0, 0)).substring(0,5);
-            inminutes = string.valueOf(  integer.valueOf(hour.substring(0,2))*60 
-                                       + integer.valueOf(hour.substring(3,5)     )
-                      );
-            options.add(new SelectOption(inminutes,hour));  // value bez : label z musi być string  !!!!!!!!!!
-        }   
-        return options; 
     }
     public static List<DenS_Appointment__c> getAppointments () {   //
         return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
@@ -426,19 +365,5 @@ public with sharing class DenS_AppointmentController {
     
     //==========TMP======================================  
     
-    /*
-    public Boolean checkClientExists () {
-        for ( Client__c cl : [SELECT Email__c from Client__c LIMIT 1]) {
-            if (client.Email__c == cl.Email__c) {
-                ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Client exists'));
-                return true;
-            }
-            else {
-                ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Not this client'));
-            }
-        }
-        return false;
-    }
-    */
     ///===========TMP-END======================================
 }

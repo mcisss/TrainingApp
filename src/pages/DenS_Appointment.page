@@ -1,4 +1,4 @@
-<apex:page standardController="DenS_Appointment__c" extensions="DenS_AppointmentController"  standardStylesheets="true" showHeader="false" sidebar="false"
+<apex:page standardController="DenS_Appointment__c" extensions="DenS_AppointmentController"  standardStylesheets="true" showHeader="true" sidebar="true"
    recordSetVar="allappoints"  id="apage">
    <!-- TODO
       css - some months get down
@@ -352,7 +352,8 @@
             
       }
       function toggleDescription () {
-      		j$('[class*=description').toggle();
+      		j$('[id*=apage:forma:appointmentDetails:j_id20:j_id29').toggle();
+      		j$('[id*=apage:forma:appointmentDetails:j_id20:j_id29').toggle();
       }
       function showVisitDuration() {
       		j$('[id*=vDuration').show();
@@ -425,7 +426,7 @@
             <apex:pageBlockSection columns="2" >
                <apex:outputField value="{!appointment.Date__c}"  > </apex:outputField>
                <apex:inputText value="{!client.FirstName}"/>
-               <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Selected term" onchange="{!setPomE}">
+               <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Selected term" onchange="showVisitDuration">
                   <apex:selectOptions value="{!possibleTerms}"/>
                </apex:selectList>
                <apex:inputText value="{!client.LastName}"/>
@@ -433,15 +434,8 @@
                	  	  			size="1" multiselect="false">
                   <apex:selectOptions value="{!appointmentTypes}"  />
                </apex:selectList>
-               <!-- 
-               <apex:selectList id = "vDuration" styleClass="sellist" value="{!pomE}" size="1" Label="Visit duration">
-                  <apex:selectOptions value="{!WorkingHours}"/>
-               </apex:selectList>
-                -->
                <apex:inputField value="{!client.Email}"/>
-               <div id="appDescription" class = "description" >
               	 <apex:inputTextarea  value="{!appointment.Description__c}" />
-               </div>
                <apex:inputField value="{!client.Phone}"/>
                <apex:commandLink />
                <apex:commandLink styleClass="saveB, floatRight" action="{!save}" style="text-decoration: none;"
