@@ -412,9 +412,6 @@
                                         </apex:repeat>
                                 </apex:pageBlockSection>
                             </div>
-                            <apex:dataTable VALUE="{!wconfigs}" var="con"> 
-                                <div> <h5>{!con.Weekday__c}</h5> </div>
-                            </apex:dataTable>
                         </div>
                      </apex:outputPanel> 
             </apex:pageBlockSection>
@@ -430,10 +427,10 @@
                         <c:out TimeInMinutes="{!te[1]}" />
                      </apex:column>
             </apex:dataTable>
-            <apex:pageBlockSection columns="2" >
+            <apex:pageBlockSection columns="2" > 
                <apex:outputField value="{!appointment.Date__c}"  > </apex:outputField>
                <apex:inputText value="{!client.FirstName}"/>
-               <apex:selectList styleClass="sellist" value="{!pomS}" size="1" Label="Selected term" onchange="showVisitDuration">
+               <apex:selectList styleClass="inputOrSelList" value="{!pomS}" size="1" Label="Selected term" onchange="showVisitDuration">
                   <apex:selectOptions value="{!possibleTerms}"/>
                </apex:selectList>
                <apex:inputText value="{!client.LastName}"/>
@@ -442,7 +439,7 @@
                   <apex:selectOptions value="{!appointmentTypes}"  />
                </apex:selectList>
                <apex:inputField value="{!client.Email}"/>
-              	 <apex:inputTextarea  value="{!appointment.Description__c}" />
+              	 <apex:inputTextarea  value="{!description}" />
                <apex:inputField value="{!client.Phone}"/>
                <apex:commandLink />
                <apex:commandLink styleClass="saveB, floatRight" action="{!save}" style="text-decoration: none;"

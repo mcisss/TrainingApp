@@ -5,9 +5,12 @@ public with sharing class DenS_AppointmentController {
     // lastly - Appointment saved
     
     //TODO
+    // before learn triggers to schedule this task in 5 min
+    // 5-minutowa blokada dla innych klientów po kliknięciu terminu
+    // jak sie zmienia strone w visualforce
     // po udanym savie pojawia się strona ApplikationInfo
     // średnie:
-    // 5-minutowa blokada dla innych klientów po kliknięciu terminu
+    // 
     // mail informujący o konieczności potwierdzenia wizyty, po tym jak lekarz ją ztwierdził otrzymuje drugi email informujący że zatwierdził
     // W przypadku gdy wizyta ma miejsce w niedzielę lub po godzinie 20.00 wymagane jest potwierdzenie zarówny dentysty jak i właściciela salonu dentystycznego. 
     // when tired: take care of looks
@@ -15,6 +18,7 @@ public with sharing class DenS_AppointmentController {
     
     //DONE:
     // save button
+    // redirection after saving
     // wybor z dostępnychn terminow na pickliscie
     // taking configs by dentistId   
     // latwe:
@@ -30,8 +34,6 @@ public with sharing class DenS_AppointmentController {
     //  get user type: List<Profile> PROFILE = [SELECT Id, Name FROM Profile WHERE Id=:userinfo.getProfileId() LIMIT 1];
     //  String MyProflieName = PROFILE[0].Name;    
         
-        
-        
     public DenS_Appointment__c appointment {get;set;}
     public Contact client {get;set;}
     public User dentist {get;set;}
@@ -43,6 +45,7 @@ public with sharing class DenS_AppointmentController {
     public String pomS {get;set;}
     public static String dentistId {get;set;}
     public String appointmentType {get;set;}
+    public String description {get;set;}
     
     public DateTime dateTimeDummy {get;set;}
     public Date dateDummy {get;set;}
@@ -60,7 +63,31 @@ public with sharing class DenS_AppointmentController {
     
     public List<Integer> visitDuration {get;set;}
     public Integer chosenVisitNb {get;set;}
-    
+	
+	
+	// for site AppointmentListDentis:
+	public String[] searchCriteria {get;set;}
+	public String[] pickListsAL {get;set;}
+	
+	/*    
+    final Handler handler = new Handler();
+	final long delay = 5 * 60 * 1000;
+	
+	public void executeSomething(){
+	    handler.postDelayed(new Runnable(){
+	        public void run(){
+	            // do your work
+	
+	            if (continueToExecute){
+	                executeSoemthing();
+	            }
+	        }
+	    }, delay);
+	}
+    */
+    public DenS_AppointmentController(ApexPages.StandardController stdController) { 
+    	
+    }
     public DenS_AppointmentController(ApexPages.StandardSetController stdController) {   
         String name = ApexPages.currentPage().getParameters().get('id');   
         appointment = (name == null) ? new  DenS_Appointment__c():
@@ -74,6 +101,14 @@ public with sharing class DenS_AppointmentController {
         
         calendarDetails = new CalendarDetails ();
         
+        //AL
+        pickListsAL = new List<String> ();
+        pickListsAL.add('');
+        pickListsAL.add('');
+        pickListsAL.add('');
+        
+        //
+        
         if (dateTimeDummy == null){        
             dateTimeDummy = datetime.now(); //.addMonths(-5); 
             dateDummy = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
@@ -85,8 +120,6 @@ public with sharing class DenS_AppointmentController {
             
             appointment.Date__c = date.newInstance(2016, 7, 21);
         }     
-        
-      
     }       
     //==========MODIFIERS========================
     public void setDisplayMonthAndYear () {  
@@ -150,15 +183,20 @@ public with sharing class DenS_AppointmentController {
      				       + String.ValueOf(dateTimeDummy.year()) + String.ValueOf(dateTimeDummy.month()) + String.ValueOf(dateTimeDummy.day()) + '_'
      				       + fromMinToHoursA(Decimal.valueOf(pomS)).substring(0,2) + fromMinToHoursA(Decimal.valueOf(pomS)).substring(3);
      	if ( appointmentType == 'Treatment') {
-     		appointment.RecordTypeId = '012580000000o0yAAA';
+     		appointment.RecordTypeId = '012580000000o0yAAA';  // get recordtypesid po Name
+     		appointment.Description__c = description; 
      	}
      	else {
      		appointment.RecordTypeId = '012580000000o13AAA'; 
      	}
+     
         try {
             upsert appointment;
             appointment = new DenS_Appointment__c();
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Appointment saved'));
+            PageReference pageRef = new PageReference('/apex/DenS_AppointmentView');
+            pageRef.setRedirect(false);
+            return pageRef;
         } catch (DmlException e) {
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Appointment date should be in the future'));
             System.debug('The following exception has occurred: ' + e.getMessage());
@@ -174,7 +212,7 @@ public with sharing class DenS_AppointmentController {
     //==========SETTERS========================   
  
     public void setFreeTerms (CalendarDay calendarDay) {  // if there are no configs on this day no color, if there are configs and available terms -green / no available terms - red
-        List<DenS_Appointment__c> appointments = getAppointments ();
+        List<DenS_Appointment__c> appointments = getAppointments ( dentistId );
         List<List<Decimal>> configTermsInt = new List<List<Decimal>>  ();
         List<List<Decimal>> termsTakenInt = new List<List<Decimal>> ();
         Integer w = 1;
@@ -305,13 +343,75 @@ public with sharing class DenS_AppointmentController {
         return dayst;
     }
     public String[] getDaysOfTheMonth () {
-        String[] dayst = new List<String> {'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31'}; //{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+        String[] dayst = new List<String> ();
+        for (Integer i=1 ; i<32 ; i++) {
+        	dayst.add( String.valueOf(i) );
+        }
         return dayst;
     }
     public static List<DenS_Appointment__c> getAppointments () {   //
         return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
-                FROM DenS_Appointment__c WHERE Dentist__c =: dentistId ORDER BY Date__c, Start_time__c];
+                FROM DenS_Appointment__c ORDER BY Date__c, Start_time__c];
     }
+    public static List<DenS_Appointment__c> getAppointments (String dentisttId ) {   //
+        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
+                FROM DenS_Appointment__c WHERE Dentist__c =: dentisttId ORDER BY Date__c, Start_time__c];
+    }
+    public static List<DenS_Appointment__c> getHistoricAppointments () {   //
+        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
+                FROM DenS_Appointment__c WHERE Date__c <: date.Today() ORDER BY Date__c, Start_time__c];
+    }
+    public static List<DenS_Appointment__c> getHistoricAppointments (String dentisttId) {   //
+        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
+                FROM DenS_Appointment__c WHERE Date__c <: date.Today() AND Dentist__c =: dentisttId ORDER BY Date__c, Start_time__c];
+    }
+    public List<SelectOption> getSearchCrits () {
+    	List<SelectOption> options = new List<SelectOption>();
+        options.add(new SelectOption('Date','Date'));
+        options.add(new SelectOption('Status','Status'));
+        options.add(new SelectOption('Client','Client'));
+        options.add(new SelectOption('Appointment type','Appointment type'));
+        return options; 
+    }
+    
+    
+    //AL
+    public String[] getStatuses () {
+    	List<String> statuses = new List<String> ();
+    	return statuses;
+    }
+    public List<String> getClients () {
+    	List<String> clients = new List<String> ();
+			//select ids from contacts     	
+    	return clients;
+    }
+    
+    public List<DenS_Appointment__c> getAppsForView () {
+    	List<DenS_Appointment__c> apps = new List<DenS_Appointment__c> ();
+    	List<DenS_Appointment__c> apps2 = new List<DenS_Appointment__c> ();
+    	Integer w = 0; 
+    	for ( String i : searchCriteria ) {
+    		if ( i == 'Date' ){
+    			apps = [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId
+               			FROM DenS_Appointment__c WHERE Date__c =: appointment.Date__c ORDER BY Date__c, Start_time__c];
+    		}
+    		if ( i == 'Status' ) {
+    			if ( w==0 ) {
+    				apps = [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId
+           			FROM DenS_Appointment__c WHERE Date__c =: appointment.Date__c ORDER BY Date__c, Start_time__c];
+    			}
+    			else {
+    				for (DenS_Appointment__c app : apps) {
+    					if ( app.Status__c == pickListsAL[0] ) {
+    						apps2.add(app);
+    					}
+    				} 
+    			}
+    		}
+    	}
+    	return apps;
+    }
+    
     ///=============GETTERS-END========================  
 
     //==========Helpers=============================

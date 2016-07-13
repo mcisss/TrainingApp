@@ -251,7 +251,7 @@
                      <apex:column headerValue="Weekday">
                         <apex:outputField value="{!con.Weekday__c}">
                         </apex:outputField>
-                     </apex:column>
+                     </apex:column> 
                      <apex:column headerValue="Start time">
                         <c:out TimeInMinutes="{!con.Start_time__c}" />
                      </apex:column>
