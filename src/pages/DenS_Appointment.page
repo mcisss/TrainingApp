@@ -44,6 +44,7 @@
          text-decoration: none;
          height: 30px;
          width: 40px;
+         text-align: center;
          cursor: default;
          font-weight: 800;
          }
@@ -351,15 +352,10 @@
          }
          div.labelCol {
          display: inline;
-         margin-left: 45px;
+         margin-left: 30px;
          padding-right: 25px;
          }
-         body .bPageBlock .pbBody .labelCol {
-         width: 17%;
-         } 
-         body .bPageBlock .pbBody .labelCol .first .last {
-         width: 13%;
-         } 
+        
          .datePick .bPageBlock .pbBody .labelCol {
          padding-top: 8px;
          vertical-align: top;
@@ -387,8 +383,8 @@
    		 text-decoration: none; 
     	 color: black;
 		 }
-		 .marg145 {
-		 margin-left: 145px;
+		 .marg130 {
+		 margin-left: 130px;
 		 }
 		 .margR0 {
 		 text-align: right !important; 
@@ -398,7 +394,7 @@
 		 }
 		 .tarea {
 		 height: 160px;
-		 width: 665px
+		 width: 680px
 		 }
       </style>
    </head>
@@ -528,7 +524,7 @@
 		             <apex:inputText styleClass="form-control" value="{!client.LastName}"/>
 		             <apex:inputField styleClass="form-control" value="{!client.Email}"/>
 		             <apex:inputField styleClass="form-control" value="{!client.Phone}"/>
-		             <apex:selectList styleClass="inputOrSelList marg145" value="{!appointmentType}" 
+		             <apex:selectList styleClass="inputOrSelList marg130" value="{!appointmentType}" 
 		             	  	  			size="1" multiselect="false">       <!-- onchange="toggleDescription();" does not work -->
 		                <apex:selectOptions value="{!appointmentTypes}"  />
 		             </apex:selectList>
