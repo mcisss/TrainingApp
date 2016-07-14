@@ -213,7 +213,7 @@ form {
    <script>
    	  j$ = jQuery.noConflict();
       j$(document).ready(function() {
-
+			setCalendarStyles ();
       });
       j$('[id*=appointmentDetails').ready( function(){
 		  j$('[id*=appointmentDetails').hide();
@@ -238,6 +238,25 @@ form {
       function clickableMouseleave () {
         j$('[class*=clickable').css({"color": "rgb(0,0,100)"});
       }
+      j$('[id*=daysCal').ready( function(){
+		    arr = "{!calendarDetails.styles}";
+            arr = arr.slice(1,arr.length-1);
+            arr = arr.split(',');
+			idStart = "apage\\:forma\\:datePickPageBlock\\:datePickPageBlockSection\\:daysBlock\\:day\\:";
+			idEnd = "\\:dayl";
+			for (i = 0; i < arr.length; i++) {
+				temp = '[id*=' + idStart + i + idEnd;
+				if (arr[i]==0) {
+					j$(temp).addClass("divCal");
+				}
+				else if (arr[i]==1) {
+					j$(temp).addClass("divCal greenBack");
+				}
+				else if (arr[i]==2) {
+					j$(temp).addClass("divCal redBack");
+				}
+			}
+	  });
    </script>
    <div>
    <apex:form id="forma">
@@ -281,8 +300,8 @@ form {
 							</ul>
                             <div id="daysCal" class='daysCal'>
                                 <apex:pageBlockSection id="daysBlock" columns="7" >
-                                        <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">
-                                            <apex:commandLink  id="dayl" action="{!dayChosen}" styleClass="{!day.styleClass}"
+                                        <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">  <!-- previously it's been styleClass="{!day.styleClass}" -->
+                                            <apex:commandLink  id="dayl" action="{!dayChosen}" 
                                             				     value="{!day.dayToDisplay}" onmouseover="commLinkMouseOver (); " >
                                             	<apex:param value="{!day.showAppDetailsAndDayToDisplay}" name="chosenCalendarDay" assignto="{!chosenDayDummy}"> </apex:param>
                                             </apex:commandLink>

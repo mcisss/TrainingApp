@@ -110,6 +110,7 @@ public with sharing class DenS_AppointmentController {
     //==========MODIFIERS========================
     public void setDisplayMonthAndYear () {
     	showAppDetails = false;
+    	calendarDetails.styles='';
         calendarDetails.monthDisplay = dateTimeDummy.format('MMMMM');  
         calendarDetails.yearDisplay = dateTimeDummy.format('YYYY');
         Date myDate = date.newInstance(2000, 10, 2); //Monday
@@ -131,9 +132,10 @@ public with sharing class DenS_AppointmentController {
 	    	cDay.styleClass = 'divCal';
 	    	if ( i >= calendarDetails.nbOfNullSpaces1 ) {
 	    		cday.cDate = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), i+1 - calendarDetails.nbOfNullSpaces1);
-	    		if ( dentistId != 'no' ) {
-	    			setFreeTerms(cDay); // sets styleClass too
-	    		}
+	    		setFreeTerms(cDay); // sets styleClass too
+	    	}
+	    	else {
+	    		calendarDetails.styles+=',0';
 	    	}
 	        calendarDetails.calendarDays.add(cDay);
         }
@@ -203,10 +205,10 @@ public with sharing class DenS_AppointmentController {
         List<List<Decimal>> configTermsInt = new List<List<Decimal>>  ();
         List<List<Decimal>> termsTakenInt = new List<List<Decimal>> ();
         Integer w = 1;
-        calendarday.clickable = true;
         calendarDay.showAppDetailsAndDayToDisplay = ' ' + calendarDay.dayToDisplay;
         if ( calendarday.cDate <= date.today() ) {
         	calendarDay.styleClass = 'divCal';
+        	calendarDetails.styles+=',0';
         }
         else {
 	        for ( DenS_Config__c con : sconfigs) {  //getting config terms 
@@ -232,6 +234,7 @@ public with sharing class DenS_AppointmentController {
 	        if ( configTermsInt.isEmpty() ) {
 	        	calendarDay.styleClass = 'divCal';
 	        	calendarDay.showAppDetailsAndDayToDisplay = '0';
+	        	calendarDetails.styles+=',0';
 	        	return;
 	        }
 	        for (DenS_Appointment__c appoint : appointments) {  //getting appointment terms
@@ -276,11 +279,12 @@ public with sharing class DenS_AppointmentController {
 	        if( calendarDay.freeTerms.isEmpty() ) {
 	        	calendarDay.styleClass = 'divCal redBack';
 	        	calendarDay.showAppDetailsAndDayToDisplay = '0'; 
+	        	calendarDetails.styles+=',2';
 	        }
 	        else {
 	        	calendarDay.styleClass = 'divCal greenBack clickable';
-	        	calendarDay.showAppDetailsAndDayToDisplay = '1' + calendarDay.showAppDetailsAndDayToDisplay; 
-	        	calendarday.clickable = false;
+	        	calendarDay.showAppDetailsAndDayToDisplay = '1' + calendarDay.showAppDetailsAndDayToDisplay;
+	        	calendarDetails.styles+=',1'; 
 	        }
         }
         //ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + configTermsInt));
