@@ -48,6 +48,9 @@ h5 {
 	border-spacing: 4px; //
 	margin-right: 670px;
 }
+.width100{
+	width: 100%;
+}
 
 /*form-control*/
 .form-control {
@@ -213,7 +216,6 @@ form {
    <script>
    	  j$ = jQuery.noConflict();
       j$(document).ready(function() {
-			setCalendarStyles ();
       });
       j$('[id*=appointmentDetails').ready( function(){
 		  j$('[id*=appointmentDetails').hide();
@@ -268,7 +270,7 @@ form {
             <p/>
                <apex:pageBlock id="datePickPageBlock">
                   <apex:pageBlockSection id="datePickPageBlockSection" columns="2">
-                     <apex:selectList label="Dentist" id="selectDentist" styleClass="inputOrSelList" value="{!dentistId}" 
+                     <apex:selectList label="Dentist" id="selectDentist" styleClass="inputOrSelList width100" value="{!dentistId}" 
                      				  size="1" multiselect="false" onchange="callSetDisplayMonthAndYear (); ">
                         <apex:selectOptions value="{!dentists}"  />
                      </apex:selectList>
@@ -319,7 +321,7 @@ form {
 		     <apex:pageBlock  title="Appointment Details">
 		         <apex:pageBlockSection columns="2" > 
 		             <apex:outputField styleClass="form-control" value="{!appointment.Date__c}"  > </apex:outputField>
-		             <apex:selectList styleClass="inputOrSelList" value="{!pomS}" size="1" Label="Selected term">
+		             <apex:selectList styleClass="inputOrSelList width100" value="{!pomS}" size="1" Label="Selected term">
 		                <apex:selectOptions value="{!possibleTerms}"/>
 		             </apex:selectList>
 		          </apex:pageBlockSection>

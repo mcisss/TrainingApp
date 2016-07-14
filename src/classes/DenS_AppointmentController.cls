@@ -13,13 +13,11 @@ public with sharing class DenS_AppointmentController {
     // 
     // mail informujący o konieczności potwierdzenia wizyty, po tym jak lekarz ją ztwierdził otrzymuje drugi email informujący że zatwierdził
     // W przypadku gdy wizyta ma miejsce w niedzielę lub po godzinie 20.00 wymagane jest potwierdzenie zarówny dentysty jak i właściciela salonu dentystycznego. 
-    // when tired: take care of looks
-    // two things (to ask(?)) - description does not disappear style of days changes for some months : January, February, April, May, July, October, December
     
     //DONE:
     // save button
     // redirection after saving
-    // wybor z dostępnychn terminow na pickliscie
+    // wybor z dostępnych terminow na pickliscie
     // taking configs by dentistId   
     // latwe:
     // klient wybiera typ wizyty (konsultacja, leczenie), opis pojawia się po wybraniu typu wizyty „leczenie”
@@ -31,8 +29,10 @@ public with sharing class DenS_AppointmentController {
     // 
     
     //  przydatne
-    //  get user type: List<Profile> PROFILE = [SELECT Id, Name FROM Profile WHERE Id=:userinfo.getProfileId() LIMIT 1];
+    //  get user id: List<Profile> PROFILE = [SELECT Id FROM Profile WHERE Id=:userinfo.getProfileId().Id];
     //  String MyProflieName = PROFILE[0].Name;    
+        
+    public String userId {get;set;}
         
     public DenS_Appointment__c appointment {get;set;}
     public Contact client {get;set;}
@@ -81,7 +81,8 @@ public with sharing class DenS_AppointmentController {
     public DenS_AppointmentController(ApexPages.StandardController stdController) { 
     	
     }
-    public DenS_AppointmentController(ApexPages.StandardSetController stdController) {   
+    public DenS_AppointmentController(ApexPages.StandardSetController stdController) {  
+    	userId = [SELECT Id FROM Profile WHERE Id=:userinfo.getProfileId()][0].Id; 
         String name = ApexPages.currentPage().getParameters().get('id');   
         appointment = (name == null) ? new  DenS_Appointment__c():
             [SELECT Id, Name, Client__c, Date__c, Dentist__c, Description__c, 
@@ -89,7 +90,7 @@ public with sharing class DenS_AppointmentController {
         
         chosenCalendarDay = new CalendarDay();
         client = new Contact (); 
-        dentistId='no';
+        dentistId='no'; //  if dentist shoud be dentistId = userId;  if owner null nothing if client nothing
         
         calendarDetails = new CalendarDetails ();
         
