@@ -105,9 +105,11 @@ public with sharing class DenS_AppointmentController {
             dateDummy = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
         }
         setDisplayMonthAndYear ();
+        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'teraz' ));
     }       
     //==========MODIFIERS========================
     public void setDisplayMonthAndYear () {
+    	showAppDetails = false;
         calendarDetails.monthDisplay = dateTimeDummy.format('MMMMM');  
         calendarDetails.yearDisplay = dateTimeDummy.format('YYYY');
         Date myDate = date.newInstance(2000, 10, 2); //Monday
@@ -294,9 +296,6 @@ public with sharing class DenS_AppointmentController {
         			chosenCalendarDay = cDay;
         		}
        		}
-    	}
-    	else {
-    		showAppDetails = false;
     	}
     }
     

@@ -1,402 +1,214 @@
 <apex:page standardController="DenS_Appointment__c" extensions="DenS_AppointmentController"  standardStylesheets="true" showHeader="true" sidebar="true"
    recordSetVar="allappoints"  id="apage">
    <!-- TODO
-      css - some months get down
-      
-      
-      Checking whether the client exists (js script checking email) after changing the inputField email
-      
-      
-      
-      
-       
-      Later
-      getDentists
-      Calendar
-      Send an email to the dentist after creating an appointment
-      
-      
-      jakby co:
-      tu jest kalendarz
-      http://www.w3schools.com/howto/howto_css_calendar.asp
       -->
    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" />
    <head>
       <style>
-      	 .form-control {
-	     display: block;
-	     width: 96%;
-	     height: 22px;
-	     padding: 10px 10px;
-	     font-size: 14px;
-	     line-height: 1.42857143;
-	     color: #555;
-    	 }
-         /* style na:
-         kalendarz
-         tabele
-         h1...
-         none or few specific fields
-         */
-         .divCal {
-         display: inline-block;
-         background-color: #eee; /*url('{!$Resource.binary_small_color}'); */
-         text-decoration: none;
-         height: 30px;
-         width: 40px;
-         text-align: center;
-         cursor: default;
-         font-weight: 800;
-         }
-         .daysCal {
-         background-color: #eee;
-         border: 3px solid black;
-         }
-         body {
-         text-align:center;
-         //background-image:url('{!$Resource.binary}');  
-         margin: auto;
-         }
-         h1 {
-         font-size: 46px;
-         font-family: Futura, Pier, Constantia;
-         }
-         h2 {
-         font-size: 34px;
-         font-family: Futura, Cambria, Constantia;
-         }
-         h3 {
-         font-size: 22px;
-         font-family: Futura, Cambria, Constantia;
-         }
-         h4 {
-         font-size: 19px;
-         font-family: Futura, Cambria, Constantia;
-         color: #000;
-         }
-         h5 {
-         font-size: 16px;
-         font-family: Futura, Cambria, Constantia;
-         }
-         .messageTable {
-         font-size: 16px;
-         margin: auto  !important;
-         background-color: rbg(0,0,100) !important;
-         }
-         .messagePanel {
-         width: 300px;
-         text-align:center;
-         margin: auto;
-         }
-         .message{
-         background-color: #DFF;
-         margin:auto;
-         width: 700px;
-         }
-         .msgIcon {
-         display: none;
-         }
-         .inputOrSelList {
-         font-size: 18px;
-         }
-         .saveB {
-         width: 100px;
-         height: 20px;
-         font-family : Constantia;
-         font-size: 18px;
-         }
-         .middle {
-         text-align:center;
-         margin: auto;
-         }
-         .configDetails {
-         width: 1000px;
-         position: static;
-         text-align:center;
-         margin: auto;
-         }    
-         .clickable {
-         color: rgb(0,0,100);
-         cursor: pointer;
-         }
-         .importantclick2 {
-         color: rgb(0,0,140);  //rgb(245,245,0);
-         cursor: pointer;
-         }
-         .detailList {
-         width: 40% !important;
-         text-align: center;
-         margin: auto;
-         font-size: 20px;
-         border-spacing: 4px;
-         //margin-right: 670px;
-         } 
-         div.detailList{
-         }
-         #daysBlock > table.detailList {
-         margin-left: 10px;
-         margin-right: 10px;
-         }
-         #divcalendar {
-         text-align: left;
-         width: 400px;
-         margin: auto;
-         }
-         ul {list-style-type: none;}
-         .month {
-         padding: 5px 0px;
-         background: #1abc9c;
-         }
-         .month ul {
-         margin: 0;
-         padding: 0;
-         }
-         .month ul li {
-         color: white;
-         font-size: 24px;
-         text-transform: uppercase;
-         letter-spacing: 3px;
-         text-align: center;
-         }
-         .month .prev {
-         float: left;
-         padding-top: 10px;
-         margin-left: 3px;
-         cursor: pointer;
-         }
-         .month .next {
-         float: right;
-         padding-top: 10px;
-         cursor: pointer;
-         } 
-         .weekdays {
-         margin: 0;
-         padding: 10px 0;
-         background-color: #ddd;
-         }
-         .weekdays li {
-         display: inline-block;
-         width: 6.6%;
-         color: #666;
-         text-align: center;
-         font-size: 16px;
-         }
-         .days li {
-         margin-bottom: 5px;
-         font-size:16px;
-         color: #777;
-         }
-         .today {
-         border-bottom: solid red;
-         }        
-         
-         
-         
-         /*
-         .table1 {  
-         margin: auto;
-         font-size : 22px;  
-         width: 900px;
-         border-spacing: 20px;
-         display: inline:
-         }
-         .table2 {
-         overflow-y: auto;
-         overflow: hidden;
-         margin: auto;
-         text-align:center;
-         }
-         .table2 th{   
-         background-color: rgb(0,0,130);
-         color: white;
-         width: 200px;
-         margin: auto;
-         text-align:center;
-         //border: 1px solid rgb(0,155,0);
-         border-spacing: 30px;
-         }
-         .table2 td {
-         border-style: solid;
-         border-color: rgb(0,0,130); #FFFF20; #4CAF50;
-         border-width: 2px;
-         background-color: rgb(70,150,250);
-         width: 200px;
-         margin: auto;
-         border-spacing: 30px;
-         } 
-         .table3 {
-         overflow-y: auto;
-         overflow: hidden;
-         margin: auto;
-         text-align:center;
-         }
-         .table3 th{   
-         background-color: rgb(0,0,130);
-         color: white;
-         width: 100px;
-         margin: auto;
-         text-align:center;
-         //border: 1px solid rgb(0,155,0);
-         border-spacing: 0px;
-         }
-         .table3 td {
-         border-style: solid;
-         border-color: rgb(0,0,130); #FFFF20; #4CAF50;
-         border-width: 2px;
-         background-color: rgb(70,150,250);
-         width: 100px;
-         margin: auto;
-         border-spacing: 0px;
-         } 
-         
-         
-         .divc {
-         width: 500px;
-         height: 100px;
-         border: 3px solid #73AD21;
-         }
-         .pblocktable {
-         margin: auto;
-         text-align:center;
-         }
-          .days {
-         padding: 10px 0;
-         background: #eee;
-         margin: 0;
-         }
-         .pbBody {
-         margin: 0px 0px 0px;
-         // background-image:url('{!$Resource.binary_pbsubsection2}'); 
-         }
-         .divcalendar {
-         padding: 30px;
-         float: left;
-         }
-         .active {
-         padding: 0px;
-         background: #1abc9c;
-         color: white !important
-         }
-         .invisib {
-         color: #eee !important; 
-         }
-         .pbSubsection {   tu można wstawic tlo           background-color: transparent;
-           margin: 0px 0px 0px;
-         // background-image:url('{!$Resource.binary_pbsubsection2}'); 
-         }
-         .floatRight {
-         float: right;
-         }
-         .apexp {
-         margin: 0px 0px 0px;
-         width: 1300px;
-         position: relative;
-         top: 0%;
-         left: 22%;
-         }
-         form {
-       
-         }
-         .individualPalette {margin: 0px 0px 0px;
-         }
-         .Custom53Block {margin: 0px 0px 0px;
-         }
-         .bPageBlock {margin: 0px 0px 0px;
-         border:none;
-         }
-         
-         #apage:j_id2:pageBlock1 {margin: 0px 0px 0px;
-         }
-         .apexp .bPageBlock.apexDefaultPageBlock .pbBody {
-         margin: 0px 0px 0px 0px ;
-         }
-         bPageBlock .detailList tr td, .bPageBlock .detailList tr th, .hoverDetail .bPageBlock .detailList tr td, .hoverDetail .bPageBlock .detailList tr th {
-         border: none;
-         }
-         body .bPageBlock .pbBody .dataCol {
-         border: none;
-         }
-         .Custom53Tab .tertiaryPalette, .individualPalette .Custom53Block .tertiaryPalette, .layoutEdit .individualPalette .Custom53Block .tertiaryPalette {
-         background: none;
-         }
-         .pbSubheader {
-         background: none;
-         }
-         */
-         
-         .pbHeader td.pbTitle ~ td {
-         display: none;
-         }
-         h2.mainTitle {
-         font-size: 34px;
-         }
-        
-         body .bRelatedList .pbTitle h3, body .bPageBlock .pbTitle h2, body .bPageBlock .pbTitle h3, body .bSubBlock h3.lbHeader {
-    		font-size: 19px;
-		 }
-         body .bPageBlock, body #bodyCell .bResource .secondaryPalette, body .secondaryPalette.bPageBlock, body .individualPalette .secondaryPalette.bPageBlock, body .bodyDiv .genericTable, body .genericPageBlockTable, body .bodyDiv .bSubBlock, body .bComponentBlock .bPageBlock, body .bMyDashboard .bPageBlock, body.rlHoverFrame .bPageBlock, body.subjectSelectionPopup div.choicesBox, body.lookupTab .secondaryPalette.bPageBlock, body.popupTab .secondaryPalette.bPageBlock, body.UserTagStatsPage .secondaryPalette.bPageBlock {
-         border: none;
-         }
-         .labelCol {
-         
-         }
-         body .bPageBlock .pbBody .labelCol,  body .detailList .labelCol {
-         vertical-align: middle;
-         font-size: 16px;
-         width: 15%;
-         color: black;
-         font-weight: 500;
-         } 
-         div.vertMid {
-         vertical-align: middle;
-         }
-         div.labelCol {
-         display: inline;
-         margin-left: 30px;
-         padding-right: 25px;
-         }
-        
-         .datePick .bPageBlock .pbBody .labelCol {
-         padding-top: 8px;
-         vertical-align: top;
-         } 
-         .datePick .bPageBlock .pbBody .dataCol {
-         width: 33%;
-         }
-         .daysCal .pbSubsection {
-         background-color: #eee; 
-         }
-         .hidden{
-         visibility: hidden;
-         }
-         .greenBack {
-         background-color: rgb(0,250,0) !important;
-         color: rgb(0,0,0) !important;
-         font-weight: 900;
-         }
-         .redBack {
-         background-color: rgb(220,0,0);
-         color: rgb(0,0,0);
-         opacity: 0.6;
-         }
-         body a:hover {
-   		 text-decoration: none; 
-    	 color: black;
-		 }
-		 .marg130 {
-		 margin-left: 130px;
-		 }
-		 .margR0 {
-		 text-align: right !important; 
-		 }
-		 .margL280 {
-		 margin-left: 280px;
-		 }
-		 .tarea {
-		 height: 160px;
-		 width: 680px
-		 }
-      </style>
+/*general*/
+body {
+	text-align: center;
+	margin: auto;
+}
+
+h1 {
+	font-size: 46px;
+	font-family: Futura, Pier, Constantia;
+}
+
+h2 {
+	font-size: 34px;
+	font-family: Futura, Cambria, Constantia;
+}
+
+h3 {
+	font-size: 22px;
+	font-family: Futura, Cambria, Constantia;
+}
+
+h4 {
+	font-size: 19px;
+	font-family: Futura, Cambria, Constantia;
+	color: #000;
+}
+
+h5 {
+	font-size: 16px;
+	font-family: Futura, Cambria, Constantia;
+}
+
+.inputOrSelList {
+	font-size: 18px;
+}
+
+.detailList {
+	text-align: center;
+	margin: auto;
+	font-size: 20px;
+	border-spacing: 4px; //
+	margin-right: 670px;
+}
+
+/*form-control*/
+.form-control {
+	display: block;
+	width: 96%;
+	height: 22px;
+	padding: 10px 10px;
+	font-size: 14px;
+	line-height: 1.42857143;
+	color: #555;
+}
+/*calendar*/
+#divcalendar {
+	width: 400px;
+}
+
+.divCal {
+	display: inline-block;
+	text-decoration: none;
+	height: 30px;
+	width: 40px;
+	text-align: center;
+	cursor: default;
+	font-weight: 800;
+}
+
+.daysCal {
+	background: #eee;
+	border: 3px solid black;
+}
+
+ul {
+	list-style-type: none;
+}
+
+.month {
+	padding: 5px 0px;
+	background: #1abc9c;
+}
+
+.month ul {
+	margin: 0;
+	padding: 0;
+}
+
+.month ul li {
+	color: white;
+	font-size: 24px;
+	text-transform: uppercase;
+	letter-spacing: 3px;
+	text-align: center;
+}
+
+.month .prev {
+	float: left;
+	padding-top: 10px;
+	margin-left: 3px;
+	cursor: pointer;
+}
+
+.month .next {
+	float: right;
+	padding-top: 10px;
+	cursor: pointer;
+}
+
+.weekdays {
+	margin: 0;
+	padding: 10px 10px 10px 0px;
+	background-color: #ddd;
+}
+
+.weekdays li {
+	display: inline-block;
+	width: 6.6%;
+	color: #666;
+	text-align: center;
+	font-size: 16px;
+}
+
+.days li {
+	margin-bottom: 5px;
+	font-size: 16px;
+	color: #777;
+}
+
+.today {
+	border-bottom: solid red;
+}
+.greenBack {
+	background-color: rgb(0, 250, 0) !important;
+	cursor: pointer;
+}
+.redBack {
+	background-color: rgb(220, 0, 0);
+	opacity: 0.6;
+}
+body a:hover {
+	text-decoration: none;
+	color: black;
+}
+/*message*/
+.messageTable {
+	font-size: 16px;
+	margin: auto !important;
+}
+.message {
+	margin: auto;
+	width: 700px;
+	background-color: #8fffe9 !important;
+}
+.msgIcon {
+	display: none;
+}
+
+/*page block + its tables*/
+.pbHeader td.pbTitle ~ td {
+	display: none;
+}
+body .bPageBlock .pbTitle h2 {
+	font-size: 19px;
+	text-align: -webkit-center;
+}
+body .secondaryPalette.bPageBlock {
+	border: none;
+}
+body .bPageBlock .pbBody .labelCol, body .detailList .labelCol {
+	vertical-align: middle;
+	font-size: 16px;
+	width: 14%;
+	color: black;
+	font-weight: 500;
+}
+div.labelCol {
+	display: inline;
+	margin-left: 20px;
+	padding-right: 25px;
+}
+.mainDiv{
+	width: 800px;
+}
+form {
+	text-align: -webkit-center;
+}
+.datePick .bPageBlock .pbBody .labelCol {
+	vertical-align: top;
+}
+.datePick .bPageBlock .pbBody .dataCol {
+	padding: 2px 6px;
+}
+.marg115 {
+	margin-left: 115px;
+}
+.margR0 {
+	text-align: right !important;
+}
+.tarea {
+	height: 160px;
+	width: 635px
+}
+</style> 
    </head>
    <script>
    	  j$ = jQuery.noConflict();
@@ -407,6 +219,7 @@
 		  j$('[id*=appointmentDetails').hide();
       	  if ( {!showAppDetails} ) {
               j$('[id*=appointmentDetails').show();
+              j$('[id*=descr').hide();
           }
 		  /*
 		  function func()
@@ -416,29 +229,8 @@
 	        setTimeout(func, 1000);
 	      */
 	  });
-      function showCalendar () {
-       		j$('[id*=calendar').show();
-      }
-      function showAppointmentDetails () {
-            j$('[id*=appointmentDetails').hide();
-      	    if ( {!showAppDetails} ) {
-            	j$('[id*=appointmentDetails').show();
-            	
-            	
-            	
-            }
-      }
-      function hideAppointmentDetails () {
-      		j$('[id*=appointmentDetails').hide();
-      		j$('[id*=descr').hide();
-      }
-      
-      function toggleDescription () {
-      		j$('[id*=apage:forma:appointmentDetails:j_id20:j_id29').toggle();
-      		j$('[id*=apage:forma:appointmentDetails:j_id20:j_id29').toggle();
-      }
-      function showVisitDuration() {
-      		j$('[id*=vDuration').show();
+      function toggleDescription() {
+      		j$('[id*=descr').toggle();
       }
       function clickableMouseenter () {
         j$('[class*=clickable').css({"color": "rgb(0,0,190)"});
@@ -446,20 +238,13 @@
       function clickableMouseleave () {
         j$('[class*=clickable').css({"color": "rgb(0,0,100)"});
       }
-      function showAppDetails () {
-      	j$('[id*=appointmentDetails').hide();
-      	if ( {!showAppDetails} ) {
-      		j$('[id*=appointmentDetails').show();
-      	}
-      }
-      
    </script>
    <div>
    <apex:form id="forma">
          <br/>
          <br/>
          <br/> 
-         <div id="datePick" class="datePick">
+         <div id="datePick" class="datePick mainDiv">
             <h4>Choose your dentist and click on your appointment date</h4>
             <p/>
                <apex:pageBlock id="datePickPageBlock">
@@ -497,7 +282,7 @@
                             <div id="daysCal" class='daysCal'>
                                 <apex:pageBlockSection id="daysBlock" columns="7" >
                                         <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">
-                                            <apex:commandLink  id="dayl" action="{!dayChosen}" styleClass="{!day.styleClass}"  onclick="showAppointmentDetails ();"
+                                            <apex:commandLink  id="dayl" action="{!dayChosen}" styleClass="{!day.styleClass}"
                                             				     value="{!day.dayToDisplay}" onmouseover="commLinkMouseOver (); " >
                                             	<apex:param value="{!day.showAppDetailsAndDayToDisplay}" name="chosenCalendarDay" assignto="{!chosenDayDummy}"> </apex:param>
                                             </apex:commandLink>
@@ -511,11 +296,11 @@
          </div>
          <br/>
          <br/>
-         	<div id="appointmentDetails">
-		       <apex:pageBlock  title="Appointment Details">
-		          <apex:pageBlockSection columns="2" > 
+         <div id="appointmentDetails" class="appointmentDetails mainDiv">
+		     <apex:pageBlock  title="Appointment Details">
+		         <apex:pageBlockSection columns="2" > 
 		             <apex:outputField styleClass="form-control" value="{!appointment.Date__c}"  > </apex:outputField>
-		             <apex:selectList styleClass="inputOrSelList" value="{!pomS}" size="1" Label="Selected term" onchange="showVisitDuration">
+		             <apex:selectList styleClass="inputOrSelList" value="{!pomS}" size="1" Label="Selected term">
 		                <apex:selectOptions value="{!possibleTerms}"/>
 		             </apex:selectList>
 		          </apex:pageBlockSection>
@@ -524,31 +309,30 @@
 		             <apex:inputText styleClass="form-control" value="{!client.LastName}"/>
 		             <apex:inputField styleClass="form-control" value="{!client.Email}"/>
 		             <apex:inputField styleClass="form-control" value="{!client.Phone}"/>
-		             <apex:selectList styleClass="inputOrSelList marg130" value="{!appointmentType}" 
-		             	  	  			size="1" multiselect="false">       <!-- onchange="toggleDescription();" does not work -->
+		             <apex:selectList styleClass="inputOrSelList marg115" value="{!appointmentType}" 
+		             	  	  			size="1" multiselect="false" onchange="toggleDescription();" >
 		                <apex:selectOptions value="{!appointmentTypes}"  />
 		             </apex:selectList>
 		          </apex:pageBlockSection>
 		       </apex:pageBlock>
 		       <div class="detailList">
-			       <div class = "vertMid">
+			       <div id="descr" class = "vertMid">
 			       	  <div class="labelCol" >Description</div> 
-			       	  <apex:inputTextarea styleClass="margR0 tarea" id="descr" value="{!description}"/>
+			       	  <apex:inputTextarea styleClass="margR0 tarea" value="{!description}"/>
 			       </div>
 			       <p/>
 			       <apex:commandLink styleClass="saveB, margR0" action="{!save}" style="text-decoration: none;"
 			          reRender="tPanel">
 			          <apex:commandButton id="saveB" action="{!save}" value="Set appointment"/>
 			       </apex:commandLink>
-			   </div>
-         	</div>
+		     </div>
+         </div>
          <apex:outputPanel id="tPanel">
             <apex:pageMessages />
          </apex:outputPanel>
          <apex:actionFunction action="{!setDisplayMonthAndYear}"  name="callSetDisplayMonthAndYear" />
          <apex:actionFunction action="{!addMonth}"  name="callAddMonth" />  <!--   oncomplete="hideAppointmentDetails (); rerenderCalendar();"   -->
          <apex:actionFunction action="{!subtractMonth}"  name="callSubtractMonth"  />
-         <apex:actionFunction action="{!dayChosen}"  name="callDayChosen" rerender="tPanel" oncomplete="showAppointmentDetails ();" />
          <apex:actionFunction action="{!doNothing}"  name="rerenderCalendar" rerender="calendar, tPanel" />
       </apex:form>
    </div>
