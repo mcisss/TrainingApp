@@ -49,21 +49,14 @@ public with sharing class DenS_AppointmentController {
     
     public DateTime dateTimeDummy {get;set;}
     public Date dateDummy {get;set;}
-    public Date dateToday {get;set;}
-    public String yearToday {get;set;}
-    public String monthToday {get;set;}
-    public String dayOfTheWeekToday {get;set;}
-    public Integer dayOfTheMonthToday {get;set;}
-    public String styleClass {get;set;}
        
     public List<DenS_Config__c> wconfigs {get;set;}   
     public List<DenS_Config__c> sconfigs {get;set;} 
     
     public String w {get;set;}
     
-    public List<Integer> visitDuration {get;set;}
-    public Integer chosenVisitNb {get;set;}
-	
+    public Boolean showAppDetails {get;set;}
+    
 	
 	// for site AppointmentListDentis:
 	public String[] searchCriteria {get;set;}
@@ -95,9 +88,8 @@ public with sharing class DenS_AppointmentController {
         Start_time__c, End_time__c, Status__c FROM  DenS_Appointment__c];
         
         chosenCalendarDay = new CalendarDay();
-        visitDuration = new List<Integer> ();
-        dentistId='no';
         client = new Contact (); 
+        dentistId='no';
         
         calendarDetails = new CalendarDetails ();
         
@@ -106,23 +98,16 @@ public with sharing class DenS_AppointmentController {
         pickListsAL.add('');
         pickListsAL.add('');
         pickListsAL.add('');
-        
         //
         
         if (dateTimeDummy == null){        
             dateTimeDummy = datetime.now(); //.addMonths(-5); 
             dateDummy = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
-            dateToday = dateDummy;
-            monthToday = dateTimeDummy.format('MMMMM');
-            yearToday = dateTimeDummy.format('YYYY');
-            dayOfTheWeekToday = dateTimeDummy.format('EEE').substring(0,2);
-            dayOfTheMonthToday = dateTimeDummy.day();
-            
-            appointment.Date__c = date.newInstance(2016, 7, 21);
-        }     
+        }
+        setDisplayMonthAndYear ();
     }       
     //==========MODIFIERS========================
-    public void setDisplayMonthAndYear () {  
+    public void setDisplayMonthAndYear () {
         calendarDetails.monthDisplay = dateTimeDummy.format('MMMMM');  
         calendarDetails.yearDisplay = dateTimeDummy.format('YYYY');
         Date myDate = date.newInstance(2000, 10, 2); //Monday
@@ -216,6 +201,8 @@ public with sharing class DenS_AppointmentController {
         List<List<Decimal>> configTermsInt = new List<List<Decimal>>  ();
         List<List<Decimal>> termsTakenInt = new List<List<Decimal>> ();
         Integer w = 1;
+        calendarday.clickable = true;
+        calendarDay.showAppDetailsAndDayToDisplay = ' ' + calendarDay.dayToDisplay;
         if ( calendarday.cDate <= date.today() ) {
         	calendarDay.styleClass = 'divCal';
         }
@@ -242,6 +229,7 @@ public with sharing class DenS_AppointmentController {
 	        }
 	        if ( configTermsInt.isEmpty() ) {
 	        	calendarDay.styleClass = 'divCal';
+	        	calendarDay.showAppDetailsAndDayToDisplay = '0';
 	        	return;
 	        }
 	        for (DenS_Appointment__c appoint : appointments) {  //getting appointment terms
@@ -285,21 +273,31 @@ public with sharing class DenS_AppointmentController {
 	        calendarDay.freeTerms = configTermsInt;
 	        if( calendarDay.freeTerms.isEmpty() ) {
 	        	calendarDay.styleClass = 'divCal redBack';
+	        	calendarDay.showAppDetailsAndDayToDisplay = '0'; 
 	        }
 	        else {
 	        	calendarDay.styleClass = 'divCal greenBack clickable';
+	        	calendarDay.showAppDetailsAndDayToDisplay = '1' + calendarDay.showAppDetailsAndDayToDisplay; 
+	        	calendarday.clickable = false;
 	        }
         }
         //ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + configTermsInt));
     }
     
     public void dayChosen () {
-    	appointment.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy) );
-        for (CalendarDay cDay : calendarDetails.calendarDays) {
-        	if ( cDay.dayToDisplay == chosenDayDummy ) {
-        		chosenCalendarDay = cDay;
-        	}
-        }
+    	if( chosenDayDummy.substring(0,1).equals( '1' ) ) {
+    		showAppDetails = true;
+    		chosenDayDummy = chosenDayDummy.substring(2);
+    		appointment.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy) );
+        	for (CalendarDay cDay : calendarDetails.calendarDays) {
+        		if ( cDay.dayToDisplay == chosenDayDummy ) {
+        			chosenCalendarDay = cDay;
+        		}
+       		}
+    	}
+    	else {
+    		showAppDetails = false;
+    	}
     }
     
  	///=============SETTERS-END========================

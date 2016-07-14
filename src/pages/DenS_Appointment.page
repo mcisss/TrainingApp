@@ -35,14 +35,12 @@
          text-decoration: none;
          height: 30px;
          width: 40px;
-         text-align: center;
-         vertical-align: middle;
          cursor: default;
          font-weight: 800;
          }
          .daysCal {
-         border: 3px solid black;
          background-color: #eee;
+         border: 3px solid black;
          }
          body {
          text-align:center;
@@ -64,6 +62,7 @@
          h4 {
          font-size: 19px;
          font-family: Futura, Cambria, Constantia;
+         color: #000;
          }
          h5 {
          font-size: 16px;
@@ -78,6 +77,11 @@
          width: 300px;
          text-align:center;
          margin: auto;
+         }
+         .message{
+         background-color: #DFF;
+         margin:auto;
+         width: 700px;
          }
          .msgIcon {
          display: none;
@@ -95,9 +99,6 @@
          text-align:center;
          margin: auto;
          }
-         .floatRight {
-         float: right;
-         }
          .configDetails {
          width: 1000px;
          position: static;
@@ -112,6 +113,73 @@
          color: rgb(0,0,140);  //rgb(245,245,0);
          cursor: pointer;
          }
+         table.detailList {
+         width: 50% !important;
+         text-align: center;
+         margin: 0 auto;
+         font-size: 20px;
+         border-spacing: 4px;
+         } 
+         #daysBlock > table.detailList {
+         margin-left: 10px;
+         margin-right: 10px;
+         }
+         #divcalendar {
+         text-align: left;
+         width: 400px;
+         margin: auto;
+         }
+         ul {list-style-type: none;}
+         .month {
+         padding: 5px 0px;
+         background: #1abc9c;
+         }
+         .month ul {
+         margin: 0;
+         padding: 0;
+         }
+         .month ul li {
+         color: white;
+         font-size: 24px;
+         text-transform: uppercase;
+         letter-spacing: 3px;
+         text-align: center;
+         }
+         .month .prev {
+         float: left;
+         padding-top: 10px;
+         margin-left: 3px;
+         cursor: pointer;
+         }
+         .month .next {
+         float: right;
+         padding-top: 10px;
+         cursor: pointer;
+         } 
+         .weekdays {
+         margin: 0;
+         padding: 10px 0;
+         background-color: #ddd;
+         }
+         .weekdays li {
+         display: inline-block;
+         width: 6.6%;
+         color: #666;
+         text-align: center;
+         font-size: 16px;
+         }
+         .days li {
+         margin-bottom: 5px;
+         font-size:16px;
+         color: #777;
+         }
+         .today {
+         border-bottom: solid red;
+         }        
+         
+         
+         
+         /*
          .table1 {  
          margin: auto;
          font-size : 22px;  
@@ -167,6 +235,8 @@
          margin: auto;
          border-spacing: 0px;
          } 
+         
+         
          .divc {
          width: 500px;
          height: 100px;
@@ -176,96 +246,34 @@
          margin: auto;
          text-align:center;
          }
-         table.detailList {
-         width: 50% !important;
-         text-align: center;
-         margin: 0 auto;
-         font: Verdana;
-         font-size: 20px;
-         //border-spacing: 20px;
-         }
-         #divcalendar {
-         text-align: left;
-         width: 400px;
-         margin: auto;
-         }
-         ul {list-style-type: none;}
-         .month {
-         padding: 5px 0px;
-         width: 100%;
-         background: #1abc9c;
-         }
-         .month ul {
-         margin: 0;
-         padding: 0;
-         }
-         .month ul li {
-         color: white;
-         font-size: 24px;
-         text-transform: uppercase;
-         letter-spacing: 3px;
-         }
-         .month .prev {
-         float: left;
-         padding-top: 10px;
-         margin-left: 3px;
-         cursor: pointer;
-         }
-         .month .next {
-         float: right;
-         padding-top: 10px;
-         cursor: pointer;
-         } 
-         .weekdays {
-         margin: 0;
-         padding: 10px 0;
-         background-color: #ddd;
-         }
-         .weekdays li {
-         display: inline-block;
-         width: 6.6%;
-         color: #666;
-         text-align: center;
-         font-size: 16px;
-         }
-         .days {
+          .days {
          padding: 10px 0;
          background: #eee;
          margin: 0;
          }
-         .days li {
-         list-style-type: none;
-         display: inline-block;
-         width: 6.6%;
-         text-align: center;
-         margin-bottom: 5px;
-         font-size:16px;
-         color: #777;
+         .pbBody {
+         margin: 0px 0px 0px;
+         // background-image:url('{!$Resource.binary_pbsubsection2}'); 
+         }
+         .divcalendar {
+         padding: 30px;
+         float: left;
          }
          .active {
          padding: 0px;
          background: #1abc9c;
          color: white !important
          }
-         .today {
-         border-bottom: solid red;
-         }        
          .invisib {
          color: #eee !important; 
          }
-         .divcalendar {
-         padding: 30px;
-         float: left;
-         }
-         .pbBody {
-         margin: 0px 0px 0px;
+         .pbSubsection {   tu można wstawic tlo           background-color: transparent;
+           margin: 0px 0px 0px;
          // background-image:url('{!$Resource.binary_pbsubsection2}'); 
          }
-         .pbSubsection {  /* tu można wstawic tlo           background-color: transparent;
-         */  margin: 0px 0px 0px;
-         // background-image:url('{!$Resource.binary_pbsubsection2}'); 
+         .floatRight {
+         float: right;
          }
-         /*
          .apexp {
          margin: 0px 0px 0px;
          width: 1300px;
@@ -273,7 +281,6 @@
          top: 0%;
          left: 22%;
          }
-         */
          form {
        
          }
@@ -284,20 +291,11 @@
          .bPageBlock {margin: 0px 0px 0px;
          border:none;
          }
+         
          #apage:j_id2:pageBlock1 {margin: 0px 0px 0px;
          }
          .apexp .bPageBlock.apexDefaultPageBlock .pbBody {
          margin: 0px 0px 0px 0px ;
-         }
-         body .bPageBlock, body #bodyCell .bResource .secondaryPalette, body .secondaryPalette.bPageBlock, body .individualPalette .secondaryPalette.bPageBlock, body .bodyDiv .genericTable, body .genericPageBlockTable, body .bodyDiv .bSubBlock, body .bComponentBlock .bPageBlock, body .bMyDashboard .bPageBlock, body.rlHoverFrame .bPageBlock, body.subjectSelectionPopup div.choicesBox, body.lookupTab .secondaryPalette.bPageBlock, body.popupTab .secondaryPalette.bPageBlock, body.UserTagStatsPage .secondaryPalette.bPageBlock {
-         border: none;
-         }
-         .Custom53Tab .tertiaryPalette, .individualPalette .Custom53Block .tertiaryPalette, .layoutEdit .individualPalette .Custom53Block .tertiaryPalette {
-         background: none;
-         border: none;
-         }
-         .pbSubheader {
-         background: none;
          }
          bPageBlock .detailList tr td, .bPageBlock .detailList tr th, .hoverDetail .bPageBlock .detailList tr td, .hoverDetail .bPageBlock .detailList tr th {
          border: none;
@@ -305,17 +303,32 @@
          body .bPageBlock .pbBody .dataCol {
          border: none;
          }
-         .message{
-         background-color: #DFF;
-         margin:auto;
-         width: 700px;
+         .Custom53Tab .tertiaryPalette, .individualPalette .Custom53Block .tertiaryPalette, .layoutEdit .individualPalette .Custom53Block .tertiaryPalette {
+         background: none;
          }
+         .pbSubheader {
+         background: none;
+         }
+         */
+         
+         .pbHeader td.pbTitle ~ td {
+         display: none;
+         }
+         h2.mainTitle {
+         font-size: 34px;
+         }
+         body .bRelatedList .pbTitle h3, body .bPageBlock .pbTitle h2, body .bPageBlock .pbTitle h3, body .bSubBlock h3.lbHeader {
+    		font-size: 19px;
+		 }
+         body .bPageBlock, body #bodyCell .bResource .secondaryPalette, body .secondaryPalette.bPageBlock, body .individualPalette .secondaryPalette.bPageBlock, body .bodyDiv .genericTable, body .genericPageBlockTable, body .bodyDiv .bSubBlock, body .bComponentBlock .bPageBlock, body .bMyDashboard .bPageBlock, body.rlHoverFrame .bPageBlock, body.subjectSelectionPopup div.choicesBox, body.lookupTab .secondaryPalette.bPageBlock, body.popupTab .secondaryPalette.bPageBlock, body.UserTagStatsPage .secondaryPalette.bPageBlock {
+         border: none;
+         }
+         
+         
          body .bPageBlock .pbBody .dataCol {
          text-align: center;
-         vertical-align: middle;
          }
          .daysCal .pbSubsection {
-         background-image: none;
          background-color: #eee; 
          }
          .hidden{
@@ -331,26 +344,46 @@
          color: rgb(0,0,0);
          opacity: 0.6;
          }
+         body a:hover {
+   		 text-decoration: none; 
+    	 color: black;
+		 }
       </style>
    </head>
    <script>
    	  j$ = jQuery.noConflict();
       j$(document).ready(function() {
-            j$('[id*=datePick').hide();
-            j$('[id*=appointmentDetails').hide();
-            j$('[id*=calendar').hide();
+      	
       });
-      function clickSetAnAppointment () {
-            j$('[id*=datePick').show();
-            j$('[id*=setAnAppointment').hide();
-      }
+      j$('[id*=appointmentDetails').ready( function(){
+		  j$('[id*=appointmentDetails').hide();
+      	  if ( {!showAppDetails} ) {
+              j$('[id*=appointmentDetails').show();
+          }
+		  /*
+		  function func()
+		  {
+		   alert("hi");
+		  }
+	        setTimeout(func, 1000);
+	      */
+	  });
       function showCalendar () {
        		j$('[id*=calendar').show();
       }
       function showAppointmentDetails () {
-            j$('[id*=appointmentDetails').show();
-            
+            j$('[id*=appointmentDetails').hide();
+            if ( {!appointment.Date__c} == Date(2000,1,1)  ) {
+            	
+            }  
+      	    if ( {!showAppDetails} ) {
+            	j$('[id*=appointmentDetails').show();
+            }
       }
+      function hideAppointmentDetails () {
+      		j$('[id*=appointmentDetails').hide();
+      }
+      
       function toggleDescription () {
       		j$('[id*=apage:forma:appointmentDetails:j_id20:j_id29').toggle();
       		j$('[id*=apage:forma:appointmentDetails:j_id20:j_id29').toggle();
@@ -364,21 +397,26 @@
       function clickableMouseleave () {
         j$('[class*=clickable').css({"color": "rgb(0,0,100)"});
       }
+      function showAppDetails () {
+      	j$('[id*=appointmentDetails').hide();
+      	if ( {!showAppDetails} ) {
+      		j$('[id*=appointmentDetails').show();
+      	}
+      }
+      
    </script>
    <div>
    <apex:form id="forma">
          <br/>
          <br/>
          <br/> 
-         <h1 id="setAnAppointment" class="clickable" onmouseover="clickableMouseenter ();"
-            onmouseout="clickableMouseleave ();" onclick="clickSetAnAppointment();">Set an appointment</h1>
          <div id="datePick">
             <h4>Choose your dentist and click on your appointment date</h4>
             <p/>
                <apex:pageBlock id="datePickPageBlock">
                   <apex:pageBlockSection id="datePickPageBlockSection" columns="2">
-                     <apex:selectList id="selectDentist" styleClass="inputOrSelList" value="{!dentistId}" 
-                     				  size="1" multiselect="false" onchange="callSetDisplayMonthAndYear ();">
+                     <apex:selectList label="Dentist" id="selectDentist" styleClass="inputOrSelList" value="{!dentistId}" 
+                     				  size="1" multiselect="false" onchange="callSetDisplayMonthAndYear (); ">
                         <apex:selectOptions value="{!dentists}"  />
                      </apex:selectList>
                      <apex:outputPanel id="calendar">
@@ -394,20 +432,25 @@
                               </ul>
                             </div>
                             <ul class="weekdays">
-							  <li>Mo</li>
-							  <li>Tu</li>
-							  <li>We</li>
-							  <li>Th</li>
-							  <li>Fr</li>
-							  <li>Sa</li>
-							  <li>Su</li>
+							  <!-- 
+							  <apex:repeat id="day" value="{!daysOfTheWeek}"  var="day">
+                                <li>{!day}</li>
+                              </apex:repeat>
+                               -->
+                              <li>Mo</li>
+                              <li>Tu</li>
+                              <li>We</li>
+                              <li>Th</li>
+                              <li>Fr</li>
+                              <li>Sa</li>
+                              <li>Su</li>
 							</ul>
                             <div id="daysCal" class='daysCal'>
                                 <apex:pageBlockSection id="daysBlock" columns="7" >
                                         <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">
-                                            <apex:commandLink  id="dayl" action="{!dayChosen}" styleClass="{!day.styleClass}"
-                                            				   value="{!day.dayToDisplay}" rerender="tPanel, appointmentDetails">
-                                            <apex:param value="{!day.dayToDisplay}" name="chosenCalendarDay" assignto="{!chosenDayDummy}"> </apex:param>
+                                            <apex:commandLink  id="dayl" action="{!dayChosen}" styleClass="{!day.styleClass}"  onclick="showAppointmentDetails ();"
+                                            				     value="{!day.dayToDisplay}" onmouseover="commLinkMouseOver (); " >
+                                            	<apex:param value="{!day.showAppDetailsAndDayToDisplay}" name="chosenCalendarDay" assignto="{!chosenDayDummy}"> </apex:param>
                                             </apex:commandLink>
                                         </apex:repeat>
                                 </apex:pageBlockSection>
@@ -417,16 +460,9 @@
             </apex:pageBlockSection>
             </apex:pageBlock>   
          </div>
-         <apex:pageBlock id="appointmentDetails">
-         	<h4>Available hours:</h4>
-            <apex:dataTable styleClass="Wizardtable table3" id="availTermsTable" VALUE="{!chosenCalendarDay.freeTerms}" var="te" rowClasses="odd,even" cellspacing="10">
-                     <apex:column headerValue="Start time">
-                        <c:out TimeInMinutes="{!te[0]}" />
-                     </apex:column>
-                     <apex:column headerValue="End time"> 
-                        <c:out TimeInMinutes="{!te[1]}" />
-                     </apex:column>
-            </apex:dataTable>
+         <br/>
+         <br/>
+         <apex:pageBlock id="appointmentDetails" title="Appointment Details">
             <apex:pageBlockSection columns="2" > 
                <apex:outputField value="{!appointment.Date__c}"  > </apex:outputField>
                <apex:inputText value="{!client.FirstName}"/>
@@ -451,9 +487,9 @@
          <apex:outputPanel id="tPanel">
             <apex:pageMessages />
          </apex:outputPanel>
-         <apex:actionFunction action="{!setDisplayMonthAndYear}"  name="callSetDisplayMonthAndYear" rerender="calendar, tPanel" oncomplete="showCalendar ();" />
-         <apex:actionFunction action="{!addMonth}"  name="callAddMonth" rerender="calendar, tPanel" />
-         <apex:actionFunction action="{!subtractMonth}"  name="callSubtractMonth" rerender="calendar, tPanel" />
+         <apex:actionFunction action="{!setDisplayMonthAndYear}"  name="callSetDisplayMonthAndYear" />
+         <apex:actionFunction action="{!addMonth}"  name="callAddMonth" />  <!--   oncomplete="hideAppointmentDetails (); rerenderCalendar();"   -->
+         <apex:actionFunction action="{!subtractMonth}"  name="callSubtractMonth"  />
          <apex:actionFunction action="{!dayChosen}"  name="callDayChosen" rerender="tPanel" oncomplete="showAppointmentDetails ();" />
          <apex:actionFunction action="{!doNothing}"  name="rerenderCalendar" rerender="calendar, tPanel" />
       </apex:form>
