@@ -33,13 +33,14 @@ public class DenS_ConfigController {
     public String pomW {get;set;}
     public String configsToDeleteID {get;set;}
     public Decimal ValueToFormat {get;set;}
-    
+    public String dentistId {get;set;}
 
     public DenS_ConfigController(ApexPages.StandardSetController stdController) {   
         String name = ApexPages.currentPage().getParameters().get('id');   
         config = (Name == null) ? new DenS_Config__c():
             [SELECT Id, Name, Active__c, date__c, 
         Start_time__c, End_time__c, Weekday__c, Dentist__c FROM DenS_Config__c];
+        dentistId = '00558000000HJSsAAO';
     }      
     public PageReference save() {
         if (pomW == 'Choose weekday' && config.date__c == null) {    // Default Weekday__c selection option - 'Choose weekday' - denotes the Specific day type of config. In other cases the config type is Weekday
@@ -97,19 +98,11 @@ public class DenS_ConfigController {
         }
         return hours + ':00';
     }
-    public static List<DenS_Config__c> getWconfigs () {   // provides weekday configs
-        return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
-            Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c =:null ORDER BY Weekday__c, Start_time__c];
-    }
-    public static List<DenS_Config__c> getSconfigs () {   // provides specific day configs
-        return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
-            Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c !=:null ORDER BY date__c, Start_time__c];
-    }
-    public static List<DenS_Config__c> getWconfigs (String dentistId) {   // provides weekday configs
+    public List<DenS_Config__c> getWconfigs () {   // provides weekday configs
         return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
             Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c =:null AND Dentist__c =: dentistId ORDER BY Weekday__c, Start_time__c];
     }
-    public static List<DenS_Config__c> getSconfigs (String dentistId) {   // provides specific day configs
+    public List<DenS_Config__c> getSconfigs () {   // provides specific day configs
         return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
             Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c !=:null AND Dentist__c =: dentistId ORDER BY date__c, Start_time__c];
     }
