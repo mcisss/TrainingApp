@@ -586,7 +586,7 @@ public with sharing class DenS_AppointmentController {
                     if (overinsidepom (con) ) {
                     	return true;
                     }
-                }    
+                }     
             } else if (config_type == 's') { 
             	if(config.date__c == con.date__c) {
             		if (overinsidepom (con) ) {
