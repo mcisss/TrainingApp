@@ -596,6 +596,7 @@ public with sharing class DenS_AppointmentController {
             }
         }
         return false;
+        
     }
     public Boolean overinsidepom (DenS_Config__c con) {  // called in overlapcheck
         List<Decimal> timee = new List<Decimal>();
