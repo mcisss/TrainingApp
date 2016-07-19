@@ -288,21 +288,37 @@ table tbody {
 .listTable tr:nth-child(even) td {  
      background: #8fffe9;
 } 
-
+fieldset table tbody tr td  {
+	padding-left: 10px;
+	padding-right: 50px;
+}
+table.listTable td {
+	padding: 0px 5px;
+}
 </style>
     </head>
     <script>
       j$ = jQuery.noConflict();
       j$(document).ready(function() {
-        /*j$('[class*=configDetails').hide();    SHOULDBE*/
+         /*j$('[class*=configDetails').hide();    SHOULDBE*/
+         /*
         if ( "{!userProfile}" == 'Dentist') {
+        	j$('[id*=pageC').hide();
             j$('[id*=pageA').hide();
+            j$('[id*=pageAL').show(); 
         }
         else if ( "{!userProfile}" == 'Client' ) { 
+            j$('[id*=pageA').show();
             j$('[id*=pageC').hide();
+            j$('[id*=pageAL').hide();
         }
-         j$('[id*=pageAL').show();
+        */
       });
+      
+      function getSelectedID(id) {
+	      	viewFunction(document.getElementById(id).value);
+	  }
+      
       j$('[id*=appointmentDetails').ready( function(){
           j$('[id*=appointmentDetails').hide();
           if ( {!showAppDetails} ) {
@@ -467,7 +483,7 @@ table tbody {
                             value="{!appointment.Date__c}">
                         </apex:outputField>
                         <apex:selectList styleClass="inputOrSelList width100"
-                            value="{!pomS}" size="1" Label="Selected term">
+                            value="{!pomS}" size="1" Label="Selected term" multiselect="false" >
                             <apex:selectOptions value="{!possibleTerms}" />
                         </apex:selectList>
                     </apex:pageBlockSection>
@@ -481,14 +497,14 @@ table tbody {
                         <apex:selectList styleClass="inputOrSelList marg115"
                             value="{!appointmentType}" size="1" multiselect="false"
                             onchange="toggleDescription();">
-                            <apex:selectOptions value="{!appointmentTypes}" />
+                            <apex:selectOptions value="{!recordIds}" />
                         </apex:selectList>
                     </apex:pageBlockSection>
                 </apex:pageBlock>
                 <div class="detailList">
                     <div id="descr" class="vertMid">
-                        <div class="specmargins inline">Description</div>
-                        <apex:inputTextarea styleClass="margR0 tarea"
+                        <apex:outputLabel styleClass="specmargins inline" value="Description" for="descr"/>
+                        <apex:inputTextarea id="descr" styleClass="margR0 tarea"
                             value="{!description}" />
                     </div>
                     <p />
@@ -544,12 +560,12 @@ table tbody {
                     </apex:inputField>
                     <h5 class="labelCol inline marg30">Start time</h5>
                     <apex:selectList styleClass="inputOrSelList inline " value="{!pomSConfig}" size="1"
-                        label="Start time">
+                        multiselect="false" label="Start time">
                         <apex:selectOptions value="{!WorkingHours}" />
                     </apex:selectList>
                     <h5 class="labelCol inline marg30">End time</h5> 
                     <apex:selectList styleClass="inputOrSelList inline" value="{!pomEConfig}" size="1"
-                        Label="End time">
+                        multiselect="false" Label="End time">
                         <apex:selectOptions value="{!WorkingHours}" />
                     </apex:selectList>
                     <br />
@@ -627,12 +643,15 @@ table tbody {
             <br/> 
                <h4>Show appointments by:</h4>
                <p/>
-            <apex:selectCheckboxes value="{!searchCriteria}">
+            <apex:selectCheckboxes styleClass="checkBoxes" value="{!searchCriteria}" onchange="printsth();">
                <apex:selectOptions value="{!searchCrits}"/>
             </apex:selectCheckboxes><br/>
+            <apex:outputPanel id="tPanelAL" styleClass="messagePanel, middle">
+               <apex:pageMessages />
+            </apex:outputPanel>
             <apex:pageBlock >            
-                <apex:pageBlockSection id="calendar" columns="2">
-                     <apex:outputPanel id="calendar">
+                <apex:pageBlockSection id="pbS" columns="2">
+                     <apex:outputPanel id="calendarAL">
                         <div id="divcalendar">
                             <div class="month"> 
                               <ul>
@@ -644,16 +663,16 @@ table tbody {
                                 </li>
                               </ul>
                             </div>
-                            <ul class="weekdays">
-                            <apex:repeat id="day" value="{!daysOfTheWeek}"  var="day">
-                                    <li>{!day}</li>
-                            </apex:repeat>
-                   </ul>
+	                            <ul class="weekdays">
+		                            <apex:repeat id="day" value="{!daysOfTheWeek}"  var="day">
+		                                    <li>{!day}</li>
+		                            </apex:repeat>
+	                   			</ul>
                             <div id="daysCal" class='daysCal'>
                                 <apex:pageBlockSection id="daysBlock" columns="7" >
                                         <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">
-                                            <apex:commandLink id="dayl" action="{!dayChosen}" styleClass="{!day.styleClass}"
-                                                               value="{!day.dayToDisplay}" rerender="tPanel, appointmentDetails">
+                                            <apex:commandLink id="dayl" action="{!dayChosenView}" styleClass="{!day.styleClass}"
+                                                               value="{!day.dayToDisplay}" rerender="tPanelAL, appointmentDetails">
                                             <apex:param value="{!day.dayToDisplay}" name="chosenCalendarDay" assignto="{!chosenDayDummy}"> </apex:param>
                                             </apex:commandLink>
                                         </apex:repeat>
@@ -661,45 +680,110 @@ table tbody {
                             </div>
                         </div>
                      </apex:outputPanel> 
-                 </apex:pageBlockSection>
-               </apex:pageBlock>      
-               <apex:selectList styleClass="inputOrSelList" value="{!pickListsAL}[0]" size="1" Label="Status" onchange="">
-                       <apex:selectOptions value="{!Statuses}"/>
-                  </apex:selectList> 
-                  <apex:selectList styleClass="inputOrSelList" value="{!pickListsAL}[1]" size="1" Label="Client" onchange="">
-                       <apex:selectOptions value="{!clients}"/>
-                  </apex:selectList> 
-                  <apex:selectList styleClass="inputOrSelList" value="{!pickListsAL}[2]" size="1" Label="Appointment type" onchange="">
-                       <apex:selectOptions value="{!appointmentTypes}"/>
-                </apex:selectList> 
+                     	<apex:pageBlocksection columns="1">
+                     		<apex:outputField styleClass="form-control"
+                            	value="{!appointmentView.Date__c}">
+                        	</apex:outputField>
+			                <apex:selectList styleClass="inputOrSelList" value="{!appointmentView.Status__c}" size="1"
+			                				 multiselect="false" Label="Status" onchange="">
+			                     <apex:selectOptions value="{!Statuses}"/>
+			                </apex:selectList> 
+			                <apex:selectList styleClass="inputOrSelList" value="{!appointmentView.Client__c}" size="1"
+			                				 multiselect="false" Label="Client" onchange="">
+			                     <apex:selectOptions value="{!clients}"/>
+			                </apex:selectList> 
+			                <apex:selectList styleClass="inputOrSelList" value="{!appointmentView.Dentist__c}" size="1"
+			                				 multiselect="false" Label="Dentist" onchange="">
+			                     <apex:selectOptions value="{!dentists}"/>
+			                </apex:selectList> 
+			                <apex:selectList styleClass="inputOrSelList" value="{!dentistTypeAl}" size="1"
+			                				 multiselect="false" Label="Dentist type" onchange="">
+			                     <apex:selectOptions value="{!dentistTypes}"/>
+			                </apex:selectList> 
+			                <apex:selectList styleClass="inputOrSelList" value="{!appointmentView.RecordTypeId}" size="1"
+			                				 multiselect="false" Label="Appointment type" onchange="">
+			                     <apex:selectOptions value="{!recordIds}"/>
+			                </apex:selectList> 
+			                
+			            </apex:pageBlocksection>
+		           </apex:pageBlockSection>
+               </apex:pageBlock> 
             <apex:outputPanel id="appointsTable">
-                <table class="table3" >
                         <!-- tu info o appointmentsach --> 
-                   <apex:dataTable styleClass="Wizardtable table2" id="tabA" VALUE="{!wconfigs}" var="con" rowClasses="odd,even" cellspacing="10">
-                        <apex:column >
-                        
+                   <apex:dataTable styleClass="listTable" id="tabA" VALUE="{!appointments}" var="app" >
+                        <apex:column headerValue="Date ">
+	                        <apex:outputField styleClass="form-control"
+	                            value="{!app.Date__c}">
+	                        </apex:outputField>
                         </apex:column>
-                        <apex:column >
-                        
+                        <apex:column headerValue="Dentist">
+                        	<apex:outputField styleClass="form-control"
+                            	value="{!app.Dentist__c}">
+                        	</apex:outputField>
                         </apex:column>
-                        <apex:column >
-                         
+                        <apex:column headerValue="Client">
+                        	<apex:outputField styleClass="form-control"
+                            	value="{!app.Client__c}">
+                        	</apex:outputField>
                         </apex:column>
-                        <apex:column >
-                        
+                        <apex:column headerValue="Start time ">
+                      	    <c:out TimeInMinutes="{!app.Start_time__c}" />
+                    	</apex:column>
+                  		<apex:column headerValue="End time ">
+                        	<c:out TimeInMinutes="{!app.End_time__c}" />
+                    	</apex:column>
+                        <apex:column headerValue="Visit type">
+                        	<apex:outputField styleClass="form-control"
+                            	value="{!app.RecordTypeId}">
+                        	</apex:outputField>
                         </apex:column>
-                        <apex:column >
-                        
-                        </apex:column>
-                            <apex:column >
-                        
-                        </apex:column>
-                        <apex:column >
-                        
+                        <apex:column headerValue="Visit Status">
+                        	<apex:selectList id="selectStatuss"
+		                        styleClass="inputOrSelList" value="{!appointmentStatus}" size="1"
+		                        multiselect="false" onchange="getSelectedID('selectStatuss');" >
+		                        <apex:selectOptions value="{!statuses}" />
+		                        <apex:param name="status" value="{!appointmentStatus}" assignTo="{!app.Status__c}" />
+		                    </apex:selectList>
                         </apex:column>
                    </apex:dataTable>
-                </table>
             </apex:outputPanel> 
         </div>
+        <apex:actionFunction action="{!updateAStatus}"
+                name="callUpdateAStatus" rerender="tPanelAL" />
+		<apex:actionFunction action="{!printsth}"
+                name="printsth" rerender="tPanelAL" />
+
+
+<!-- 
+     <apex:page standardController="Applicant__c" extensions="view">
+	      <script type="text/javascript"> function getSelectedID(id) {
+	      	viewFunction(document.getElementById(id).value);
+	      	}
+	      </script>
+	   <apex:form >
+	      <strong>
+	         <apex:actionFunction name="viewFunction" id="vfunc"
+	         	 				  action="{!getApplicantByStatus}" rerender="view">      
+	            <apex:param name="para" value=""/>
+	         </apex:actionFunction>
+	      </strong>
+	      <apex:pageBlock >
+	         <apex:outputLabel value="Status :" for="status"/>
+	         <apex:inputField id="status" value="{!Applicant__c.Status__c}" onchange="getSelectedID('{!$Component.status}');">         <br>           </apex:inputField>
+	      </apex:pageBlock>
+	      <apex:pageBlock >
+	         <apex:panelgroup id="view">
+	            <apex:pageBlockTable id="viewApplicant" value="{!applicantByStatusList}" var="app">
+	               <apex:column headerValue="Applicant ID" value="{!app.Name}">                              <br>                  </apex:column>
+	               <apex:column headerValue="Applicant Name" value="{!app.Name__c}">                              <br>                  </apex:column>
+	               <apex:column headerValue="Interview Date" value="{!app.Interview_Date_Time__c}">                              <br>                  </apex:column>
+	            </apex:pageBlockTable>
+	         </apex:panelgroup>
+	      </apex:pageBlock>
+	   </apex:form>
+	</apex:page>   
+               -->  
+
+
     </apex:form>
 </apex:page>

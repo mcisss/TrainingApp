@@ -40,19 +40,22 @@ public with sharing class DenS_AppointmentController {
     public String configsToDeleteID {get;set;}
     public Decimal ValueToFormat {get;set;}
     public String dentistId {get;set;}
+    public String[] dentistsIds {get;set;}
 	      
     public String userProfile {get;set;}
         
     public DenS_Appointment__c appointment {get;set;}
     public Contact client {get;set;}
-    public User dentist {get;set;}
     public CalendarDetails calendarDetails {get;set;}
     public String chosenDayDummy {get;set;}
     public CalendarDay chosenCalendarDay {get;set;}
     
-    public String appointmentsToDeleteID {get;set;}
+    public String appointmentID {get;set;}
     public String pomS {get;set;}
+    public DenS_Appointment__c appointmentView {get;set;}
+    public String dentistTypeAl {get;set;}
     public String appointmentType {get;set;}
+    public String appointmentStatus {get;set;}
     public String description {get;set;}
     
     public List<DenS_Config__c> wconfigsLocal {get;set;}   
@@ -101,14 +104,21 @@ public with sharing class DenS_AppointmentController {
     		dentistId='00558000000HJSsAAO'; // TEMP Id Rzeznika
     	}
     	if (userProfile =='Owner') {
-    		dentistId='no';
+    		dentistId='000000000000000000';
     	}
     	if (userProfile =='Client') {
-    		dentistId='no';
+    		dentistId='000000000000000000';
     	}
+    	dentistsIds = new List<String>();
+    	dentistsIds.add( 
+    					[SELECT Id FROM User 
+                                WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')
+                                ].Id
+    					);
     	
     	
-    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + userProfile));
+    	
+    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + userProfile + 'dentIds' + dentistsIds));
     	
     	String name = ApexPages.currentPage().getParameters().get('id');   
         
@@ -130,6 +140,7 @@ public with sharing class DenS_AppointmentController {
        
         
         //AL
+        appointmentView = new DenS_Appointment__c ();
         pickListsAL = new List<String> ();
         pickListsAL.add('');
         pickListsAL.add('');
@@ -207,13 +218,7 @@ public with sharing class DenS_AppointmentController {
      				       + clientPom.FirstName.substring(0,1) + clientPom.LastName.substring(0,1) + '_' 
      				       + String.ValueOf(dateTimeDummy.year()) + String.ValueOf(dateTimeDummy.month()) + String.ValueOf(dateTimeDummy.day()) + '_'
      				       + fromMinToHoursA(Decimal.valueOf(pomS)).substring(0,2) + fromMinToHoursA(Decimal.valueOf(pomS)).substring(3);
-     	if ( appointmentType == 'Treatment') {
-     		appointment.RecordTypeId = '012580000000o0yAAA';  // get recordtypesid po Name
-     		appointment.Description__c = description; 
-     	}
-     	else {
-     		appointment.RecordTypeId = '012580000000o13AAA'; 
-     	}
+     	appointment.RecordTypeId = appointmentType;
         try {
             upsert appointment;
             appointment = new DenS_Appointment__c();
@@ -229,14 +234,14 @@ public with sharing class DenS_AppointmentController {
         return null;
     }
     public void removeAppointment(){
-        delete [SELECT Id FROM DenS_Appointment__c WHERE Id=:appointmentsToDeleteID];
+        delete [SELECT Id FROM DenS_Appointment__c WHERE Id=:appointmentID];
     }
     
     ///=============MODIFIERS-END========================  
     //==========SETTERS========================   
  
     public void setFreeTerms (CalendarDay calendarDay) {  // if there are no configs on this day no color, if there are configs and available terms -green / no available terms - red
-        List<DenS_Appointment__c> appointments = getAppointments ( dentistId );
+        List<DenS_Appointment__c> appointments = getAppointments ();
         List<List<Decimal>> configTermsInt = new List<List<Decimal>>  ();
         List<List<Decimal>> termsTakenInt = new List<List<Decimal>> ();
         Integer w = 1;
@@ -337,6 +342,52 @@ public with sharing class DenS_AppointmentController {
        		}
     	}
     }
+    public void dayChosenView () {
+    	if( chosenDayDummy.substring(0,1).equals( '1' ) ) {
+    		chosenDayDummy = chosenDayDummy.substring(2);
+    		appointmentView.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy) );
+    	}
+    }
+    
+    /*
+    public class view { 
+	     public view(ApexPages.StandardController controller) {
+	 	 }
+	 	 public Applicant__c applicant;
+		 public List <Applicant__c> applicantByStatusList {get;set;}
+		 private ApexPages.StandardSetController controller;
+		 public List <String> applicantNameByStatus {get;set;}
+		 public view(ApexPages.StandardSetController controller) { 
+			this.applicant = (Applicant__c) controller.getRecord();
+	 	 }
+		 public PageReference getApplicantByStatus (){
+			 String para1 = Apexpages.currentPage().getParameters().get('para');                  
+			 applicantByStatusList = new List<Applicant__c>();
+			 applicantNameByStatus = new List<String>();         
+			 applicantByStatusList = [SELECT Name,Name__c,Status__c,Interview_Date_Time__c
+			 						 FROM Applicant__c WHERE Status__c =: para1];                          
+			 for(Applicant__c a:applicantByStatusList){            
+			 	String name=(String)a.Name;                      
+			 	applicantNameByStatus.add(name);                        
+		     }                          
+		 	 return null;    
+		 }
+	}
+    */
+    
+    public void updateAStatus () {
+    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + appointmentID));
+    	
+    	
+    	
+    	DenS_Appointment__c ap = [SELECT Status__c FROM DenS_Appointment__c
+							 WHERE Id =: appointmentID][0];
+		ap.Status__c = 	'Rejected';
+		update ap;						 
+    }
+    public void printsth () {
+    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + searchCriteria));
+    }
     
  	///=============SETTERS-END========================
 
@@ -347,16 +398,31 @@ public with sharing class DenS_AppointmentController {
         List<User> ul = [SELECT Name FROM User 
                                 WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')
                                ];
-        options.add(new SelectOption('no','Select a dentist'));
+        options.add(new SelectOption('000000000000000000','Select a dentist'));
         for (User u: ul) {
             options.add(new SelectOption(u.Id,u.Name));
         }
+        return options; 
+    }
+    public List<SelectOption> getDentistTypes () {
+    	List<SelectOption> options = new List<SelectOption>();
+        options.add(new SelectOption('Stomatologist','Stomatologist'));
+        options.add(new SelectOption('Orthodontist','Orthodontist'));
+        options.add(new SelectOption('Orthognathic surgeon','Orthognathic surgeon'));
         return options; 
     }
     public List<SelectOption> getAppointmentTypes () {
         List<SelectOption> options = new List<SelectOption>();
         options.add(new SelectOption('Consultation','Consultation'));
         options.add(new SelectOption('Treatment','Treatment'));
+        return options; 
+    }
+    public List<SelectOption> getRecordIds () {
+        List<SelectOption> options = new List<SelectOption>();
+        String recordId = [Select Id From RecordType WHERE sobjecttype = 'MBart__DenS_Appointment__c' AND Name = 'Treatment'][0].Id;
+        options.add(new SelectOption( recordId, 'Treatment' ));
+        recordId = [Select Id From RecordType WHERE sobjecttype = 'MBart__DenS_Appointment__c' AND Name = 'Consultation'][0].Id;
+        options.add(new SelectOption( recordId, 'Consultation' ));
         return options; 
     }
     public List<SelectOption> getPossibleTerms () {  //only hours
@@ -370,10 +436,6 @@ public with sharing class DenS_AppointmentController {
         }
         return options; 
     }
-    public List<Client__c> getClient () { 
-    	//TODO
-    	return null;
-    }
     public static String[] getDaysOfTheWeek () {
         String[] dayst = new List<String> {'Mo','Tu','We','Th','Fr','Sa','Su'};
         return dayst;
@@ -385,67 +447,75 @@ public with sharing class DenS_AppointmentController {
         }
         return dayst;
     }
-    public static List<DenS_Appointment__c> getAppointments () {   //
-        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
-                FROM DenS_Appointment__c ORDER BY Date__c, Start_time__c];
+    public List<DenS_Appointment__c> getAppointments () {   //
+        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, Status__c
+                FROM DenS_Appointment__c WHERE Dentist__c IN :dentistsIds ORDER BY Date__c, Start_time__c];
     }
-    public static List<DenS_Appointment__c> getAppointments (String dentisttId ) {   //
-        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
-                FROM DenS_Appointment__c WHERE Dentist__c =: dentisttId ORDER BY Date__c, Start_time__c];
-    }
-    public static List<DenS_Appointment__c> getHistoricAppointments () {   //
-        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
-                FROM DenS_Appointment__c WHERE Date__c <: date.Today() ORDER BY Date__c, Start_time__c];
-    }
-    public static List<DenS_Appointment__c> getHistoricAppointments (String dentisttId) {   //
-        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c
-                FROM DenS_Appointment__c WHERE Date__c <: date.Today() AND Dentist__c =: dentisttId ORDER BY Date__c, Start_time__c];
+    public List<DenS_Appointment__c> getHistoricAppointments () {   //
+        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, Status__c
+                FROM DenS_Appointment__c WHERE Date__c <: date.Today() AND Dentist__c IN :dentistsIds ORDER BY Date__c, Start_time__c];
     }
     public List<SelectOption> getSearchCrits () {
     	List<SelectOption> options = new List<SelectOption>();
         options.add(new SelectOption('Date','Date'));
         options.add(new SelectOption('Status','Status'));
         options.add(new SelectOption('Client','Client'));
+        options.add(new SelectOption('Dentist','Dentist'));
+        options.add(new SelectOption('Dentist type','Dentist type'));
         options.add(new SelectOption('Appointment type','Appointment type'));
         return options; 
     }
     
     
     //AL
-    public String[] getStatuses () {
-    	List<String> statuses = new List<String> ();
-    	return statuses;
+    public List<SelectOption> getStatuses () {
+    	List<SelectOption> options = new List<SelectOption>();
+       Schema.DescribeFieldResult fieldResult = DenS_Appointment__c.Status__c.getDescribe();
+       List<Schema.PicklistEntry> ple = fieldResult.getPicklistValues();
+       for( Schema.PicklistEntry f : ple)
+       {
+          options.add(new SelectOption(f.getLabel(), f.getValue()));
+       }       
+       return options;
     }
-    public List<String> getClients () {
-    	List<String> clients = new List<String> ();
-			//select ids from contacts     	
-    	return clients;
+    
+    public List<SelectOption> getClients () { 
+    	List<SelectOption> options = new List<SelectOption>();
+    	List<Contact> clients = [SELECT Id, Name from Contact ORDER BY Name];
+    	for (Contact c : clients) {
+    		options.add(new SelectOption(c.Id, c.Name));
+    	}
+    	return options;
     }
     
     public List<DenS_Appointment__c> getAppsForView () {
-    	List<DenS_Appointment__c> apps = new List<DenS_Appointment__c> ();
-    	List<DenS_Appointment__c> apps2 = new List<DenS_Appointment__c> ();
-    	Integer w = 0; 
+    	List<DenS_Appointment__c> appsForView = new List<DenS_Appointment__c>();
+    	String queryInjection = '';
     	for ( String i : searchCriteria ) {
     		if ( i == 'Date' ){
-    			apps = [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId
-               			FROM DenS_Appointment__c WHERE Date__c =: appointment.Date__c ORDER BY Date__c, Start_time__c];
+    			queryInjection += 'Date__c =: appointment.Date__c ';
     		}
     		if ( i == 'Status' ) {
-    			if ( w==0 ) {
-    				apps = [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId
-           			FROM DenS_Appointment__c WHERE Date__c =: appointment.Date__c ORDER BY Date__c, Start_time__c];
-    			}
-    			else {
-    				for (DenS_Appointment__c app : apps) {
-    					if ( app.Status__c == pickListsAL[0] ) {
-    						apps2.add(app);
-    					}
-    				} 
-    			}
+    			queryInjection += 'Status__c =: appointment.Status__c ';
+    		}
+    		if ( i == 'Client' ) {
+    			queryInjection += 'Status__c =: appointment.Status__c ';
+    		}
+    		if ( i == 'Dentist' ) {
+    			queryInjection += 'Status__c =: appointment.Status__c ';
+    		}
+    		if ( i == 'Dentist type' ) {
+    			queryInjection += 'Status__c =: appointment.Status__c ';
+    		}
+    		if ( i == 'Appointment type' ) {
+    			queryInjection += 'Status__c =: appointment.Status__c ';
     		}
     	}
-    	return apps;
+    	String qryString = 'SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId	FROM DenS_Appointment__c WHERE ' +
+            			 + queryInjection
+           				 + 'ORDER BY Date__c, Start_time__c';
+        appsForView = Database.query(qryString);
+    	return appsForView;
     }
     
     ///=============GETTERS-END========================  
@@ -552,20 +622,12 @@ public with sharing class DenS_AppointmentController {
         return hours + ':00';
     }
     public List<DenS_Config__c> getWconfigs () {   // provides weekday configs
-        if (dentistId=='no') {
-        	return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
-                Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c =:null ORDER BY Weekday__c, Start_time__c];
-        }
         return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
-            Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c =:null AND Dentist__c =: dentistId ORDER BY Weekday__c, Start_time__c];
+            Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c =:null AND Dentist__c IN :dentistsIds ORDER BY Weekday__c, Start_time__c];
     }
      public List<DenS_Config__c> getSconfigs () {   // provides specific day configs
-        if (dentistId=='no') {
-        	return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
-            Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c !=:null ORDER BY date__c, Start_time__c];
-        }
         return [SELECT Id, Name, Active__c, date__c, Start_time__c, End_time__c,
-            Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c !=:null AND Dentist__c =: dentistId ORDER BY date__c, Start_time__c];
+            Weekday__c, Dentist__c, Delete__c FROM DenS_Config__c WHERE date__c !=:null AND Dentist__c IN :dentistsIds ORDER BY date__c, Start_time__c];
     }
      public Boolean overlapcheck () { // checks whether the hours chosen do not overlap with other configs
         List<DenS_Config__c> w_or_s_configs = new List<DenS_Config__c>();  
