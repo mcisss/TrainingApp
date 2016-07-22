@@ -71,8 +71,14 @@ public with sharing class DenS_AppointmentController {
 	
 	// for site AppointmentListDentis:
 	public String[] searchCriteria {get;set;}
-	public String[] pickListsAL {get;set;}
-	
+	public String searchCriteriaString {get;set;}
+	public List<DenS_Appointment__c> appsForView2 {get;set;}
+	public Boolean isDentist {get;set;}
+	public Boolean isOwner {get;set;}
+	public Boolean isClient {get;set;}
+	public DenS_Appointment__c appointmentTest {get;set;}
+	public List<String> scs {get;set;}
+	public List<Boolean> showFields {get;set;}
 	//for DenS_Config
 	
     
@@ -99,24 +105,40 @@ public with sharing class DenS_AppointmentController {
         userProfile = 'Dentist'; //  SHOULD BE userProfile = [SELECT Name FROM Profile WHERE Id =: userinfo.getProfileId()][0].Name;
     	// System Adminitrator // Dentist // Owner
     	// Contact nie ma Usera - jak to zrobic? 
+    	dentistsIds = new List<String>();
     	if (userProfile =='Dentist') {
-    		dentistId=userinfo.getUserId();
-    		dentistId='00558000000HJSsAAO'; // TEMP Id Rzeznika
+    		//dentistId=userinfo.getUserId();
+    		//dentistId='00558000000HJSsAAO'; // TEMP Id Rzeznika
+    		dentistsIds.add('00558000000HJSsAAO' );
+    		isDentist = true;
+    	}
+    	else{
+    		isDentist = false;
     	}
     	if (userProfile =='Owner') {
-    		dentistId='000000000000000000';
+    		dentistsIds.add( 
+    					[SELECT Id FROM User 
+                         WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')
+                         ].Id
+    		);
+    		isOwner = true;
+    	}
+    	else {
+    		isOwner = false;
     	}
     	if (userProfile =='Client') {
     		dentistId='000000000000000000';
+    		isClient = true;
     	}
-    	dentistsIds = new List<String>();
-    	dentistsIds.add( 
-    					[SELECT Id FROM User 
-                                WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')
-                                ].Id
-    					);
+    	else {
+    		isClient = false;
+    	}
     	
     	
+    	searchCriteria = new List<String> ();
+    	showFields = new List<Boolean>();
+    	showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false);
+    	searchCriteriaString = 'Date__c';
     	
     	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + userProfile + 'dentIds' + dentistsIds));
     	
@@ -126,32 +148,32 @@ public with sharing class DenS_AppointmentController {
         config = (Name == null) ? new DenS_Config__c():
             [SELECT Id, Name, Active__c, date__c, 
         Start_time__c, End_time__c, Weekday__c, Dentist__c FROM DenS_Config__c];
-        dentistId = '00558000000HJSsAAO';
         
     	
-        appointment = (name == null) ? new  DenS_Appointment__c():
-            [SELECT Id, Name, Client__c, Date__c, Dentist__c, Description__c, 
-        Start_time__c, End_time__c, Status__c FROM  DenS_Appointment__c];
+        appointment =  new  DenS_Appointment__c();
 		
 		chosenCalendarDay = new CalendarDay();
         client = new Contact (); 
         
         calendarDetails = new CalendarDetails ();
-       
-        
-        //AL
-        appointmentView = new DenS_Appointment__c ();
-        pickListsAL = new List<String> ();
-        pickListsAL.add('');
-        pickListsAL.add('');
-        pickListsAL.add('');
-        //
         
         if (dateTimeDummy == null){        
             dateTimeDummy = datetime.now(); //.addMonths(-5); 
             dateDummy = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
         }
+        
+        //AL
+        appointmentView = new DenS_Appointment__c ();
+        appointmentView.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
+        appointmentView.Client__c = getClients().get(0).getValue();
+     	appointmentView.Status__c = 'Awaiting acceptance';
+        //
+        
         setDisplayMonthAndYear ();
+        appsForView2 = getAppsForView ();
+        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + searchCriteria));
+        appointmentTest = [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, Status__c
+                FROM DenS_Appointment__c ORDER BY Date__c, Start_time__c][0];
     }      
     
     
@@ -343,10 +365,7 @@ public with sharing class DenS_AppointmentController {
     	}
     }
     public void dayChosenView () {
-    	if( chosenDayDummy.substring(0,1).equals( '1' ) ) {
-    		chosenDayDummy = chosenDayDummy.substring(2);
-    		appointmentView.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy) );
-    	}
+    	appointmentView.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy) );
     }
     
     /*
@@ -376,17 +395,51 @@ public with sharing class DenS_AppointmentController {
     */
     
     public void updateAStatus () {
-    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + appointmentID));
-    	
-    	
+    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + appointmentID + 'appointmentStatus' + appointmentStatus));
     	
     	DenS_Appointment__c ap = [SELECT Status__c FROM DenS_Appointment__c
 							 WHERE Id =: appointmentID][0];
 		ap.Status__c = 	'Rejected';
 		update ap;						 
     }
+    public void showAL () {
+    	scs = searchCriteria;
+    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'searchcritstring' + scs));
+    }
+    public void searchApAL () {
+    	scs = searchCriteria;
+    }
     public void printsth () {
     	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + searchCriteria));
+    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + appointmentID + 'appointmentStatus' + appointmentStatus));
+    }
+    public void processVisitApprovalRequest() {
+        Id userId = userinfo.getUserId();
+        Approval.ProcessSubmitRequest req1 = 
+            new Approval.ProcessSubmitRequest();
+        req1.setComments( 'Processing approval of a visit' );
+        req1.setObjectId( appointmentId ); // appointmentId
+        req1.setSubmitterId( '00558000000H9l1AAC' ); 
+        req1.setProcessDefinitionNameOrId( 'DenS_Appointment_Request_Process' );
+        req1.setSkipEntryCriteria(false);
+        Approval.ProcessResult result = Approval.process(req1);        // request info ends here
+        System.assert(result.isSuccess());
+        System.assertEquals(
+            'Pending', result.getInstanceStatus(), 
+            'Instance Status'+result.getInstanceStatus());
+        List<Id> newWorkItemIds = result.getNewWorkitemIds();          // 0 or 1 Ids of submitted approval requests 
+        Approval.ProcessWorkitemRequest req2 = 						   // ProcessWorkitemRequest is used to process the approval request after it is submitted 
+            new Approval.ProcessWorkitemRequest();
+        req2.setComments('Approving request.');
+        req2.setAction('Approve');
+        req2.setNextApproverIds(new Id[] {UserInfo.getUserId()});
+        req2.setWorkitemId(newWorkItemIds.get(0));
+        Approval.ProcessResult result2 =  Approval.process(req2);
+        System.assert(result2.isSuccess(), 'Result Status:'+result2.isSuccess());
+        
+        System.assertEquals(
+            'Approved', result2.getInstanceStatus(), 
+            'Instance Status'+result2.getInstanceStatus());
     }
     
  	///=============SETTERS-END========================
@@ -461,8 +514,10 @@ public with sharing class DenS_AppointmentController {
         options.add(new SelectOption('Status','Status'));
         options.add(new SelectOption('Client','Client'));
         options.add(new SelectOption('Dentist','Dentist'));
-        options.add(new SelectOption('Dentist type','Dentist type'));
-        options.add(new SelectOption('Appointment type','Appointment type'));
+        if ( isOwner ) {
+        	options.add(new SelectOption('Dentist type','Dentist type'));
+        	options.add(new SelectOption('Appointment type','Appointment type')); 
+        }
         return options; 
     }
     
@@ -489,35 +544,50 @@ public with sharing class DenS_AppointmentController {
     }
     
     public List<DenS_Appointment__c> getAppsForView () {
-    	List<DenS_Appointment__c> appsForView = new List<DenS_Appointment__c>();
     	String queryInjection = '';
+    	String qryString = 'SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId, Status__c	FROM DenS_Appointment__c';
     	for ( String i : searchCriteria ) {
+    		String addition = '';
     		if ( i == 'Date' ){
-    			queryInjection += 'Date__c =: appointment.Date__c ';
+    			String month = ('0' + appointmentView.Date__c.month()).reverse().substring(0,2).reverse();
+    			String day = ('0' + appointmentView.Date__c.day()).reverse().substring(0,2).reverse();
+    			addition += 'Date__c = ' + appointmentView.Date__c.year() + '-'+ month + '-' + day + ' ';  //SOQL date format YYYY-MM-DD
     		}
     		if ( i == 'Status' ) {
-    			queryInjection += 'Status__c =: appointment.Status__c ';
+    			if ( appointmentView.Status__c !=null ) {
+    				addition += 'Status__c = \'' + appointmentView.Status__c + '\' ';
+    			}
     		}
     		if ( i == 'Client' ) {
-    			queryInjection += 'Status__c =: appointment.Status__c ';
+    			if ( appointmentView.Client__c !=null ) {
+    			addition += 'Client__c = \'' + appointmentView.Client__c + '\' ';
+    			}
     		}
     		if ( i == 'Dentist' ) {
-    			queryInjection += 'Status__c =: appointment.Status__c ';
+    			if ( appointmentView.Dentist__c !=null ) {
+    				addition += 'Dentist__c = \'' + appointmentView.Dentist__c + '\' ';
+    			}
     		}
     		if ( i == 'Dentist type' ) {
-    			queryInjection += 'Status__c =: appointment.Status__c ';
+    			addition += 'Status__c = \'' +  + '\' ';
     		}
     		if ( i == 'Appointment type' ) {
-    			queryInjection += 'Status__c =: appointment.Status__c ';
+    			addition += 'Status__c = \'' +  + '\' ';
     		}
+    		if ( queryInjection != '') {
+    			queryInjection += ' AND ';
+    		}
+    		queryInjection += addition;
     	}
-    	String qryString = 'SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId	FROM DenS_Appointment__c WHERE ' +
-            			 + queryInjection
-           				 + 'ORDER BY Date__c, Start_time__c';
-        appsForView = Database.query(qryString);
-    	return appsForView;
+    	if (queryInjection != '') {
+    		qryString += ' WHERE ' + queryInjection;
+    	}
+    	qryString += ' ORDER BY Date__c, Start_time__c';
+    	return Database.query(qryString);
     }
-    
+    public void searchAppointments () {
+    	appsForView2 = getAppsForView ();
+    }
     ///=============GETTERS-END========================  
 
     //==========Helpers=============================
