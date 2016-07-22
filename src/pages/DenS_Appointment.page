@@ -311,47 +311,30 @@ table.listTable td {
             j$('[id*=pageAL').hide();
         }
         */
-        document.getElementById("apage:forma:searchCritsCheckBox:3").onclick = function() {clickDate()};
-  	  	  function clickDate() {
-	    document.getElementById("apage:forma:pb1AL:pbS:searchDetailsAL:DentistAL").style.diplay = 'none';
-	  }
+        j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:DateAL').hide();
+        j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:viewDateALin').parent().parent().hide();
+        j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:StatusAL').parent().parent().hide();
+      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:ClientAL').parent().parent().hide();
+      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:DentistAL').parent().parent().hide();
+      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:AppointmenttypeAL').parent().parent().hide();
+      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:DentisttypeAL').parent().parent().hide();
       });
-      function showShowAL (){
-      	 j$('[id*=pb1AL').show();
-      	 
-      	 arr2 ="{!scs}";
-      	 
-      	 /*
-      	 var criteria = ["Date", "Status", "Client", "Dentist", "Dentist type", "Appointment type"];
-      	 for (i in criteria) {
-      	 	j$('[id*=' + i + 'AL').hide();
-      	 }
-      	 for (i = 0; i < arr2.length; i++) {
-      	 	 j$('[id*=' + arr2[i] + 'AL').show();
-      	 }
-      	 */
-      	 
-         alert(arr2);
-         arr2 = arr2.slice(1,arr2.length-1);
-         arr2 = arr2.split(',');
-         idStart = "apage\\:forma\\:mainDiv\\:aDatePickPageBlock\\:aDatePickPageBlockSection\\:daysBlock\\:day\\:";
-         idEnd = "\\:dayl";
-         for (i = 0; i < arr2.length; i++) {
-             temp = '[id*=' + idStart + i + idEnd;
-             if (arr2[i]==0) {
-                 j$(temp).addClass("divCal");
-             }
-             else if (arr2[i]==1) {
-                 j$(temp).addClass("divCal greenBack");
-             }
-             else if (arr2[i]==2) {
-                 j$(temp).addClass("divCal redBack");
-             }
-         }
+      function toggleSearchDate () {
+        j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:DateAL').toggle();
+      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:viewDateALin').parent().parent().toggle();
       }
-      function getSelectedID(id) {
-	      	viewFunction(document.getElementById(id).value);
-	  }
+      function toggleSearchStatus () {
+      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:StatusAL').parent().parent().toggle();
+      }
+      function toggleSearchClient () {
+      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:ClientAL').parent().parent().toggle();
+      }
+      function toggleSearchDentist () {
+      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:DentistAL').parent().parent().toggle();
+      }
+      function toggleSearchAppointmentType () {
+      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:AppointmenttypeAL').parent().parent().toggle();
+      }
       
       j$('[id*=appointmentDetails').ready( function(){
           j$('[id*=appointmentDetails').hide();
@@ -689,12 +672,22 @@ table.listTable td {
 	            <br/> 
 	               <h4>Show appointments by:</h4>
 	               <p/>
-	            <apex:selectCheckboxes id="searchCritsCheckBox" styleClass="checkBoxes" value="{!searchCriteria}" onchange="callShowAL ();">
-	               <apex:selectOptions value="{!searchCrits}"/>
-	            </apex:selectCheckboxes><br/>
+	            <apex:inputCheckbox id="checkboxDate" styleClass="checkBoxes" value="{!showFields[0]}"
+	            					onchange="toggleSearchDate (); rerenderAppointstable();"/>
+	            <apex:outputLabel styleClass="specmargins inline" value="Date" for="checkboxDate"/> &nbsp; &nbsp; &nbsp; 
+	            <apex:inputCheckbox id="checkboxStatus" styleClass="checkBoxes" value="{!showFields[1]}" onchange="toggleSearchStatus ();"/>	
+	            <apex:outputLabel styleClass="specmargins inline" value="Status" for="checkboxStatus"/> &nbsp; &nbsp; &nbsp; 
+	            <apex:inputCheckbox id="checkboxClient" styleClass="checkBoxes" value="{!showFields[2]}" onchange="toggleSearchClient ();"/>
+	            <apex:outputLabel styleClass="specmargins inline" value="Client" for="checkboxClient"/> &nbsp; &nbsp; &nbsp; 
+	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentist" styleClass="checkBoxes" value="{!showFields[3]}" onchange="toggleSearchDentist ();"/>											
+	            <apex:outputLabel rendered="{!isOwner}" styleClass="specmargins inline" value="Dentist" for="checkboxDentist"/>
+	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentistType" styleClass="checkBoxes" value="{!showFields[4]}" onchange="toggleSearchDentistType ();"/>											
+	            <apex:outputLabel rendered="{!isOwner}" styleClass="specmargins inline" value="Dentist type" for="checkboxDentistType"/>
+	            <apex:inputCheckbox id="checkboxAppointmentType" styleClass="checkBoxes" value="{!showFields[5]}" onchange="toggleSearchAppointmentType ();"/>											
+	            <apex:outputLabel styleClass="specmargins inline" value="Appointment type" for="checkboxAppointmentType"/>
+	            
 	            <apex:outputPanel id="tPanelAL" styleClass="messagePanel, middle">
 	               <apex:pageMessages />
-	               {!searchCriteriaString} {!appointmentView.Date__c}
 	            </apex:outputPanel>
 	            <apex:pageBlock id="pb1AL">            
 	                <apex:pageBlockSection id="pbS" columns="2">
@@ -719,7 +712,7 @@ table.listTable td {
 	                                <apex:pageBlockSection id="daysBlock" columns="7" >
 	                                        <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">
 	                                            <apex:commandLink id="dayl" action="{!dayChosenView}" styleClass="{!day.styleClass}"
-	                                                               value="{!day.dayToDisplay}" rerender="tPanelAL, viewDateAL, appointsTable">
+	                                                               value="{!day.dayToDisplay}" rerender="tPanelAL, viewDateALin, appointsTable">
 	                                            <apex:param value="{!day.dayToDisplay}" name="chosenCalendarDay" assignto="{!chosenDayDummy}"> </apex:param>
 	                                            </apex:commandLink>
 	                                        </apex:repeat>
@@ -728,16 +721,14 @@ table.listTable td {
 	                        </div>
 	                     </apex:outputPanel> 
 	                     	<apex:pageBlocksection id="searchDetailsAL" columns="1">
-	                     		<apex:outputPanel id="viewDateAL"> 
-		                     		<apex:outputField id="DateAL" styleClass="form-control"
-		                            	value="{!appointmentView.Date__c}">
-		                        	</apex:outputField>
-				                </apex:outputPanel> 
+		                     	<apex:outputField id="viewDateALin" styleClass="form-control"
+		                        	value="{!appointmentView.Date__c}">
+		                        </apex:outputField>
 				                <apex:selectList id="StatusAL" styleClass="inputOrSelList" value="{!appointmentView.Status__c}" size="1"
-				                				 rendered="isEmpty('{!searchCriteria}')" multiselect="false" Label="Status" onchange="rerenderAppointstable();">
+				                				 multiselect="false" Label="Status" onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value="{!Statuses}"/>
 				                </apex:selectList> 
-				                <apex:selectList rendered="isEmpty('{!searchCriteria}')" id="ClientAL" styleClass="inputOrSelList" value="{!appointmentView.Client__c}" size="1"
+				                <apex:selectList id="ClientAL" styleClass="inputOrSelList" value="{!appointmentView.Client__c}" size="1"
 				                				 multiselect="false" Label="Client" onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value='{!clients}'/>
 				                </apex:selectList>
@@ -814,46 +805,6 @@ table.listTable td {
         </apex:outputPanel>
         <apex:actionFunction action="{!updateAStatus}"
                 name="callUpdateAStatus" rerender="tPanelAL" />
-        <apex:actionFunction action="{!showAL}"
-                name="callShowAL" oncomplete="showShowAL ();" rerender="tPanelAL, appointsTable" >
-        </apex:actionFunction>
-		<apex:actionFunction action="{!printsth}"
-                name="printsth" rerender="tPanelAL" />
         <apex:actionFunction name="rerenderAppointstable" rerender="appointsTable" />      
-        <apex:actionFunction action="{!searchApAl}" oncomplete="showShowAL ();"
-                name="callSearchAppointments" rerender="tPanelAL, appointsTable" />
-		<apex:actionFunction action="{!searchApAl}"
-                name="callChangeSearchCrits" rerender="tPanelAL, appointsTable" /> 
-<!-- 
-     <apex:page standardController="Applicant__c" extensions="view">
-	      <script type="text/javascript"> function getSelectedID(id) {
-	      	viewFunction(document.getElementById(id).value);
-	      	}
-	      </script>
-	   <apex:form >
-	      <strong>
-	         <apex:actionFunction name="viewFunction" id="vfunc"
-	         	 				  action="{!getApplicantByStatus}" rerender="view">      
-	            <apex:param name="para" value=""/>
-	         </apex:actionFunction>
-	      </strong>
-	      <apex:pageBlock >
-	         <apex:outputLabel value="Status :" for="status"/>
-	         <apex:inputField id="status" value="{!Applicant__c.Status__c}" onchange="getSelectedID('{!$Component.status}');">         <br>           </apex:inputField>
-	      </apex:pageBlock>
-	      <apex:pageBlock >
-	         <apex:panelgroup id="view">
-	            <apex:pageBlockTable id="viewApplicant" value="{!applicantByStatusList}" var="app">
-	               <apex:column headerValue="Applicant ID" value="{!app.Name}">                              <br>                  </apex:column>
-	               <apex:column headerValue="Applicant Name" value="{!app.Name__c}">                              <br>                  </apex:column>
-	               <apex:column headerValue="Interview Date" value="{!app.Interview_Date_Time__c}">                              <br>                  </apex:column>
-	            </apex:pageBlockTable>
-	         </apex:panelgroup>
-	      </apex:pageBlock>
-	   </apex:form>
-	</apex:page>   
-               -->  
-
-
     </apex:form>
 </apex:page>

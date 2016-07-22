@@ -137,7 +137,7 @@ public with sharing class DenS_AppointmentController {
     	
     	searchCriteria = new List<String> ();
     	showFields = new List<Boolean>();
-    	showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false);
+    	showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false);
     	searchCriteriaString = 'Date__c';
     	
     	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + userProfile + 'dentIds' + dentistsIds));
@@ -402,17 +402,6 @@ public with sharing class DenS_AppointmentController {
 		ap.Status__c = 	'Rejected';
 		update ap;						 
     }
-    public void showAL () {
-    	scs = searchCriteria;
-    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'searchcritstring' + scs));
-    }
-    public void searchApAL () {
-    	scs = searchCriteria;
-    }
-    public void printsth () {
-    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + searchCriteria));
-    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + appointmentID + 'appointmentStatus' + appointmentStatus));
-    }
     public void processVisitApprovalRequest() {
         Id userId = userinfo.getUserId();
         Approval.ProcessSubmitRequest req1 = 
@@ -520,8 +509,6 @@ public with sharing class DenS_AppointmentController {
         }
         return options; 
     }
-    
-    
     //AL
     public List<SelectOption> getStatuses () {
     	List<SelectOption> options = new List<SelectOption>();
@@ -533,7 +520,6 @@ public with sharing class DenS_AppointmentController {
        }       
        return options;
     }
-    
     public List<SelectOption> getClients () { 
     	List<SelectOption> options = new List<SelectOption>();
     	List<Contact> clients = [SELECT Id, Name from Contact ORDER BY Name];
@@ -542,52 +528,55 @@ public with sharing class DenS_AppointmentController {
     	}
     	return options;
     }
-    
-    public List<DenS_Appointment__c> getAppsForView () {
-    	String queryInjection = '';
+    public List<DenS_Appointment__c> getAppsForView () {   // returns appointments for view on AL (AppointmentList)  on page: apex:outputPanel of Id="pageAL"
     	String qryString = 'SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId, Status__c	FROM DenS_Appointment__c';
-    	for ( String i : searchCriteria ) {
-    		String addition = '';
-    		if ( i == 'Date' ){
-    			String month = ('0' + appointmentView.Date__c.month()).reverse().substring(0,2).reverse();
-    			String day = ('0' + appointmentView.Date__c.day()).reverse().substring(0,2).reverse();
-    			addition += 'Date__c = ' + appointmentView.Date__c.year() + '-'+ month + '-' + day + ' ';  //SOQL date format YYYY-MM-DD
-    		}
-    		if ( i == 'Status' ) {
-    			if ( appointmentView.Status__c !=null ) {
-    				addition += 'Status__c = \'' + appointmentView.Status__c + '\' ';
-    			}
-    		}
-    		if ( i == 'Client' ) {
-    			if ( appointmentView.Client__c !=null ) {
-    			addition += 'Client__c = \'' + appointmentView.Client__c + '\' ';
-    			}
-    		}
-    		if ( i == 'Dentist' ) {
-    			if ( appointmentView.Dentist__c !=null ) {
-    				addition += 'Dentist__c = \'' + appointmentView.Dentist__c + '\' ';
-    			}
-    		}
-    		if ( i == 'Dentist type' ) {
-    			addition += 'Status__c = \'' +  + '\' ';
-    		}
-    		if ( i == 'Appointment type' ) {
-    			addition += 'Status__c = \'' +  + '\' ';
-    		}
-    		if ( queryInjection != '') {
-    			queryInjection += ' AND ';
-    		}
-    		queryInjection += addition;
-    	}
-    	if (queryInjection != '') {
-    		qryString += ' WHERE ' + queryInjection;
+    	String addition = '';
+		if ( showFields[0] ){
+			String month = ('0' + appointmentView.Date__c.month()).reverse().substring(0,2).reverse();
+			String day = ('0' + appointmentView.Date__c.day()).reverse().substring(0,2).reverse();
+			addition += 'Date__c = ' + appointmentView.Date__c.year() + '-'+ month + '-' + day + ' ';  //SOQL date format YYYY-MM-DD
+		}
+		if ( showFields[1] ) {
+			if ( appointmentView.Status__c !=null ) {
+				addition = addAnd(addition);
+				addition += 'Status__c = \'' + appointmentView.Status__c + '\' ';
+			}
+		}
+		if ( showFields[2] ) {
+			if ( appointmentView.Client__c !=null ) {
+				addition = addAnd(addition);
+				addition += 'Client__c = \'' + appointmentView.Client__c + '\' ';
+			}
+		}
+		if ( showFields[3] ) {
+			if ( appointmentView.Dentist__c !=null ) {
+				addition = addAnd(addition);
+				addition += 'Dentist__c = \'' + appointmentView.Dentist__c + '\' ';
+			}
+		}
+		if ( showFields[4] ) {
+			addition = addAnd(addition);
+			addition += 'Dentisttype__c = \'' +  + '\' ';
+		}
+		if ( showFields[5] ) {
+			if ( appointmentType !=null ) {
+				addition = addAnd(addition);
+				addition += 'RecordTypeId = \'' + appointmentType + '\' ';
+			}
+		}
+    	if ( addition != '' ) {
+    		qryString += ' WHERE ' + addition;
     	}
     	qryString += ' ORDER BY Date__c, Start_time__c';
     	return Database.query(qryString);
     }
-    public void searchAppointments () {
-    	appsForView2 = getAppsForView ();
+    public String addAnd (String addition2) {
+    	if ( addition2 != '') {
+			addition2 += ' AND ';
+		}
+		return addition2;
     }
+    
     ///=============GETTERS-END========================  
 
     //==========Helpers=============================
@@ -618,7 +607,6 @@ public with sharing class DenS_AppointmentController {
         }
         return hours + ':00';
     }
-    
     public void doNothing() {
     }
     
@@ -728,7 +716,6 @@ public with sharing class DenS_AppointmentController {
             }
         }
         return false;
-        
     }
     public Boolean overinsidepom (DenS_Config__c con) {  // called in overlapcheck
         List<Decimal> timee = new List<Decimal>();
