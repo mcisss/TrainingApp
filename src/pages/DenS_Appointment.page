@@ -747,10 +747,6 @@ table.listTable td {
 				            </apex:pageBlocksection>
 			           </apex:pageBlockSection>
 	               </apex:pageBlock> 
-	               <apex:commandLink styleClass="saveB" onclick="{callSearchAppointments ();}"
-	                   style="text-decoration: none;" reRender="tPanelAL,appointsTable">
-	                   <apex:commandButton styleClass="saveB" value="Search appointments" />
-	               </apex:commandLink>
 	            <apex:outputPanel id="appointsTable">
 	                        <!-- tu info o appointmentsach --> 
 	                   <apex:dataTable styleClass="listTable" id="tabA" VALUE="{!appsForView}" var="app" >
@@ -795,9 +791,13 @@ table.listTable td {
 		                        	 <apex:param value="{!app.Id}"
                                          name="appId" assignto="{!appointmentId}" />
 		                        </apex:commandLInk>
-		                        
-		                        
-				                    
+		                        <apex:selectList id="Appoinn" styleClass="inputOrSelList" value="{!app.Status__c}" size="1"
+				                				 multiselect="false" Label="Status" >
+				                     <apex:selectOptions value="{!Statuses}"/>
+				                     <apex:actionSupport event="onchange" action="{!updateAStatus}" reRender="appointsTable">
+				                     	<apex:param value="{!app.Id}" name="appId" assignto="{!appointmentId}" />
+				                     </apex:actionSupport>
+				                </apex:selectList>
 	                        </apex:column>
 	                   </apex:dataTable>
 	            </apex:outputPanel> 
