@@ -84,7 +84,14 @@ h5 {
     cursor: default;
     font-weight: 800;
 }
-
+.day1{
+    background-color: rgb(0, 250, 0) !important;
+    cursor: pointer;
+}
+.day2{
+    background-color: rgb(220, 0, 0);
+    opacity: 0.6;
+}
 .daysCal {
     background: #eee;
     border: 3px solid black;
@@ -359,28 +366,7 @@ table.listTable td {
       function clickableMouseleave () {
         j$('[class*=clickable').css({"color": "rgb(0,0,100)"});
       }
-      j$('[id*=daysCal').ready( function(){
-            arr = "{!calendarDetails.styles}"; /*ściagnij do atrybutu class style  */
-            arr = arr.slice(1,arr.length-1);
-            arr = arr.split(','); 
-            idStart = "apage\\:forma\\:aDatePickPageBlock\\:aDatePickPageBlockSection\\:daysBlock\\:day\\:";
-            idEnd = "\\:dayl";
-            for (i=0 ; i<1 ; i++) {
-	            for (i = 0; i < arr.length; i++) {
-	                temp = '[id*=' + idStart + i + idEnd;
-	                if (arr[i]==0) {
-	                    j$(temp).addClass("divCal");
-	                }
-	                else if (arr[i]==1) {
-	                    j$(temp).addClass("divCal greenBack");
-	                }
-	                else if (arr[i]==2) {
-	                    j$(temp).addClass("divCal redBack");
-	                }
-	            }
-	            idStart = "apage\\:forma\\:pb1AL\\:pbS\\:daysBlock\\:day\\:";
-	        }
-      });
+   
       j$('[id*=pageC').ready( function(){
             clickWeekdayC();
       });
@@ -466,25 +452,16 @@ table.listTable td {
 	                                    </ul>
 	                                </div>
 	                                <ul class="weekdays">
-	                                    <!-- 
 	                                  <apex:repeat id="day" value="{!daysOfTheWeek}"  var="day">
 	                                    <li>{!day}</li>
 	                                  </apex:repeat>
-	                                   -->
-	                                    <li>Mo</li>
-	                                    <li>Tu</li>
-	                                    <li>We</li>
-	                                    <li>Th</li>
-	                                    <li>Fr</li>
-	                                    <li>Sa</li>
-	                                    <li>Su</li>
 	                                </ul>
 	                                <div id="daysCal" class='daysCal'>
 	                                    <apex:pageBlockSection id="daysBlock" columns="7">
 	                                        <apex:repeat id="day" value="{!calendarDetails.calendarDays}"
 	                                            var="day">
 	                                            <!-- previously it's been styleClass="{!day.styleClass}" -->
-	                                            <apex:commandLink id="dayl" action="{!dayChosen}"
+	                                            <apex:commandLink id="dayl" styleClass="divCal day{!day.styleClass}" action="{!dayChosen}"
 	                                                value="{!day.dayToDisplay}"
 	                                                onmouseover="commLinkMouseOver (); ">
 	                                                <apex:param value="{!day.showAppDetailsAndDayToDisplay}"
@@ -711,7 +688,7 @@ table.listTable td {
 	                            <div id="daysCal" class='daysCal'>
 	                                <apex:pageBlockSection id="daysBlock" columns="7" >
 	                                        <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">
-	                                            <apex:commandLink id="dayl" action="{!dayChosenView}" styleClass="{!day.styleClass}"
+	                                            <apex:commandLink id="dayl" action="{!dayChosenView}" styleClass="divCal day{!day.styleClass}"
 	                                                               value="{!day.dayToDisplay}" rerender="tPanelAL, viewDateALin, appointsTable">
 	                                            <apex:param value="{!day.dayToDisplay}" name="chosenCalendarDay" assignto="{!chosenDayDummy}"> </apex:param>
 	                                            </apex:commandLink>

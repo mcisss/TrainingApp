@@ -177,7 +177,6 @@ public with sharing class DenS_AppointmentController {
       	dentistsIds.clear();
       	dentistsIds.add( dentistId ); // '00558000000HJSsAAO'
     	showAppDetails = false;
-    	calendarDetails.styles='';
         calendarDetails.monthDisplay = dateTimeDummy.format('MMMMM');  
         calendarDetails.yearDisplay = dateTimeDummy.format('YYYY');
         Date myDate = date.newInstance(2000, 10, 2); //Monday
@@ -199,10 +198,7 @@ public with sharing class DenS_AppointmentController {
 	    	cDay.styleClass = 'divCal';
 	    	if ( i >= calendarDetails.nbOfNullSpaces1 ) {
 	    		cday.cDate = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), i+1 - calendarDetails.nbOfNullSpaces1);
-	    		setFreeTerms(cDay); // sets styleClass too
-	    	}
-	    	else {
-	    		calendarDetails.styles+=',0';
+	    		setFreeTerms(cDay); // sets day styleClass too
 	    	}
 	        calendarDetails.calendarDays.add(cDay);
         }
@@ -272,12 +268,7 @@ public with sharing class DenS_AppointmentController {
         List<List<Decimal>> configTermsInt = new List<List<Decimal>>  ();
         List<List<Decimal>> termsTakenInt = new List<List<Decimal>> ();
         Integer w = 1;
-        calendarDay.showAppDetailsAndDayToDisplay = ' ' + calendarDay.dayToDisplay;
-        if ( calendarday.cDate <= date.today() ) {
-        	calendarDay.styleClass = 'divCal';
-        	calendarDetails.styles+=',0';
-        }
-        else {
+        if ( calendarday.cDate >= date.today() ) {
 	        for ( DenS_Config__c con : sconfigsLocal) {  //getting config terms 
 	            if ( calendarday.cDate == con.date__c ) { 
 	                List<Decimal> term = new List<Decimal> ();
@@ -299,9 +290,7 @@ public with sharing class DenS_AppointmentController {
 	            }
 	        }
 	        if ( configTermsInt.isEmpty() ) {
-	        	calendarDay.styleClass = 'divCal';
 	        	calendarDay.showAppDetailsAndDayToDisplay = '0';
-	        	calendarDetails.styles+=',0';
 	        	return;
 	        }
 	        for (DenS_Appointment__c appoint : appointments) {  //getting appointment terms
@@ -344,14 +333,12 @@ public with sharing class DenS_AppointmentController {
 	        }
 	        calendarDay.freeTerms = configTermsInt;
 	        if( calendarDay.freeTerms.isEmpty() ) {
-	        	calendarDay.styleClass = 'divCal redBack';
+	        	calendarDay.styleClass = '2';
 	        	calendarDay.showAppDetailsAndDayToDisplay = '0'; 
-	        	calendarDetails.styles+=',2';
 	        }
 	        else {
-	        	calendarDay.styleClass = 'divCal greenBack clickable';
-	        	calendarDay.showAppDetailsAndDayToDisplay = '1' + calendarDay.showAppDetailsAndDayToDisplay;
-	        	calendarDetails.styles+=',1'; 
+	        	calendarDay.styleClass = '1';
+	        	calendarDay.showAppDetailsAndDayToDisplay = '1' + ' ' + calendarDay.dayToDisplay;
 	        }
         }
         //ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + configTermsInt));
@@ -424,10 +411,11 @@ public with sharing class DenS_AppointmentController {
         	Approval.ProcessWorkitemRequest req3 = 						   // ProcessWorkitemRequest is used to process the approval request after it is submitted 
             	new Approval.ProcessWorkitemRequest();
         	Id ownerId = [SELECT Id FROM User 
-                                WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Owner')
+                                WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Standard Platform User')  // should be 'Name=: 'Owner'
                                ][0].Id;
-            req3.setNextApproverIds(new Id[] {UserInfo.getUserId(), ownerId}); // jesli owner zobaczy moze zrobic samemu akceptacje
+            req3.setNextApproverIds(new Id[] {ownerId}); // jesli owner zobaczy moze zrobic samemu akceptacje
         	req3.setWorkitemId(newWorkItemIds.get(0));
+        	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'IDs=' + UserInfo.getUserId() + ' ' + ownerId ));
         	req3.setComments('Approving request.');
 	        req3.setAction('Approve');
 	        Approval.ProcessResult result3 =  Approval.process(req3);
@@ -448,12 +436,11 @@ public with sharing class DenS_AppointmentController {
             'Instance Status'+result2.getInstanceStatus());
     }
     public Approval.ProcessWorkitemRequest processVisitApprovalRequest() {
-        Id userId = userinfo.getUserId();
         Approval.ProcessSubmitRequest req1 = 
             new Approval.ProcessSubmitRequest();
         req1.setComments( 'Processing approval of a visit' );
         req1.setObjectId( appointmentId ); // appointmentId
-        req1.setSubmitterId( '00558000000H9l1AAC' ); 
+        req1.setSubmitterId( userinfo.getUserId() ); // '00558000000H9l1AAC' ); 
         req1.setProcessDefinitionNameOrId( 'DenS_Appointment_Request_Process' );
         req1.setSkipEntryCriteria(false);
         Approval.ProcessResult result = Approval.process(req1);        // request info ends here
@@ -464,7 +451,10 @@ public with sharing class DenS_AppointmentController {
         List<Id> newWorkItemIds = result.getNewWorkitemIds();		   // 0 or 1 Ids of submitted approval requests 
         Approval.ProcessWorkitemRequest req2 = 						   // ProcessWorkitemRequest is used to process the approval request after it is submitted 
             new Approval.ProcessWorkitemRequest();
-        req2.setNextApproverIds(new Id[] {UserInfo.getUserId()});
+        Id ownerId = [SELECT Id FROM User 
+                                WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Standard Platform User')  // should be 'Name=: 'Owner'
+                               ][0].Id;
+        req2.setNextApproverIds(new Id[] {UserInfo.getUserId(), ownerId});
         req2.setWorkitemId(newWorkItemIds.get(0));
         return req2;
     }
