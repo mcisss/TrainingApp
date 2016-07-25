@@ -675,15 +675,15 @@ table.listTable td {
 	            <apex:inputCheckbox id="checkboxDate" styleClass="checkBoxes" value="{!showFields[0]}"
 	            					onchange="toggleSearchDate (); rerenderAppointstable();"/>
 	            <apex:outputLabel styleClass="specmargins inline" value="Date" for="checkboxDate"/> &nbsp; &nbsp; &nbsp; 
-	            <apex:inputCheckbox id="checkboxStatus" styleClass="checkBoxes" value="{!showFields[1]}" onchange="toggleSearchStatus ();"/>	
+	            <apex:inputCheckbox id="checkboxStatus" styleClass="checkBoxes" value="{!showFields[1]}" onchange="toggleSearchStatus (); rerenderAppointstable();"/>	
 	            <apex:outputLabel styleClass="specmargins inline" value="Status" for="checkboxStatus"/> &nbsp; &nbsp; &nbsp; 
-	            <apex:inputCheckbox id="checkboxClient" styleClass="checkBoxes" value="{!showFields[2]}" onchange="toggleSearchClient ();"/>
+	            <apex:inputCheckbox id="checkboxClient" styleClass="checkBoxes" value="{!showFields[2]}" onchange="toggleSearchClient (); rerenderAppointstable();"/>
 	            <apex:outputLabel styleClass="specmargins inline" value="Client" for="checkboxClient"/> &nbsp; &nbsp; &nbsp; 
-	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentist" styleClass="checkBoxes" value="{!showFields[3]}" onchange="toggleSearchDentist ();"/>											
+	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentist" styleClass="checkBoxes" value="{!showFields[3]}" onchange="toggleSearchDentist (); rerenderAppointstable();"/>											
 	            <apex:outputLabel rendered="{!isOwner}" styleClass="specmargins inline" value="Dentist" for="checkboxDentist"/>
-	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentistType" styleClass="checkBoxes" value="{!showFields[4]}" onchange="toggleSearchDentistType ();"/>											
+	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentistType" styleClass="checkBoxes" value="{!showFields[4]}" onchange="toggleSearchDentistType (); rerenderAppointstable();"/>											
 	            <apex:outputLabel rendered="{!isOwner}" styleClass="specmargins inline" value="Dentist type" for="checkboxDentistType"/>
-	            <apex:inputCheckbox id="checkboxAppointmentType" styleClass="checkBoxes" value="{!showFields[5]}" onchange="toggleSearchAppointmentType ();"/>											
+	            <apex:inputCheckbox id="checkboxAppointmentType" styleClass="checkBoxes" value="{!showFields[5]}" onchange="toggleSearchAppointmentType (); rerenderAppointstable();"/>											
 	            <apex:outputLabel styleClass="specmargins inline" value="Appointment type" for="checkboxAppointmentType"/>
 	            
 	            <apex:outputPanel id="tPanelAL" styleClass="messagePanel, middle">
@@ -781,21 +781,22 @@ table.listTable td {
 		                            value="{!app.Status__c}">
 		                        </apex:outputField>
 		                        <!-- rendered="{!!isdentist}" -->
-		                        <apex:commandLink action="{!processVisitApprovalRequest}"  >
+		                        <apex:commandLink action="{!approveAppointment}"  >
 		                        	 <apex:commandButton value="Approve appointment" />
 		                        	 <apex:param value="{!app.Id}"
                                          name="appId" assignto="{!appointmentId}" />
 		                        </apex:commandLInk>
-		                        <apex:commandLink action="{!processVisitApprovalRequest}"  >
+		                        <apex:commandLink action="{!rejectAppointment}"  >
 		                        	 <apex:commandButton value="Reject appointment" />
 		                        	 <apex:param value="{!app.Id}"
                                          name="appId" assignto="{!appointmentId}" />
+                                     
 		                        </apex:commandLInk>
 		                        <apex:selectList id="Appoinn" styleClass="inputOrSelList" value="{!app.Status__c}" size="1"
 				                				 multiselect="false" Label="Status" >
 				                     <apex:selectOptions value="{!Statuses}"/>
 				                     <apex:actionSupport event="onchange" action="{!updateAStatus}" reRender="appointsTable">
-				                     	<apex:param value="{!app.Id}" name="appId" assignto="{!appointmentId}" />
+				                     	<apex:param value="{!app.Id}+{!app.Status__c}" name="appId" assignto="{!appointmentId}" />
 				                     </apex:actionSupport>
 				                </apex:selectList>
 	                        </apex:column>

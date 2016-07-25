@@ -107,9 +107,9 @@ public with sharing class DenS_AppointmentController {
     	// Contact nie ma Usera - jak to zrobic? 
     	dentistsIds = new List<String>();
     	if (userProfile =='Dentist') {
-    		//dentistId=userinfo.getUserId();
-    		//dentistId='00558000000HJSsAAO'; // TEMP Id Rzeznika
-    		dentistsIds.add('00558000000HJSsAAO' );
+    		// should be dentistId=userinfo.getUserId();
+    		dentistId='00558000000HJSsAAO'; // TEMP Id Rzeznika
+    		dentistsIds.add( dentistId );
     		isDentist = true;
     	}
     	else{
@@ -170,14 +170,12 @@ public with sharing class DenS_AppointmentController {
         //
         
         setDisplayMonthAndYear ();
-        appsForView2 = getAppsForView ();
-        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + searchCriteria));
-        appointmentTest = [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, Status__c
-                FROM DenS_Appointment__c ORDER BY Date__c, Start_time__c][0];
     }      
     
     
       public void setDisplayMonthAndYear () {
+      	dentistsIds.clear();
+      	dentistsIds.add( dentistId ); // '00558000000HJSsAAO'
     	showAppDetails = false;
     	calendarDetails.styles='';
         calendarDetails.monthDisplay = dateTimeDummy.format('MMMMM');  
@@ -230,6 +228,10 @@ public with sharing class DenS_AppointmentController {
 			insert client; 
 		}
 		Contact clientPom = [SELECT Id, FirstName, LastName, Email FROM Contact WHERE Email =: client.Email][0];
+		if ( [SELECT Id, FirstName, LastName FROM User WHERE Id=:dentistId].isEmpty() ) {   //not needed but safe
+			ApexPages.addmessage(new ApexPages.message(ApexPages.severity.Error,'Please choose your dentist'));
+			return null;
+		} 
 		User dentistPom = [SELECT Id, FirstName, LastName FROM User WHERE Id=:dentistId][0];
 		appointment.Client__c = clientPom.Id;
      	appointment.Dentist__c = dentistId;
@@ -245,9 +247,12 @@ public with sharing class DenS_AppointmentController {
             upsert appointment;
             appointment = new DenS_Appointment__c();
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Appointment saved'));
+            /*
             PageReference pageRef = new PageReference('/apex/DenS_AppointmentView');
             pageRef.setRedirect(false);
             return pageRef;
+            */
+            return null;
         } catch (DmlException e) {
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Appointment date should be in the future'));
             System.debug('The following exception has occurred: ' + e.getMessage());
@@ -395,14 +400,54 @@ public with sharing class DenS_AppointmentController {
     */
     
     public void updateAStatus () {
-    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + appointmentID + 'appointmentStatus' + appointmentStatus));
-    	
     	DenS_Appointment__c ap = [SELECT Status__c FROM DenS_Appointment__c
-							 WHERE Id =: appointmentID][0];
-		ap.Status__c = 	'Rejected';
+							 WHERE Id =: appointmentID.substring(0,18)][0];
+		ap.Status__c = 	'accepted'; //appointmentID.substring(19);
+		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + appointmentID + 'appointmentStatus' + appointmentStatus));
 		update ap;						 
     }
-    public void processVisitApprovalRequest() {
+    public void approveAppointment() {
+    	Approval.ProcessWorkitemRequest req2 = processVisitApprovalRequest();
+        req2.setComments('Approving request.');
+        req2.setAction('Approve');
+        Approval.ProcessResult result2 =  Approval.process(req2);
+        System.assert(result2.isSuccess(), 'Result Status:'+result2.isSuccess());
+        DenS_Appointment__c ap = [SELECT Status__c FROM DenS_Appointment__c
+							 WHERE Id =: appointmentID][0];
+        if ( result2.getInstanceStatus() != 'Pending' ) {
+        	System.assertEquals(
+            'Approved', result2.getInstanceStatus(), 
+            'Instance Status'+result2.getInstanceStatus());
+        }
+        else {
+        	List<Id> newWorkItemIds = result2.getNewWorkitemIds();
+        	Approval.ProcessWorkitemRequest req3 = 						   // ProcessWorkitemRequest is used to process the approval request after it is submitted 
+            	new Approval.ProcessWorkitemRequest();
+        	Id ownerId = [SELECT Id FROM User 
+                                WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Owner')
+                               ][0].Id;
+            req3.setNextApproverIds(new Id[] {UserInfo.getUserId(), ownerId}); // jesli owner zobaczy moze zrobic samemu akceptacje
+        	req3.setWorkitemId(newWorkItemIds.get(0));
+        	req3.setComments('Approving request.');
+	        req3.setAction('Approve');
+	        Approval.ProcessResult result3 =  Approval.process(req3);
+	        System.assert(result3.isSuccess(), 'Result Status:'+result3.isSuccess());
+			System.assertEquals(
+            'Approved', result3.getInstanceStatus(), 
+            'Instance Status'+result3.getInstanceStatus());   
+        }
+    }
+    public void rejectAppointment() {
+    	Approval.ProcessWorkitemRequest req2 = processVisitApprovalRequest();
+        req2.setComments('Approving request.');
+        req2.setAction('Reject');
+        Approval.ProcessResult result2 =  Approval.process(req2);
+        System.assert(result2.isSuccess(), 'Result Status:'+result2.isSuccess());
+        System.assertEquals(
+            'Rejected', result2.getInstanceStatus(), 
+            'Instance Status'+result2.getInstanceStatus());
+    }
+    public Approval.ProcessWorkitemRequest processVisitApprovalRequest() {
         Id userId = userinfo.getUserId();
         Approval.ProcessSubmitRequest req1 = 
             new Approval.ProcessSubmitRequest();
@@ -416,19 +461,12 @@ public with sharing class DenS_AppointmentController {
         System.assertEquals(
             'Pending', result.getInstanceStatus(), 
             'Instance Status'+result.getInstanceStatus());
-        List<Id> newWorkItemIds = result.getNewWorkitemIds();          // 0 or 1 Ids of submitted approval requests 
+        List<Id> newWorkItemIds = result.getNewWorkitemIds();		   // 0 or 1 Ids of submitted approval requests 
         Approval.ProcessWorkitemRequest req2 = 						   // ProcessWorkitemRequest is used to process the approval request after it is submitted 
             new Approval.ProcessWorkitemRequest();
-        req2.setComments('Approving request.');
-        req2.setAction('Approve');
         req2.setNextApproverIds(new Id[] {UserInfo.getUserId()});
         req2.setWorkitemId(newWorkItemIds.get(0));
-        Approval.ProcessResult result2 =  Approval.process(req2);
-        System.assert(result2.isSuccess(), 'Result Status:'+result2.isSuccess());
-        
-        System.assertEquals(
-            'Approved', result2.getInstanceStatus(), 
-            'Instance Status'+result2.getInstanceStatus());
+        return req2;
     }
     
  	///=============SETTERS-END========================
