@@ -7,6 +7,9 @@
     <head>
 <style>
 /*general*/
+form {
+    text-align: -webkit-center;
+}
 body {
     text-align: center;
     margin: auto;
@@ -16,15 +19,8 @@ body {
     text-align: right;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-size: 46px;
     font-family: Futura, Cambria, Pier, Constantia;
     color: black;
-}
-h2 {
-    font-size: 34px;
-}
-h3 {
-    font-size: 22px;
 }
 h4 {
     font-size: 19px;
@@ -41,8 +37,10 @@ h5 {
 .detailList {
     margin: auto;
     font-size: 20px;
-    border-spacing: 4px; //
-    margin-right: 670px;
+    border-spacing: 4px;
+}
+.bPageBlock .detailList .dataCol {
+    width: 0%;
 }
 .width100 {
     width: 100%;
@@ -62,10 +60,10 @@ h5 {
     color: #555;
 }
 /*calendar*/
-#divcalendar {
+.width400px {
     width: 400px;
 }
-.divCal {
+.day {
     display: inline-block;
     text-decoration: none;
     height: 30px;
@@ -79,25 +77,23 @@ h5 {
     cursor: pointer;
 }
 .day2{
-    background-color: rgb(220, 0, 0);
+    background-color: rgb(100, 0, 0);
     opacity: 0.6;
 }
-.daysCal {
+.pbBody a.daysunday {
+	color: rgb(250, 10, 10);
+}
+.daysDiv {
     background: #eee;
     border: 3px solid black;
 }
 ul {
     list-style-type: none;
 }
-.month {
-    padding: 5px 0px;
-    background: #1abc9c;
-}
 .month ul {
     margin: 0;
-    padding: 0;
-}
-.month ul li {
+    padding: 5px 0px;
+    background: #1abc9c;
     color: white;
     font-size: 24px;
     text-transform: uppercase;
@@ -115,22 +111,21 @@ ul {
     padding-top: 10px;
     cursor: pointer;
 }
-.weekdays {
+.floatright {
+	float: right;
+}
+ul.weekdays {
+	text-align: justify;
     margin: 0;
-    padding: 10px 10px 10px 0px;
+    padding: 10px 20px 10px 20px;
     background-color: #ddd;
+    color: #667;
+    font-size: 18px;
 }
-.weekdays li {
+ul.weekdays:after {
+    content: "";
     display: inline-block;
-    width: 6.6%;
-    color: #666;
-    text-align: center;
-    font-size: 16px;
-}
-.days li {
-    margin-bottom: 5px;
-    font-size: 16px;
-    color: #777;
+    width: 100%;
 }
 .today {
     border-bottom: solid red;
@@ -156,38 +151,26 @@ body a:hover {
 .pbHeader td.pbTitle ~ td {
     display: none;
 }
-body .bPageBlock .pbTitle h2 {
-    font-size: 19px;
-    text-align: -webkit-center;
-}
 body .secondaryPalette.bPageBlock {
     border: none;
 }
-body .bPageBlock .pbBody .labelCol, body .detailList .labelCol {
+body .bPageBlock .pbBody .labelCol, body .detailList .labelCol, .labelCol {
     vertical-align: middle;
     font-size: 16px;
     width: 14%;
-    color: black;
     font-weight: 500;
 }
-.labelCol {
-    font-size: 16px;
-    color: black;
-    font-weight: 500;
+body .btn {
+	color: black;
 }
 .inline {
     display: inline;
 }
-.specmargins {
-    margin-left: 20px;
+.specPadding {
     padding-right: 25px;
-    font-size: 16px;
 }
 .mainDiv {
     width: 800px !important;
-}
-form {
-    text-align: -webkit-center;
 }
 .aDatePick .bPageBlock .pbBody .labelCol {
     vertical-align: top;
@@ -204,29 +187,18 @@ form {
 .marg30 {
     margin-left: 30px;
 }
-.margR0 {
-    text-align: right !important;
-}
 .tarea {
     height: 160px;
     width: 635px
 }
 /*tables*/
-.table {
-    border-spacing: 0px;
-}
 .outer td {
     vertical-align: middle;
     text-align: center;
 }
 table.listTable, th, td {
     border-collapse: collapse;
-}
-.listTable {
-    font-size : 16px;
-    font-weigth: bold; 
-    overflow-y: auto;
-    overflow: hidden;
+    text-align: center;
 }
 .listTable td.leftAlign {
     padding: 0px 0px 0px 18px;
@@ -236,7 +208,6 @@ table.listTable th {
     padding: 0px 5px;
     border: 1px solid #1abc9c;
     border-bottom: 1px solid black;
-    text-align: center;
     height: 30px;
     background: #1abc9c;
     color: white;
@@ -256,12 +227,6 @@ table tbody {
 table.listTable td {
 	padding: 0px 5px;
 }
-/* to delete?
-fieldset table tbody tr td  {
-	padding-left: 0px;
-	padding-right: 500px;
-}
-*/
 </style>
     </head>
     <script>
@@ -277,17 +242,17 @@ fieldset table tbody tr td  {
             j$('[id*=pageAL').hide();
         }
         */
-        j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:DateAL').hide();
-        for ( j=0 ; j<5 ; j++) {
+        j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:DateAL').parent().hide();
+        for ( j=0 ; j<6 ; j++) {
         	var1 = '[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:AL' + j ;
         	j$(var1).parent().parent().hide();
         }
       	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:DentisttypeAL').parent().parent().hide();
       });
-      function toggleSearchDate () {
-      	 j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:DateAL').toggle();
-      }
       function toggleSearch (i) {
+       	if (i==0) {
+       		j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:DateAL').parent().toggle();
+      	}
       	varrr = '[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:AL' + i;
       	j$(varrr).parent().parent().toggle();
       }
@@ -356,7 +321,7 @@ fieldset table tbody tr td  {
 	                            <apex:selectOptions value="{!dentists}" />
 	                        </apex:selectList>
 	                        <apex:outputPanel id="calendar">
-	                            <div id="divcalendar">
+	                            <div id="divcalendar" class="width400px" >
 	                                <div class="month">
 	                                    <ul>
 	                                        <li class="prev" onclick="callSubtractMonth();">&#10094;</li>
@@ -367,16 +332,13 @@ fieldset table tbody tr td  {
 	                                    </ul>
 	                                </div>
 	                                <ul class="weekdays">
-	                                  <apex:repeat id="day" value="{!daysOfTheWeek}"  var="day">
-	                                    <li>{!day}</li>
-	                                  </apex:repeat>
+	                                  <apex:repeat id="day" value="{!daysOfTheWeek}"  var="day"> {!day}</apex:repeat>
 	                                </ul>
-	                                <div id="daysCal" class='daysCal'>
+	                                <div id="daysDiv" class='daysDiv'>
 	                                    <apex:pageBlockSection id="daysBlock" columns="7">
 	                                        <apex:repeat id="day" value="{!calendarDetails.calendarDays}"
 	                                            var="day">
-	                                            <!-- previously it's been styleClass="{!day.styleClass}" -->
-	                                            <apex:commandLink id="dayl" styleClass="divCal day{!day.styleClass}" action="{!dayChosen}"
+	                                            <apex:commandLink id="dayl" styleClass="day day{!day.sunday} day{!day.styleClass}" action="{!dayChosen}"
 	                                                value="{!day.dayToDisplay}"
 	                                                onmouseover="commLinkMouseOver (); ">
 	                                                <apex:param value="{!day.showAppDetailsAndDayToDisplay}"
@@ -418,14 +380,14 @@ fieldset table tbody tr td  {
 	                        </apex:selectList>
 	                    </apex:pageBlockSection>
 	                </apex:pageBlock>
-	                <div class="detailList">
+	                <div class="margin-left:30px">
 	                    <div id="descr" class="vertMid">
-	                        <apex:outputLabel styleClass="specmargins inline" value="Description" for="descr"/>
-	                        <apex:inputTextarea id="descr" styleClass="margR0 tarea"
+	                        <apex:outputLabel styleClass="specPadding inline" value="Description" for="descr"/>
+	                        <apex:inputTextarea id="descr" styleClass="tarea"
 	                            value="{!description}" />
 	                    </div>
 	                    <p />
-	                    <apex:commandLink styleClass="saveB, margR0" action="{!save}"
+	                    <apex:commandLink styleClass="saveB" action="{!save}"
 	                        style="text-decoration: none;" reRender="tPanel">
 	                        <apex:commandButton styleClass="saveB" action="{!save}"
 	                            value="Schedule appointment" />
@@ -474,14 +436,14 @@ fieldset table tbody tr td  {
 	                    </apex:selectList>
 	                    <apex:inputField id="selectdate" styleClass="inputOrSelList"
 	                        value="{!config.date__c}" showDatePicker="true">
-	                    </apex:inputField>
-	                    <h5 class="labelCol inline marg30">Start time</h5>
-	                    <apex:selectList styleClass="inputOrSelList inline " value="{!pomSConfig}" size="1"
+	                    </apex:inputField> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+	                    <apex:outputLabel styleClass="specPadding inline" value="Start time" for="pickStartTime"/>
+	                    <apex:selectList id="pickStartTime" styleClass="inputOrSelList inline " value="{!pomSConfig}" size="1"
 	                        multiselect="false" label="Start time">
 	                        <apex:selectOptions value="{!WorkingHours}" />
-	                    </apex:selectList>
-	                    <h5 class="labelCol inline marg30">End time</h5> 
-	                    <apex:selectList styleClass="inputOrSelList inline" value="{!pomEConfig}" size="1"
+	                    </apex:selectList> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+	                    <apex:outputLabel styleClass="specPadding inline" value="End time" for="pickEndTime"/>
+	                    <apex:selectList id="pickEndTime" styleClass="inputOrSelList inline" value="{!pomEConfig}" size="1"
 	                        multiselect="false" Label="End time">
 	                        <apex:selectOptions value="{!WorkingHours}" />
 	                    </apex:selectList>
@@ -562,25 +524,25 @@ fieldset table tbody tr td  {
 	            <h4>Show appointments by:</h4>
 	            <p/>
 	            <apex:inputCheckbox id="checkboxDate" styleClass="checkBoxes" value="{!showFields[0]}"
-	            					onchange="toggleSearchDate (); rerenderAppointstable();"/>
-	            <apex:outputLabel styleClass="specmargins inline" value="Date" for="checkboxDate"/> &nbsp; &nbsp; &nbsp; 
+	            					onchange="toggleSearch(0); rerenderAppointstable();"/>
+	            <apex:outputLabel styleClass="specPadding" value="Date" for="checkboxDate"/> &nbsp; &nbsp; &nbsp; 
 	            <apex:inputCheckbox styleClass="checkBoxes" id="checkboxStatus" value="{!showFields[1]}" onchange="toggleSearch(1); rerenderAppointstable();"/>	
-	            <apex:outputLabel styleClass="specmargins inline" value="Status" for="checkboxStatus"/> &nbsp; &nbsp; &nbsp; 
+	            <apex:outputLabel styleClass="specPadding" value="Status" for="checkboxStatus"/> &nbsp; &nbsp; &nbsp; 
 	            <apex:inputCheckbox styleClass="checkBoxes" id="checkboxClient"  value="{!showFields[2]}" onchange="toggleSearch (2); rerenderAppointstable();"/>
-	            <apex:outputLabel styleClass="specmargins inline" value="Client" for="checkboxClient"/> &nbsp; &nbsp; &nbsp; 
+	            <apex:outputLabel styleClass="specPadding" value="Client" for="checkboxClient"/> &nbsp; &nbsp; &nbsp; 
 	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentist" styleClass="checkBoxes" value="{!showFields[3]}" onchange="toggleSearch (4); rerenderAppointstable();"/>											
-	            <apex:outputLabel rendered="{!isOwner}" styleClass="specmargins inline" value="Dentist" for="checkboxDentist"/>
+	            <apex:outputLabel rendered="{!isOwner}" styleClass="specPadding" value="Dentist" for="checkboxDentist"/>
 	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentistType" styleClass="checkBoxes" value="{!showFields[4]}" onchange="toggleSearch (5); rerenderAppointstable();"/>											
-	            <apex:outputLabel rendered="{!isOwner}" styleClass="specmargins inline" value="Dentist type" for="checkboxDentistType"/>
+	            <apex:outputLabel rendered="{!isOwner}" styleClass="specPadding" value="Dentist type" for="checkboxDentistType"/>
 	            <apex:inputCheckbox id="checkboxAppointmentType" styleClass="checkBoxes" value="{!showFields[5]}" onchange="toggleSearch (3); rerenderAppointstable();"/>											
-	            <apex:outputLabel styleClass="specmargins inline" value="Appointment type" for="checkboxAppointmentType"/>
+	            <apex:outputLabel styleClass="specPadding  inline" value="Appointment type" for="checkboxAppointmentType"/>
 	            <apex:outputPanel id="tPanelAL" styleClass="messagePanel, middle">
 	               <apex:pageMessages />
 	            </apex:outputPanel>
 	            <apex:pageBlock id="pb1AL">            
 	                <apex:pageBlockSection id="pbS" columns="2">
 	                     <apex:outputPanel id="DateAL">
-	                        <div id="divcalendar">
+	                        <div id="divcalendar" class="width400px">
 	                            <div class="month"> 
 	                              <ul>
 	                                <li class="prev" onclick="callSubtractMonth();">&#10094;</li>
@@ -591,15 +553,13 @@ fieldset table tbody tr td  {
 	                                </li>
 	                              </ul>
 	                            </div>
-		                            <ul class="weekdays">
-			                            <apex:repeat id="day" value="{!daysOfTheWeek}"  var="day">
-			                                    <li>{!day}</li>
-			                            </apex:repeat>
-		                   			</ul>
-	                            <div id="daysCal" class='daysCal'>
+		                   			<ul class="weekdays">
+	                                  <apex:repeat id="day" value="{!daysOfTheWeek}"  var="day"> {!day}</apex:repeat>
+	                                </ul>
+	                            <div id="daysDiv" class='daysDiv'>
 	                                <apex:pageBlockSection id="daysBlock" columns="7" >
 	                                        <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">
-	                                            <apex:commandLink id="dayl" action="{!dayChosenView}" styleClass="divCal day{!day.styleClass}"
+	                                            <apex:commandLink id="dayl" action="{!dayChosenView}" styleClass="day day{!day.sunday} day{!day.styleClass}"
 	                                                               value="{!day.dayToDisplay}" rerender="tPanelAL, AL0, appointsTable">
 	                                            <apex:param value="{!day.dayToDisplay}" name="chosenCalendarDay" assignto="{!chosenDayDummy}"> </apex:param>
 	                                            </apex:commandLink>
@@ -612,23 +572,23 @@ fieldset table tbody tr td  {
 		                     	<apex:outputField id="AL0" styleClass="form-control"
 		                        	value="{!appointmentView.Date__c}">
 		                        </apex:outputField>
-				                <apex:selectList id="AL1" styleClass="inputOrSelList" value="{!appointmentView.Status__c}" size="1"
-				                				 multiselect="false" Label="Status" onchange="rerenderAppointstable();">
+				                <apex:selectList id="AL1" styleClass="inputOrSelList width100 " value="{!appointmentView.Status__c}" size="1"
+				                				 multiselect="false" onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value="{!Statuses}"/>
-				                </apex:selectList> 
-				                <apex:selectList id="AL2" styleClass="inputOrSelList" value="{!appointmentView.Client__c}" size="1"
-				                				 multiselect="false" Label="Client" onchange="rerenderAppointstable();">
+				                </apex:selectList>
+				                <apex:selectList id="AL2" styleClass="inputOrSelList width100 " value="{!appointmentView.Client__c}" size="1"
+				                				 multiselect="false"  onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value="{!clients}"/>
 				                </apex:selectList>
-				                <apex:selectList id="AL4" styleClass="inputOrSelList" value="{!appointmentView.Dentist__c}" size="1"
-				                				 multiselect="false" Label="Dentist" onchange="rerenderAppointstable();">
+				                <apex:selectList id="AL4" styleClass="inputOrSelList width100 " value="{!appointmentView.Dentist__c}" size="1"
+				                				 multiselect="false"  onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value="{!dentists}"/>
 				                </apex:selectList> 
-				                <apex:selectList id="DentisttypeAL" styleClass="inputOrSelList" value="{!dentistTypeAl}" size="1"
+				                <apex:selectList id="AL5" styleClass="inputOrSelList width100 " value="{!dentistTypeAl}" size="1"
 				                				 multiselect="false" Label="Dentist type" onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value="{!dentistTypes}"/>
 				                </apex:selectList> 
-				                <apex:selectList id="AL3" styleClass="inputOrSelList" value="{!appointmentView.RecordTypeId}" size="1"
+				                <apex:selectList id="AL3" styleClass="inputOrSelList width100 " value="{!appointmentView.RecordTypeId}" size="1"
 				                				 multiselect="false" Label="Appointment type" onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value="{!recordIds}"/>
 				                </apex:selectList> 

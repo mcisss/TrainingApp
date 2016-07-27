@@ -106,7 +106,7 @@ public with sharing class DenS_AppointmentController {
                                 WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')  // should be 'Name=: 'Owner'
                                ][0].Id;
         
-        userProfile = 'Dentist'; //  SHOULD BE userProfile = [SELECT Name FROM Profile WHERE Id =: userinfo.getProfileId()][0].Name;
+        userProfile = 'Owner'; //  SHOULD BE userProfile = [SELECT Name FROM Profile WHERE Id =: userinfo.getProfileId()][0].Name;
     	// System Adminitrator // Dentist // Owner
     	// Contact nie ma Usera - jak to zrobic? 
     	dentistsIds = new List<String>();
@@ -184,7 +184,7 @@ public with sharing class DenS_AppointmentController {
         calendarDetails.monthDisplay = dateTimeDummy.format('MMMMM');  
         calendarDetails.yearDisplay = dateTimeDummy.format('YYYY');
         Date myDate = date.newInstance(2000, 10, 2); //Monday
-        calendarDetails.nbOfNullSpaces1 = getDayOfTheWeek();
+        calendarDetails.nbOfNullSpaces1 = getDayOfTheWeekMonthStart();
         calendarDetails.nbOfNullSpaces2 = 31 - date.daysInMonth(dateTimeDummy.year(), dateTimeDummy.month());
         List<String> daysToDisplay;
         daysToDisplay = getDaysOfTheMonth ();              //calculate daysToDisplay for calendar rendering
@@ -199,10 +199,12 @@ public with sharing class DenS_AppointmentController {
         sconfigsLocal = getSconfigs();
         for (Integer i=0 ; i < daysToDisplay.size() ; i++) {  //daysToDisplay.size()
 	    	CalendarDay cDay = new CalendarDay(String.valueOf(daysToDisplay[i]));
-	    	cDay.styleClass = 'divCal';
 	    	if ( i >= calendarDetails.nbOfNullSpaces1 ) {
-	    		cday.cDate = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), i+1 - calendarDetails.nbOfNullSpaces1);
-	    		setFreeTerms(cDay); // sets day styleClass too
+	    		 cday.cDate = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), i+1 - calendarDetails.nbOfNullSpaces1);
+				 if ( getDayOfTheWeek(cday.cDate) ==6) {    
+					 cday.sunday = 'sunday';
+				 }
+				 setFreeTerms(cDay); // sets freeTerms and styleClass too
 	    	}
 	        calendarDetails.calendarDays.add(cDay);
         }
@@ -610,8 +612,10 @@ public with sharing class DenS_AppointmentController {
 			}
 		}
 		if ( showFields[4] ) {
-			addition = addAnd(addition);
-			addition += 'Dentisttype__c = \'' +  + '\' ';
+			if ( dentistTypeAl !=null ) {
+				addition = addAnd(addition);
+				addition += 'Dentist__c IN (SELECT Id FROM User WHERE Dentist_type__c =\'' + dentistTypeAl + '\') ';
+			}
 		}
 		if ( showFields[5] ) {
 			if ( appointmentType !=null ) {
@@ -636,12 +640,22 @@ public with sharing class DenS_AppointmentController {
 
     //==========Helpers=============================
     
-    public Integer getDayOfTheWeek () {
-        String[] dayss = new List<String> {'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su' };
+    public Integer getDayOfTheWeek (Date adate) {
+    	Datetime adatetime = datetime.newinstance(adate.year(), adate.month(), adate.day());
+    	String dayOfTheWeek = adatetime.format('EEE').substring(0,2);
+    	for (Integer i=0 ; i<7 ; i++){
+            if (getDaysOfTheWeek()[i]==dayOfTheWeek) {
+                return i;   
+            }       
+        }  
+    	return 10; 
+    }
+    
+    public Integer getDayOfTheWeekMonthStart () {
         Datetime firstDayOfTheMonth = dateDummy.toStartOfMonth (); 
         String dayOfTheWeek = firstDayOfTheMonth.format('EEE').substring(0,2);
-        for (Integer i=0 ; i<dayss.size() ; i++){
-            if (dayss[i]==dayOfTheWeek) {
+        for (Integer i=0 ; i<7 ; i++){
+            if (getDaysOfTheWeek()[i]==dayOfTheWeek) {
                 return i;   
             }       
         }   
