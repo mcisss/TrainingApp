@@ -9,5 +9,4 @@ public with sharing class CalendarDetails {
     public CalendarDetails () {
     	this.calendarDays = new List<CalendarDay> ();
     }
-} 
-
+}

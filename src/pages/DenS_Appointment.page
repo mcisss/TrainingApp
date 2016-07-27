@@ -10,48 +10,40 @@
 body {
     text-align: center;
     margin: auto;
+    font-size: 100%;
 }
 .head {
     text-align: right;
 }
-
 h1, h2, h3, h4, h5, h6 {
     font-size: 46px;
     font-family: Futura, Cambria, Pier, Constantia;
     color: black;
 }
-
 h2 {
     font-size: 34px;
 }
-
 h3 {
     font-size: 22px;
 }
-
 h4 {
     font-size: 19px;
 }
-
 h5 {
     font-size: 16px;
     font-weight: 500;
     display: block;
     font-family: Arial, Futura, Cambria, Pier, Constantia;
 }
-
 .inputOrSelList {
     font-size: 18px;
 }
-
 .detailList {
-    text-align: center;
     margin: auto;
     font-size: 20px;
     border-spacing: 4px; //
     margin-right: 670px;
 }
-
 .width100 {
     width: 100%;
 }
@@ -59,7 +51,6 @@ h5 {
     color: rgb(0,0,140);
     cursor: pointer;
 }
-
 /*form-control*/
 .form-control {
     display: block;
@@ -74,7 +65,6 @@ h5 {
 #divcalendar {
     width: 400px;
 }
-
 .divCal {
     display: inline-block;
     text-decoration: none;
@@ -96,21 +86,17 @@ h5 {
     background: #eee;
     border: 3px solid black;
 }
-
 ul {
     list-style-type: none;
 }
-
 .month {
     padding: 5px 0px;
     background: #1abc9c;
 }
-
 .month ul {
     margin: 0;
     padding: 0;
 }
-
 .month ul li {
     color: white;
     font-size: 24px;
@@ -118,26 +104,22 @@ ul {
     letter-spacing: 3px;
     text-align: center;
 }
-
 .month .prev {
     float: left;
     padding-top: 10px;
     margin-left: 3px;
     cursor: pointer;
 }
-
 .month .next {
     float: right;
     padding-top: 10px;
     cursor: pointer;
 }
-
 .weekdays {
     margin: 0;
     padding: 10px 10px 10px 0px;
     background-color: #ddd;
 }
-
 .weekdays li {
     display: inline-block;
     width: 6.6%;
@@ -145,27 +127,14 @@ ul {
     text-align: center;
     font-size: 16px;
 }
-
 .days li {
     margin-bottom: 5px;
     font-size: 16px;
     color: #777;
 }
-
 .today {
     border-bottom: solid red;
 }
-
-.greenBack {
-    background-color: rgb(0, 250, 0) !important;
-    cursor: pointer;
-}
-
-.redBack {
-    background-color: rgb(220, 0, 0);
-    opacity: 0.6;
-}
-
 body a:hover {
     text-decoration: none;
     color: black;
@@ -175,31 +144,25 @@ body a:hover {
     font-size: 16px;
     margin: auto !important;
 }
-
 .message {
     margin: auto;
     width: 700px;
     background-color: #8fffe9 !important;
 }
-
 .msgIcon {
     display: none;
 }
-
 /*page block + its tables*/
 .pbHeader td.pbTitle ~ td {
     display: none;
 }
-
 body .bPageBlock .pbTitle h2 {
     font-size: 19px;
     text-align: -webkit-center;
 }
-
 body .secondaryPalette.bPageBlock {
     border: none;
 }
-
 body .bPageBlock .pbBody .labelCol, body .detailList .labelCol {
     vertical-align: middle;
     font-size: 16px;
@@ -220,23 +183,18 @@ body .bPageBlock .pbBody .labelCol, body .detailList .labelCol {
     padding-right: 25px;
     font-size: 16px;
 }
-
 .mainDiv {
     width: 800px !important;
 }
-
 form {
     text-align: -webkit-center;
 }
-
 .aDatePick .bPageBlock .pbBody .labelCol {
     vertical-align: top;
 }
-
 .aDatePick .bPageBlock .pbBody .dataCol {
     padding: 2px 6px;
 }
-
 .marg115 {
     margin-left: 115px;
 }
@@ -246,16 +204,13 @@ form {
 .marg30 {
     margin-left: 30px;
 }
-
 .margR0 {
     text-align: right !important;
 }
-
 .tarea {
     height: 160px;
     width: 635px
 }
-
 /*tables*/
 .table {
     border-spacing: 0px;
@@ -289,19 +244,24 @@ table.listTable th {
 table tbody {
     border: 1px solid black;
 }
+.listTable tr { 
+	 height: 38px;
+}
 .listTable tr:nth-child(odd) td {   
      background: #aeffd9;
 }
 .listTable tr:nth-child(even) td {  
      background: #8fffe9;
-} 
-fieldset table tbody tr td  {
-	padding-left: 10px;
-	padding-right: 50px;
 }
 table.listTable td {
 	padding: 0px 5px;
 }
+/* to delete?
+fieldset table tbody tr td  {
+	padding-left: 0px;
+	padding-right: 500px;
+}
+*/
 </style>
     </head>
     <script>
@@ -311,7 +271,6 @@ table.listTable td {
          	todentist:
         if ( "{!userProfile}" == 'Dentist') {
             j$('[id*=pageC').hide();
-            j$('[id*=pb1AL').hide();
         }
         else if ( "{!userProfile}" == 'Client' ) { 
             j$('[id*=pageC').hide();
@@ -319,28 +278,18 @@ table.listTable td {
         }
         */
         j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:DateAL').hide();
-        j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:viewDateALin').parent().parent().hide();
-        j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:StatusAL').parent().parent().hide();
-      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:ClientAL').parent().parent().hide();
-      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:DentistAL').parent().parent().hide();
-      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:AppointmenttypeAL').parent().parent().hide();
+        for ( j=0 ; j<5 ; j++) {
+        	var1 = '[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:AL' + j ;
+        	j$(var1).parent().parent().hide();
+        }
       	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:DentisttypeAL').parent().parent().hide();
       });
       function toggleSearchDate () {
-        j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:DateAL').toggle();
-      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:viewDateALin').parent().parent().toggle();
+      	 j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:DateAL').toggle();
       }
-      function toggleSearchStatus () {
-      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:StatusAL').parent().parent().toggle();
-      }
-      function toggleSearchClient () {
-      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:ClientAL').parent().parent().toggle();
-      }
-      function toggleSearchDentist () {
-      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:DentistAL').parent().parent().toggle();
-      }
-      function toggleSearchAppointmentType () {
-      	j$('[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:AppointmenttypeAL').parent().parent().toggle();
+      function toggleSearch (i) {
+      	varrr = '[id*=apage\\:forma\\:pb1AL\\:pbS\\:searchDetailsAL\\:AL' + i;
+      	j$(varrr).parent().parent().toggle();
       }
       
       j$('[id*=appointmentDetails').ready( function(){
@@ -366,7 +315,6 @@ table.listTable td {
       function clickableMouseleave () {
         j$('[class*=clickable').css({"color": "rgb(0,0,100)"});
       }
-   
       j$('[id*=pageC').ready( function(){
             clickWeekdayC();
       });
@@ -386,39 +334,6 @@ table.listTable td {
         j$('[id*=chooseSConfig').css({"border": "3px solid rgb(0,0,255) /*rgb(255,255,155)*/", "border-width": "0px 0px 3px 0px", "border-radius": "5px"});
         j$('[id*=chooseWConfig').css({"border-style": "none"});
       }
-      function checkboxesOnchange () {
-      	 callChangeSearchCrits();
-      	 alert("{!scs}");
-      }
-      /*
-      function clicksetconfig () {
-        j$('[class*=configDetails').show();
-        j$('[class*=configDetails2').hide();
-        j$('[id*=setConfig').hide();
-      }
-      function hideconfigDetails() {
-          //j$('[class*=configDetails').hide();
-          //j$('[id*=setConfig').show();
-      }
-      function setConfigWTypeMouseenter () {
-        //j$('[id*=chooseWConfig').css({"color": "rgb(90,0,0)"});
-      }
-      function setConfigWTypeMouseleave () {
-        //j$('[id*=chooseWConfig').css({"color": "rgb(0,85,0)"});
-      }
-         function setConfigSTypeMouseenter () {
-        //j$('[id*=chooseSConfig').css({"color": "rgb(90,0,0)"});
-      }
-      function setConfigSTypeMouseleave () {
-        //j$('[id*=chooseSConfig').css({"color": "rgb(0,85,0)"});
-      }
-      function clickableMouseenter (this) {
-        j$(this).css({"color": "rgb(0,0,250)"});
-      }
-      function clickableMouseleave () {
-        j$(this).css({"color": "rgb(0,0,140)"});
-      }
-      */
    </script>
     <apex:form id="forma">
         <apex:outputPanel id="pageA" > 
@@ -531,8 +446,6 @@ table.listTable td {
         <apex:actionFunction action="{!doNothing}" name="rerenderCalendar"
             rerender="calendar, tPanel" />
 
-
-
         <apex:outputPanel id="pageC" rendered="{!isDentist}">
 	        <div id="mainDiv" class="mainDiv">   
 	            <br /> <br /> <br />
@@ -639,30 +552,28 @@ table.listTable td {
 	        </div>              
         </apex:outputPanel>
         
-        
-        
-        
         <apex:outputPanel Id="pageAL" styleClass="mainDiv">
 	        <div id="mainDiv" class="mainDiv">   
 	            <br/>
 	            <br/>
 	            <br/> 
-	               <h4>Show appointments by:</h4>
-	               <p/>
+	            <h5 class="head">Appointment list</h5>
+	            <br/> <br/> <br/> 
+	            <h4>Show appointments by:</h4>
+	            <p/>
 	            <apex:inputCheckbox id="checkboxDate" styleClass="checkBoxes" value="{!showFields[0]}"
 	            					onchange="toggleSearchDate (); rerenderAppointstable();"/>
 	            <apex:outputLabel styleClass="specmargins inline" value="Date" for="checkboxDate"/> &nbsp; &nbsp; &nbsp; 
-	            <apex:inputCheckbox id="checkboxStatus" styleClass="checkBoxes" value="{!showFields[1]}" onchange="toggleSearchStatus (); rerenderAppointstable();"/>	
+	            <apex:inputCheckbox styleClass="checkBoxes" id="checkboxStatus" value="{!showFields[1]}" onchange="toggleSearch(1); rerenderAppointstable();"/>	
 	            <apex:outputLabel styleClass="specmargins inline" value="Status" for="checkboxStatus"/> &nbsp; &nbsp; &nbsp; 
-	            <apex:inputCheckbox id="checkboxClient" styleClass="checkBoxes" value="{!showFields[2]}" onchange="toggleSearchClient (); rerenderAppointstable();"/>
+	            <apex:inputCheckbox styleClass="checkBoxes" id="checkboxClient"  value="{!showFields[2]}" onchange="toggleSearch (2); rerenderAppointstable();"/>
 	            <apex:outputLabel styleClass="specmargins inline" value="Client" for="checkboxClient"/> &nbsp; &nbsp; &nbsp; 
-	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentist" styleClass="checkBoxes" value="{!showFields[3]}" onchange="toggleSearchDentist (); rerenderAppointstable();"/>											
+	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentist" styleClass="checkBoxes" value="{!showFields[3]}" onchange="toggleSearch (4); rerenderAppointstable();"/>											
 	            <apex:outputLabel rendered="{!isOwner}" styleClass="specmargins inline" value="Dentist" for="checkboxDentist"/>
-	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentistType" styleClass="checkBoxes" value="{!showFields[4]}" onchange="toggleSearchDentistType (); rerenderAppointstable();"/>											
+	            <apex:inputCheckbox rendered="{!isOwner}" id="checkboxDentistType" styleClass="checkBoxes" value="{!showFields[4]}" onchange="toggleSearch (5); rerenderAppointstable();"/>											
 	            <apex:outputLabel rendered="{!isOwner}" styleClass="specmargins inline" value="Dentist type" for="checkboxDentistType"/>
-	            <apex:inputCheckbox id="checkboxAppointmentType" styleClass="checkBoxes" value="{!showFields[5]}" onchange="toggleSearchAppointmentType (); rerenderAppointstable();"/>											
+	            <apex:inputCheckbox id="checkboxAppointmentType" styleClass="checkBoxes" value="{!showFields[5]}" onchange="toggleSearch (3); rerenderAppointstable();"/>											
 	            <apex:outputLabel styleClass="specmargins inline" value="Appointment type" for="checkboxAppointmentType"/>
-	            
 	            <apex:outputPanel id="tPanelAL" styleClass="messagePanel, middle">
 	               <apex:pageMessages />
 	            </apex:outputPanel>
@@ -689,7 +600,7 @@ table.listTable td {
 	                                <apex:pageBlockSection id="daysBlock" columns="7" >
 	                                        <apex:repeat id="day" value="{!calendarDetails.calendarDays}"  var="day">
 	                                            <apex:commandLink id="dayl" action="{!dayChosenView}" styleClass="divCal day{!day.styleClass}"
-	                                                               value="{!day.dayToDisplay}" rerender="tPanelAL, viewDateALin, appointsTable">
+	                                                               value="{!day.dayToDisplay}" rerender="tPanelAL, AL0, appointsTable">
 	                                            <apex:param value="{!day.dayToDisplay}" name="chosenCalendarDay" assignto="{!chosenDayDummy}"> </apex:param>
 	                                            </apex:commandLink>
 	                                        </apex:repeat>
@@ -698,18 +609,18 @@ table.listTable td {
 	                        </div>
 	                     </apex:outputPanel> 
 	                     	<apex:pageBlocksection id="searchDetailsAL" columns="1">
-		                     	<apex:outputField id="viewDateALin" styleClass="form-control"
+		                     	<apex:outputField id="AL0" styleClass="form-control"
 		                        	value="{!appointmentView.Date__c}">
 		                        </apex:outputField>
-				                <apex:selectList id="StatusAL" styleClass="inputOrSelList" value="{!appointmentView.Status__c}" size="1"
+				                <apex:selectList id="AL1" styleClass="inputOrSelList" value="{!appointmentView.Status__c}" size="1"
 				                				 multiselect="false" Label="Status" onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value="{!Statuses}"/>
 				                </apex:selectList> 
-				                <apex:selectList id="ClientAL" styleClass="inputOrSelList" value="{!appointmentView.Client__c}" size="1"
+				                <apex:selectList id="AL2" styleClass="inputOrSelList" value="{!appointmentView.Client__c}" size="1"
 				                				 multiselect="false" Label="Client" onchange="rerenderAppointstable();">
-				                     <apex:selectOptions value='{!clients}'/>
+				                     <apex:selectOptions value="{!clients}"/>
 				                </apex:selectList>
-				                <apex:selectList id="DentistAL" styleClass="inputOrSelList" value="{!appointmentView.Dentist__c}" size="1"
+				                <apex:selectList id="AL4" styleClass="inputOrSelList" value="{!appointmentView.Dentist__c}" size="1"
 				                				 multiselect="false" Label="Dentist" onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value="{!dentists}"/>
 				                </apex:selectList> 
@@ -717,7 +628,7 @@ table.listTable td {
 				                				 multiselect="false" Label="Dentist type" onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value="{!dentistTypes}"/>
 				                </apex:selectList> 
-				                <apex:selectList id="AppointmenttypeAL" styleClass="inputOrSelList" value="{!appointmentView.RecordTypeId}" size="1"
+				                <apex:selectList id="AL3" styleClass="inputOrSelList" value="{!appointmentView.RecordTypeId}" size="1"
 				                				 multiselect="false" Label="Appointment type" onchange="rerenderAppointstable();">
 				                     <apex:selectOptions value="{!recordIds}"/>
 				                </apex:selectList> 
@@ -726,7 +637,7 @@ table.listTable td {
 	               </apex:pageBlock> 
 	            <apex:outputPanel id="appointsTable">
 	                        <!-- tu info o appointmentsach --> 
-	                   <apex:dataTable styleClass="listTable" id="tabA" VALUE="{!appsForView}" var="app" >
+	                   <apex:dataTable styleClass="listTable inline" id="tabA" VALUE="{!appsForView}" var="app" >
 	                        <apex:column headerValue="Date ">
 		                        <apex:outputField styleClass="form-control"
 		                            value="{!app.Date__c}">
@@ -753,29 +664,24 @@ table.listTable td {
 	                            	value="{!app.RecordTypeId}">
 	                        	</apex:outputField>
 	                        </apex:column>
-	                        <apex:column headerValue="Visit Status">
-	                        	<apex:outputField styleClass="form-control" 
+	                        <apex:column headerValue="Appointment Status">
+	                        	<apex:outputText rendered="{!OR (app.Status__c != 'Awaiting acceptance' )}"  
 		                            value="{!app.Status__c}">
-		                        </apex:outputField>
+		                        </apex:outputText>
+		                        <apex:outputText rendered="{!AND( app.whileOwnerApproval__c, app.Status__c == 'Awaiting acceptance', isDentist )}" value="Awaiting owner's approval"/>
 		                        <!-- rendered="{!!isdentist}" -->
-		                        <apex:commandLink action="{!approveAppointment}"  >
-		                        	 <apex:commandButton value="Approve appointment" />
+		                        <apex:commandLink rendered="{!AND(app.Status__c == 'Awaiting acceptance', OR( AND(isDentist, !app.whileOwnerApproval__c ), AND( isOwner, app.whileOwnerApproval__c ) ) )}"
+		                        	 rerender="appointsTable" action="{!approveAppointment}" style="text-decoration: none;" >
+		                        	 <apex:commandButton value="Approve" />
 		                        	 <apex:param value="{!app.Id}"
                                          name="appId" assignto="{!appointmentId}" />
 		                        </apex:commandLInk>
-		                        <apex:commandLink action="{!rejectAppointment}"  >
-		                        	 <apex:commandButton value="Reject appointment" />
+		                        <apex:commandLink rendered="{!AND(app.Status__c == 'Awaiting acceptance', OR( AND(isDentist, !app.whileOwnerApproval__c ), AND( isOwner, app.whileOwnerApproval__c ) ) )}"
+		                        	 rerender="appointsTable" action="{!rejectAppointment}" style="text-decoration: none;" >
+		                        	 <apex:commandButton value="Reject" />
 		                        	 <apex:param value="{!app.Id}"
                                          name="appId" assignto="{!appointmentId}" />
-                                     
 		                        </apex:commandLInk>
-		                        <apex:selectList id="Appoinn" styleClass="inputOrSelList" value="{!app.Status__c}" size="1"
-				                				 multiselect="false" Label="Status" >
-				                     <apex:selectOptions value="{!Statuses}"/>
-				                     <apex:actionSupport event="onchange" action="{!updateAStatus}" reRender="appointsTable">
-				                     	<apex:param value="{!app.Id}+{!app.Status__c}" name="appId" assignto="{!appointmentId}" />
-				                     </apex:actionSupport>
-				                </apex:selectList>
 	                        </apex:column>
 	                   </apex:dataTable>
 	            </apex:outputPanel> 

@@ -32,7 +32,7 @@ public with sharing class DenS_AppointmentController {
     //  get user id: List<Profile> PROFILE = [SELECT Id FROM Profile WHERE Id=:userinfo.getProfileId().Id];
     //  String MyProflieName = PROFILE[0].Name;    
         
-    
+    public Id ownerId;
     public DenS_Config__c config { get; set; }
     public String pomSConfig {get;set;}
     public String pomEConfig {get;set;}
@@ -102,6 +102,10 @@ public with sharing class DenS_AppointmentController {
     	
     }
     public DenS_AppointmentController(ApexPages.StandardSetController stdController) {  
+        ownerId = [SELECT Id FROM User 
+                                WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')  // should be 'Name=: 'Owner'
+                               ][0].Id;
+        
         userProfile = 'Dentist'; //  SHOULD BE userProfile = [SELECT Name FROM Profile WHERE Id =: userinfo.getProfileId()][0].Name;
     	// System Adminitrator // Dentist // Owner
     	// Contact nie ma Usera - jak to zrobic? 
@@ -234,13 +238,16 @@ public with sharing class DenS_AppointmentController {
      	appointment.Status__c = 'Awaiting acceptance';
      	appointment.Start_time__c = Decimal.valueOf(pomS);
      	appointment.End_time__c = Decimal.valueOf(pomS)+60;
+     	/*
      	appointment.Name = '' + dentistPom.FirstName.substring(0,1) + dentistPom.LastName.substring(0,1) + '_'
      				       + clientPom.FirstName.substring(0,1) + clientPom.LastName.substring(0,1) + '_' 
      				       + String.ValueOf(dateTimeDummy.year()) + String.ValueOf(dateTimeDummy.month()) + String.ValueOf(dateTimeDummy.day()) + '_'
      				       + fromMinToHoursA(Decimal.valueOf(pomS)).substring(0,2) + fromMinToHoursA(Decimal.valueOf(pomS)).substring(3);
+     	*/
      	appointment.RecordTypeId = appointmentType;
         try {
             upsert appointment;
+            submitForApproval(appointment);
             appointment = new DenS_Appointment__c();
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Appointment saved'));
             /*
@@ -268,7 +275,7 @@ public with sharing class DenS_AppointmentController {
         List<List<Decimal>> configTermsInt = new List<List<Decimal>>  ();
         List<List<Decimal>> termsTakenInt = new List<List<Decimal>> ();
         Integer w = 1;
-        if ( calendarday.cDate >= date.today() ) {
+        if ( calendarday.cDate > date.today() ) {
 	        for ( DenS_Config__c con : sconfigsLocal) {  //getting config terms 
 	            if ( calendarday.cDate == con.date__c ) { 
 	                List<Decimal> term = new List<Decimal> ();
@@ -393,68 +400,88 @@ public with sharing class DenS_AppointmentController {
 		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + appointmentID + 'appointmentStatus' + appointmentStatus));
 		update ap;						 
     }
-    public void approveAppointment() {
-    	Approval.ProcessWorkitemRequest req2 = processVisitApprovalRequest();
-        req2.setComments('Approving request.');
-        req2.setAction('Approve');
-        Approval.ProcessResult result2 =  Approval.process(req2);
-        System.assert(result2.isSuccess(), 'Result Status:'+result2.isSuccess());
-        DenS_Appointment__c ap = [SELECT Status__c FROM DenS_Appointment__c
-							 WHERE Id =: appointmentID][0];
-        if ( result2.getInstanceStatus() != 'Pending' ) {
-        	System.assertEquals(
-            'Approved', result2.getInstanceStatus(), 
-            'Instance Status'+result2.getInstanceStatus());
+
+
+    public void submitForApproval(DenS_Appointment__c app){
+    	Approval.ProcessSubmitRequest req1 = new Approval.ProcessSubmitRequest();
+        req1.setComments( 'Processing approval of a visit' );
+        req1.setObjectId(app.id);
+        req1.setProcessDefinitionNameOrId( 'DenS_Appointment_Approval_Process' );
+        req1.setSkipEntryCriteria(false);
+        req1.setNextApproverIds(new Id[] {app.Dentist__c});
+        Approval.ProcessResult result = Approval.process(req1);
+        System.assert(result.isSuccess());
+        System.assertEquals(
+            'Pending', result.getInstanceStatus(), 
+            'Instance Status' + result.getInstanceStatus() );
+    }
+    
+    public Approval.ProcessWorkitemRequest approvalPart () {
+    	DenS_Appointment__c app = [SELECT Id, Dentist__c, whileOwnerApproval__c FROM DenS_Appointment__c WHERE Id =: appointmentId][0];
+        Id approverId; 
+        if (app.whileOwnerApproval__c) {
+        	approverId = ownerId;
         }
         else {
-        	List<Id> newWorkItemIds = result2.getNewWorkitemIds();
-        	Approval.ProcessWorkitemRequest req3 = 						   // ProcessWorkitemRequest is used to process the approval request after it is submitted 
-            	new Approval.ProcessWorkitemRequest();
-        	Id ownerId = [SELECT Id FROM User 
-                                WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Standard Platform User')  // should be 'Name=: 'Owner'
-                               ][0].Id;
-            req3.setNextApproverIds(new Id[] {ownerId}); // jesli owner zobaczy moze zrobic samemu akceptacje
-        	req3.setWorkitemId(newWorkItemIds.get(0));
-        	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'IDs=' + UserInfo.getUserId() + ' ' + ownerId ));
-        	req3.setComments('Approving request.');
-	        req3.setAction('Approve');
-	        Approval.ProcessResult result3 =  Approval.process(req3);
-	        System.assert(result3.isSuccess(), 'Result Status:'+result3.isSuccess());
-			System.assertEquals(
-            'Approved', result3.getInstanceStatus(), 
-            'Instance Status'+result3.getInstanceStatus());   
+        	approverId = app.Dentist__c;
+        	app.whileOwnerApproval__c = true;
+        	update app;
+        }
+        Approval.ProcessWorkitemRequest req = 
+            new Approval.ProcessWorkitemRequest();
+        req.setNextApproverIds(new Id[] {approverId});
+        req.setWorkitemId(getWorkItemId(appointmentId));
+        return req;
+    }
+    public Id getWorkItemId(Id targetObjectId)
+    {
+        Id retVal = [Select Id from ProcessInstanceWorkitem
+            where ProcessInstanceId IN ( SELECT Id FROM ProcessInstance
+            WHERE TargetObjectId =: targetObjectId) 
+            ][0].Id;
+        return retVal;
+    }
+    
+    public void approveAppointment() {
+        Approval.ProcessWorkitemRequest req = approvalPart();
+        req.setComments('Approving request.');
+        req.setAction('Approve');
+        Approval.ProcessResult result =  Approval.process(req);
+        if ( result.getInstanceStatus() != 'Pending' ) {
+        	System.assertEquals(
+            'Approved', result.getInstanceStatus(), 
+            'Instance Status'+result.getInstanceStatus());
         }
     }
+    
     public void rejectAppointment() {
-    	Approval.ProcessWorkitemRequest req2 = processVisitApprovalRequest();
-        req2.setComments('Approving request.');
-        req2.setAction('Reject');
-        Approval.ProcessResult result2 =  Approval.process(req2);
-        System.assert(result2.isSuccess(), 'Result Status:'+result2.isSuccess());
+    	Approval.ProcessWorkitemRequest req = approvalPart();
+        req.setComments('Rejecting request.');
+        req.setAction('Reject');
+        Approval.ProcessResult result =  Approval.process(req);
+        System.assert(result.isSuccess(), 'Result Status:'+result.isSuccess());
         System.assertEquals(
-            'Rejected', result2.getInstanceStatus(), 
-            'Instance Status'+result2.getInstanceStatus());
+            'Rejected', result.getInstanceStatus(), 
+            'Instance Status'+result.getInstanceStatus());
     }
-    public Approval.ProcessWorkitemRequest processVisitApprovalRequest() {
+    public Approval.ProcessWorkitemRequest processVisitApprovalRequest(Id dentisttId) {
         Approval.ProcessSubmitRequest req1 = 
             new Approval.ProcessSubmitRequest();
         req1.setComments( 'Processing approval of a visit' );
         req1.setObjectId( appointmentId ); // appointmentId
         req1.setSubmitterId( userinfo.getUserId() ); // '00558000000H9l1AAC' ); 
-        req1.setProcessDefinitionNameOrId( 'DenS_Appointment_Request_Process' );
+        req1.setProcessDefinitionNameOrId( 'DenS_Appointment_Approval_Process' );
         req1.setSkipEntryCriteria(false);
+        req1.setNextApproverIds(new Id[] {dentisttId});
         Approval.ProcessResult result = Approval.process(req1);        // request info ends here
         System.assert(result.isSuccess());
         System.assertEquals(
             'Pending', result.getInstanceStatus(), 
-            'Instance Status'+result.getInstanceStatus());
+            'Instance Status' + result.getInstanceStatus() );
         List<Id> newWorkItemIds = result.getNewWorkitemIds();		   // 0 or 1 Ids of submitted approval requests 
         Approval.ProcessWorkitemRequest req2 = 						   // ProcessWorkitemRequest is used to process the approval request after it is submitted 
             new Approval.ProcessWorkitemRequest();
-        Id ownerId = [SELECT Id FROM User 
-                                WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Standard Platform User')  // should be 'Name=: 'Owner'
-                               ][0].Id;
-        req2.setNextApproverIds(new Id[] {UserInfo.getUserId(), ownerId});
+        req2.setNextApproverIds(new Id[] {dentisttId});
         req2.setWorkitemId(newWorkItemIds.get(0));
         return req2;
     }
@@ -518,11 +545,11 @@ public with sharing class DenS_AppointmentController {
         return dayst;
     }
     public List<DenS_Appointment__c> getAppointments () {   //
-        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, Status__c
+        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, Status__c, whileOwnerApproval__c
                 FROM DenS_Appointment__c WHERE Dentist__c IN :dentistsIds ORDER BY Date__c, Start_time__c];
     }
     public List<DenS_Appointment__c> getHistoricAppointments () {   //
-        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, Status__c
+        return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, Status__c, whileOwnerApproval__c
                 FROM DenS_Appointment__c WHERE Date__c <: date.Today() AND Dentist__c IN :dentistsIds ORDER BY Date__c, Start_time__c];
     }
     public List<SelectOption> getSearchCrits () {
@@ -557,7 +584,7 @@ public with sharing class DenS_AppointmentController {
     	return options;
     }
     public List<DenS_Appointment__c> getAppsForView () {   // returns appointments for view on AL (AppointmentList)  on page: apex:outputPanel of Id="pageAL"
-    	String qryString = 'SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId, Status__c	FROM DenS_Appointment__c';
+    	String qryString = 'SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId, Status__c, whileOwnerApproval__c	FROM DenS_Appointment__c';
     	String addition = '';
 		if ( showFields[0] ){
 			String month = ('0' + appointmentView.Date__c.month()).reverse().substring(0,2).reverse();
