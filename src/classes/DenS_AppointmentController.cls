@@ -2,35 +2,6 @@ public with sharing class DenS_AppointmentController {
         
     public DenS_AppointmentController() {
     } 
-    // lastly - Appointment saved
-    
-    //TODO
-    // before learn triggers to schedule this task in 5 min
-    // 5-minutowa blokada dla innych klientów po kliknięciu terminu
-    // jak sie zmienia strone w visualforce
-    // po udanym savie pojawia się strona ApplikationInfo
-    // średnie:
-    // 
-    // mail informujący o konieczności potwierdzenia wizyty, po tym jak lekarz ją ztwierdził otrzymuje drugi email informujący że zatwierdził
-    // W przypadku gdy wizyta ma miejsce w niedzielę lub po godzinie 20.00 wymagane jest potwierdzenie zarówny dentysty jak i właściciela salonu dentystycznego. 
-    
-    //DONE:
-    // save button
-    // redirection after saving
-    // wybor z dostępnych terminow na pickliscie
-    // taking configs by dentistId   
-    // latwe:
-    // klient wybiera typ wizyty (konsultacja, leczenie), opis pojawia się po wybraniu typu wizyty „leczenie”
-    // Każda instancja wizyty powinna mieć unikalną nazwę składającą się z inicjałów dentysty, inicjałów klienta oraz daty z godziną: AB_MK_20160812_1530 – nazwa ta jest tworzona podczas tworzenia wizyty.
-    // issues with calendar including daysToDisplay, setFreeTermsFunction, cleaning up the code, making it work dayChosen function with appointment.Date__c saving
-    // 
-    
-    // maybe:
-    // 
-    
-    //  przydatne
-    //  get user id: List<Profile> PROFILE = [SELECT Id FROM Profile WHERE Id=:userinfo.getProfileId().Id];
-    //  String MyProflieName = PROFILE[0].Name;    
         
     public Id ownerId;
     public DenS_Config__c config { get; set; }
@@ -81,7 +52,6 @@ public with sharing class DenS_AppointmentController {
 	public List<Boolean> showFields {get;set;}
 	//for DenS_Config
 	
-    
 	/*    
     final Handler handler = new Handler();
 	final long delay = 5 * 60 * 1000;
@@ -106,7 +76,7 @@ public with sharing class DenS_AppointmentController {
                                 WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')  // should be 'Name=: 'Owner'
                                ][0].Id;
         
-        userProfile = 'Owner'; //  SHOULD BE userProfile = [SELECT Name FROM Profile WHERE Id =: userinfo.getProfileId()][0].Name;
+        userProfile = 'Dentist'; //  SHOULD BE userProfile = [SELECT Name FROM Profile WHERE Id =: userinfo.getProfileId()][0].Name;
     	// System Adminitrator // Dentist // Owner
     	// Contact nie ma Usera - jak to zrobic? 
     	dentistsIds = new List<String>();
@@ -138,13 +108,10 @@ public with sharing class DenS_AppointmentController {
     		isClient = false;
     	}
     	
-    	
     	searchCriteria = new List<String> ();
     	showFields = new List<Boolean>();
     	showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false);
     	searchCriteriaString = 'Date__c';
-    	
-    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + userProfile + 'dentIds' + dentistsIds));
     	
     	String name = ApexPages.currentPage().getParameters().get('id');   
         
@@ -175,12 +142,10 @@ public with sharing class DenS_AppointmentController {
         
         setDisplayMonthAndYear ();
     }      
-    
-    
-      public void setDisplayMonthAndYear () {
+    public void setDisplayMonthAndYear () {
       	dentistsIds.clear();
       	dentistsIds.add( dentistId ); // '00558000000HJSsAAO'
-    	showAppDetails = false;
+    	showAppDetails = true;
         calendarDetails.monthDisplay = dateTimeDummy.format('MMMMM');  
         calendarDetails.yearDisplay = dateTimeDummy.format('YYYY');
         Date myDate = date.newInstance(2000, 10, 2); //Monday
@@ -204,8 +169,11 @@ public with sharing class DenS_AppointmentController {
 				 if ( getDayOfTheWeek(cday.cDate) ==6) {    
 					 cday.sunday = 'sunday';
 				 }
-				 setFreeTerms(cDay); // sets freeTerms and styleClass too
 	    	}
+	    	else {
+	    		 cday.cDate = date.newInstance(1970, 1, 1);
+	    	}
+	    	setFreeTerms(cDay); // sets freeTerms and styleClass too
 	        calendarDetails.calendarDays.add(cDay);
         }
     }
@@ -350,10 +318,13 @@ public with sharing class DenS_AppointmentController {
 	        	calendarDay.showAppDetailsAndDayToDisplay = '1' + ' ' + calendarDay.dayToDisplay;
 	        }
         }
-        //ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + configTermsInt));
+        else {
+        	calendarDay.showAppDetailsAndDayToDisplay = '0';
+        }
     }
     
     public void dayChosen () {
+    	showAppDetails = false;
     	if( chosenDayDummy.substring(0,1).equals( '1' ) ) {
     		showAppDetails = true;
     		chosenDayDummy = chosenDayDummy.substring(2);
@@ -368,33 +339,6 @@ public with sharing class DenS_AppointmentController {
     public void dayChosenView () {
     	appointmentView.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), Integer.valueOf(chosenDayDummy) );
     }
-    
-    /*
-    public class view { 
-	     public view(ApexPages.StandardController controller) {
-	 	 }
-	 	 public Applicant__c applicant;
-		 public List <Applicant__c> applicantByStatusList {get;set;}
-		 private ApexPages.StandardSetController controller;
-		 public List <String> applicantNameByStatus {get;set;}
-		 public view(ApexPages.StandardSetController controller) { 
-			this.applicant = (Applicant__c) controller.getRecord();
-	 	 }
-		 public PageReference getApplicantByStatus (){
-			 String para1 = Apexpages.currentPage().getParameters().get('para');                  
-			 applicantByStatusList = new List<Applicant__c>();
-			 applicantNameByStatus = new List<String>();         
-			 applicantByStatusList = [SELECT Name,Name__c,Status__c,Interview_Date_Time__c
-			 						 FROM Applicant__c WHERE Status__c =: para1];                          
-			 for(Applicant__c a:applicantByStatusList){            
-			 	String name=(String)a.Name;                      
-			 	applicantNameByStatus.add(name);                        
-		     }                          
-		 	 return null;    
-		 }
-	}
-    */
-    
     public void updateAStatus () {
     	DenS_Appointment__c ap = [SELECT Status__c FROM DenS_Appointment__c
 							 WHERE Id =: appointmentID.substring(0,18)][0];
@@ -402,8 +346,6 @@ public with sharing class DenS_AppointmentController {
 		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'teraz' + appointmentID + 'appointmentStatus' + appointmentStatus));
 		update ap;						 
     }
-
-
     public void submitForApproval(DenS_Appointment__c app){
     	Approval.ProcessSubmitRequest req1 = new Approval.ProcessSubmitRequest();
         req1.setComments( 'Processing approval of a visit' );
@@ -417,7 +359,6 @@ public with sharing class DenS_AppointmentController {
             'Pending', result.getInstanceStatus(), 
             'Instance Status' + result.getInstanceStatus() );
     }
-    
     public Approval.ProcessWorkitemRequest approvalPart () {
     	DenS_Appointment__c app = [SELECT Id, Dentist__c, whileOwnerApproval__c FROM DenS_Appointment__c WHERE Id =: appointmentId][0];
         Id approverId; 
@@ -443,7 +384,6 @@ public with sharing class DenS_AppointmentController {
             ][0].Id;
         return retVal;
     }
-    
     public void approveAppointment() {
         Approval.ProcessWorkitemRequest req = approvalPart();
         req.setComments('Approving request.');
@@ -455,7 +395,6 @@ public with sharing class DenS_AppointmentController {
             'Instance Status'+result.getInstanceStatus());
         }
     }
-    
     public void rejectAppointment() {
     	Approval.ProcessWorkitemRequest req = approvalPart();
         req.setComments('Rejecting request.');
@@ -679,7 +618,6 @@ public with sharing class DenS_AppointmentController {
     public void doNothing() {
     }
     
-    
     /*==================================================================================================================
     
     
@@ -689,8 +627,6 @@ public with sharing class DenS_AppointmentController {
     
     
     ====================================================================================================================*/
-    
-    
     
     public PageReference saveConfig() {
         if (pomW == 'Choose weekday' && config.date__c == null) {    // Default Weekday__c selection option - 'Choose weekday' - denotes the Specific day type of config. In other cases the config type is Weekday
