@@ -264,18 +264,12 @@ table.listTable th, td {
         showf = showf.split(', ');
         for (i = 0; i < showf.length; i++) {
             if (showf[i]=='false') {
-            	if( i == 0 ) {
-            		j$('[id*=apage\\:forma\\:DateAL').parent().hide(); 
-            	}
             	var1 = '[id*=AL' + i ;
             	j$(var1).hide();
             }
         }
       });
       function toggleSearch (i) {
-        if (i==0) {
-            j$('[id*=apage\\:forma\\:DateAL').parent().toggle();
-        }
         varrr = '[id*=AL' + i;
         j$(varrr).toggle();
       }
@@ -445,13 +439,16 @@ table.listTable th, td {
                 <p/>
                 <p/>
                 <div class="marg80">
-                    <apex:commandLink styleClass="saveB" action="{!save}" style="text-decoration: none;" reRender="tPanel">
+                    <apex:commandLink styleClass="saveB" action="{!save}" style="text-decoration: none;">
                         <apex:commandButton styleClass="saveB" action="{!save}" value="Schedule appointment" />
                     </apex:commandLink>
                 </div>
             </apex:outputPanel>
         </apex:outputPanel>
-        <apex:outputPanel layout="block" styleClass="marg80" id="tPanel">
+        <apex:outputPanel layout="block" styleClass="marg80" style="clear: both" id="tPanel">
+            <p/>
+            <br/>
+            <br/>
             <apex:pageMessages />
         </apex:outputPanel>
         <apex:actionFunction action="{!setDisplayMonthAndYear}"
@@ -579,20 +576,20 @@ table.listTable th, td {
 	                <table class="checkbox-table">
 	                    <tr>
 	                        <td>
-	                            <apex:inputCheckbox styleClass="checkBoxes" value="{!showFields[0]}" onchange="toggleSearch(0); rerenderAppointstable();"/>
+	                            <apex:inputCheckbox styleClass="checkBoxes" value="{!showFields[0]}" onchange="toggleSearch(0); rerenderAppointstable(); "/>
 	                                    
 	                        </td>
 	                        <th>
 	                            Date
 	                        </th>
 	                        <td>
-	                            <apex:inputCheckbox styleClass="checkBoxes" value="{!showFields[1]}" onchange="toggleSearch(1); rerenderAppointstable();"/>
+	                            <apex:inputCheckbox styleClass="checkBoxes" value="{!showFields[1]}" onchange="toggleSearch(1); callSetDisplayMonthAndYear (); rerenderAppointstable(); "/>
 	                        </td>
 	                        <th>
 	                            Status
 	                        </th>
 	                        <td>
-	                            <apex:inputCheckbox styleClass="checkBoxes" value="{!showFields[2]}" onchange="toggleSearch (2); rerenderAppointstable();"/>
+	                            <apex:inputCheckbox styleClass="checkBoxes" value="{!showFields[2]}" onchange="toggleSearch (2); callSetDisplayMonthAndYear (); rerenderAppointstable();"/>
 	                        </td>
 	                        <th>
 	                            Client
@@ -605,14 +602,14 @@ table.listTable th, td {
 	                                <apex:outputText rendered="{!isOwner}">Dentist</apex:outputText>
 	                            </th>
 	                            <td>
-	                                <apex:inputCheckbox rendered="{!isOwner}" styleClass="checkBoxes" value="{!showFields[5]}" onchange="toggleSearch (5); rerenderAppointstable();"/>
+	                                <apex:inputCheckbox rendered="{!isOwner}" styleClass="checkBoxes" value="{!showFields[5]}" onchange="toggleSearch (5); callSetDisplayMonthAndYear (); rerenderAppointstable();"/>
 	                            </td>
 	                            <th>
 	                                <apex:outputText rendered="{!isOwner}">Dentist type</apex:outputText>
 	                            </th>
 	                        </apex:outputPanel>
 	                        <td>
-	                            <apex:inputCheckbox styleClass="checkBoxes" value="{!showFields[3]}" onchange="toggleSearch (3); rerenderAppointstable();"/>
+	                            <apex:inputCheckbox styleClass="checkBoxes" value="{!showFields[3]}" onchange="toggleSearch (3); callSetDisplayMonthAndYear (); rerenderAppointstable();"/>
 	                        </td>
 	                        <th>
 	                            Appointment type
@@ -648,7 +645,7 @@ table.listTable th, td {
 	                                     <apex:repeat id="day" value="{!calendarDetails.calendarDays}" var="day">
 	                                      <div class="dayCont">   
 	                                          <apex:commandLink id="dayl" styleClass="day day{!day.sunday} day{!day.styleClass}" action="{!dayChosenView}"
-	                                              value="{!day.dayToDisplay}" rerender="appointsTable appDateField">
+	                                              value="{!day.dayToDisplay}" >
 	                                              <apex:param value="{!day.DayToDisplay}"
 	                                                  name="chosenCalendarDay" assignto="{!chosenDayDummy}">
 	                                              </apex:param>
@@ -873,7 +870,8 @@ table.listTable th, td {
         <apex:actionFunction action="{!updateAStatus}"
                 name="callUpdateAStatus" rerender="tPanelAL" />
         <apex:actionFunction name="rerenderAppointstable" rerender="appointsTable" />      
-    
+    	<apex:actionFunction name="rerenderCalendar" rerender="DateAL" />    
+    	
     	<apex:outputPanel styleClass="mainDiv" layout="block" rendered="{!AND(isOwner, CL)}">
 			<h5 class="head">Client List</h5>
            	<p/>

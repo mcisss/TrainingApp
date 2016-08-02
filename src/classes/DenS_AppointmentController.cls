@@ -127,8 +127,7 @@ public with sharing class DenS_AppointmentController {
     	
     	searchCriteria = new List<String> ();
     	showFields = new List<Boolean>();
-    	showFields.add(true);
-    	for (Integer i=0 ; i<5 ; i++) {
+    	for (Integer i=0 ; i<6 ; i++) {
     	 	showFields.add(false);
     	}
     	searchCriteriaString = 'Date__c';
@@ -155,7 +154,9 @@ public with sharing class DenS_AppointmentController {
         
         //AL
         appointmentView = new DenS_Appointment__c ();
-        appointmentView.Date__c = date.today();
+        if (appointmentView.Date__c == null) {
+        	appointmentView.Date__c = date.today();
+        }
         //
         
         setDisplayMonthAndYear ();
@@ -235,6 +236,7 @@ public with sharing class DenS_AppointmentController {
             upsert appointment;
             submitForApproval(appointment);
             appointment = new DenS_Appointment__c();
+            showAppDetails = false;
             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.CONFIRM,'Appointment saved'));
             /*
             PageReference pageRef = new PageReference('/apex/DenS_AppointmentView');
@@ -300,6 +302,7 @@ public with sharing class DenS_AppointmentController {
 	                termsTakenInt.add(term);
 	                if ( isOwner || isDentist ) {
         				calendarDay.styleClass = '11';
+        				calendarDay.showAppDetailsAndDayToDisplay = '1' + ' ' + calendarDay.dayToDisplay;
         			} 
 	            }
 	        }
@@ -344,9 +347,6 @@ public with sharing class DenS_AppointmentController {
 	        else {
 	        	calendarDay.styleClass = '1';
 	        	calendarDay.showAppDetailsAndDayToDisplay = '1' + ' ' + calendarDay.dayToDisplay;
-	        	if ( isOwner || isDentist ) {
-        			calendarDay.styleClass = '3';
-        		} 
 	        }
         }
         else {
