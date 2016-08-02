@@ -2,8 +2,16 @@ public with sharing class DenS_AppointmentController {
         
     public DenS_AppointmentController() {
     } 
-        
-    public Id ownerId;
+    public Boolean isDentist {get;set;}
+	public Boolean isOwner {get;set;}
+	public Boolean isClient {get;set;}
+    
+    public Boolean AL {get;set;}
+    public Boolean C {get;set;}
+    public Boolean CV {get;set;}
+    public Boolean CL {get;set;}
+    
+    public Id ownerId {get;set;}
     public DenS_Config__c config { get; set; }
     public String pomSConfig {get;set;}
     public String pomEConfig {get;set;}
@@ -11,7 +19,8 @@ public with sharing class DenS_AppointmentController {
     public String configsToDeleteID {get;set;}
     public Decimal ValueToFormat {get;set;}
     public String dentistId {get;set;}
-    public String[] dentistsIds {get;set;}
+    public Set<Id> allDentistsIds {get;set;}
+    public Set<Id> dentistsIds {get;set;}
 	      
     public String userProfile {get;set;}
         
@@ -23,10 +32,6 @@ public with sharing class DenS_AppointmentController {
     
     public String appointmentID {get;set;}
     public String pomS {get;set;}
-    public DenS_Appointment__c appointmentView {get;set;}
-    public String dentistTypeAl {get;set;}
-    public String appointmentType {get;set;}
-    public String appointmentStatus {get;set;}
     public String description {get;set;}
     
     public List<DenS_Config__c> wconfigsLocal {get;set;}   
@@ -43,14 +48,19 @@ public with sharing class DenS_AppointmentController {
 	// for site AppointmentListDentis:
 	public String[] searchCriteria {get;set;}
 	public String searchCriteriaString {get;set;}
-	public List<DenS_Appointment__c> appsForView2 {get;set;}
-	public Boolean isDentist {get;set;}
-	public Boolean isOwner {get;set;}
-	public Boolean isClient {get;set;}
-	public DenS_Appointment__c appointmentTest {get;set;}
-	public List<String> scs {get;set;}
+	public Boolean appView {get;set;}
+	public Boolean treatment {get;set;}
+	public DenS_Appointment__c appointmentView {get;set;}
+	public DenS_Appointment__c appointmentViewV {get;set;}
+    public String dentistTypeAl {get;set;}
+    public String appointmentType {get;set;}
+    public String appointmentStatus {get;set;}
 	public List<Boolean> showFields {get;set;}
 	//for DenS_Config
+	//CV
+	public Contact contactView {get;set;}
+	public Id searchedId {get;set;}
+	public String userOrContactt {get;set;}
 	
 	/*    
     final Handler handler = new Handler();
@@ -76,41 +86,51 @@ public with sharing class DenS_AppointmentController {
                                 WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')  // should be 'Name=: 'Owner'
                                ][0].Id;
         
-        userProfile = 'Dentist'; //  SHOULD BE userProfile = [SELECT Name FROM Profile WHERE Id =: userinfo.getProfileId()][0].Name;
+        userProfile = 'Owner'; //  SHOULD BE userProfile = [SELECT Name FROM Profile WHERE Id =: userinfo.getProfileId()][0].Name;
     	// System Adminitrator // Dentist // Owner
     	// Contact nie ma Usera - jak to zrobic? 
-    	dentistsIds = new List<String>();
+    	allDentistsIds = new Set<id>();
+    	dentistsIds = new Set<Id>();
     	if (userProfile =='Dentist') {
-    		// should be dentistId=userinfo.getUserId();
-    		dentistId='00558000000HJSsAAO'; // TEMP Id Rzeznika
-    		dentistsIds.add( dentistId );
-    		isDentist = true;
-    	}
-    	else{
-    		isDentist = false;
-    	}
-    	if (userProfile =='Owner') {
-    		dentistsIds.add( 
-    					[SELECT Id FROM User 
-                         WHERE profileid IN (SELECT Id FROM Profile WHERE Name=:'Dentist')
-                         ].Id
-    		);
-    		isOwner = true;
-    	}
-    	else {
     		isOwner = false;
+    		isClient = false;
+    		isDentist = true;
+    		// should be dentistId=userinfo.getUserId();
+    		dentistId='00558000000HJSsAAO'; // TEMP Id Bob Toothinski
+    		dentistsIds.add( dentistId );
+    		AL = true;
+    		C = false;
     	}
-    	if (userProfile =='Client') {
-    		dentistId='000000000000000000';
-    		isClient = true;
+    	else if (userProfile =='Owner') {
+    		isOwner = true;
+    		isDentist = false;
+    		isClient = false;
+    		List<User> dentists = [SELECT Id FROM User 
+                         WHERE profileid IN (SELECT Id FROM Profile WHERE Name='Dentist')
+                         ];
+            for ( User d : dentists ) {
+            	allDentistsIds.add(d.Id);
+            }
+            dentistId=getDentists().get(0).getValue();
+    		AL = true;
     	}
     	else {
-    		isClient = false;
+    		isClient = true;
+    		isDentist = false;
+    		isOwner = false;
+    		dentistId=getDentists().get(0).getValue();
+    		
     	}
+    	appView = false;
+		CV = false;
+		CL = false;
     	
     	searchCriteria = new List<String> ();
     	showFields = new List<Boolean>();
-    	showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false); showFields.add(false);
+    	showFields.add(true);
+    	for (Integer i=0 ; i<5 ; i++) {
+    	 	showFields.add(false);
+    	}
     	searchCriteriaString = 'Date__c';
     	
     	String name = ApexPages.currentPage().getParameters().get('id');   
@@ -135,16 +155,13 @@ public with sharing class DenS_AppointmentController {
         
         //AL
         appointmentView = new DenS_Appointment__c ();
-        appointmentView.Date__c = date.newInstance(dateTimeDummy.year(), dateTimeDummy.month(), dateTimeDummy.day());
-        appointmentView.Client__c = getClients().get(0).getValue();
-     	appointmentView.Status__c = 'Awaiting acceptance';
+        appointmentView.Date__c = date.today();
         //
         
         setDisplayMonthAndYear ();
     }      
     public void setDisplayMonthAndYear () {
-      	dentistsIds.clear();
-      	dentistsIds.add( dentistId ); // '00558000000HJSsAAO'
+      	setDentistsIds ();
     	showAppDetails = true;
         calendarDetails.monthDisplay = dateTimeDummy.format('MMMMM');  
         calendarDetails.yearDisplay = dateTimeDummy.format('YYYY');
@@ -169,11 +186,11 @@ public with sharing class DenS_AppointmentController {
 				 if ( getDayOfTheWeek(cday.cDate) ==6) {    
 					 cday.sunday = 'sunday';
 				 }
+				 setFreeTerms(cDay); // sets freeTerms and styleClass too
 	    	}
 	    	else {
 	    		 cday.cDate = date.newInstance(1970, 1, 1);
 	    	}
-	    	setFreeTerms(cDay); // sets freeTerms and styleClass too
 	        calendarDetails.calendarDays.add(cDay);
         }
     }
@@ -192,7 +209,7 @@ public with sharing class DenS_AppointmentController {
     public PageReference save() {
      	if ( !checkEmailExists () ) {  // create new Client if does not exist in the Contact database
 			if ( client.LastName == null || client.FirstName == null || client.Phone == null  ) {
-     		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.Error,'Please enter	 your first name, last name and the phone number'));
+     		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.Error,'Please enter your first name, last name and the phone number'));
      		return null;
      		} 
 			insert client; 
@@ -208,18 +225,17 @@ public with sharing class DenS_AppointmentController {
      	appointment.Status__c = 'Awaiting acceptance';
      	appointment.Start_time__c = Decimal.valueOf(pomS);
      	appointment.End_time__c = Decimal.valueOf(pomS)+60;
-     	/*
      	appointment.Name = '' + dentistPom.FirstName.substring(0,1) + dentistPom.LastName.substring(0,1) + '_'
      				       + clientPom.FirstName.substring(0,1) + clientPom.LastName.substring(0,1) + '_' 
      				       + String.ValueOf(dateTimeDummy.year()) + String.ValueOf(dateTimeDummy.month()) + String.ValueOf(dateTimeDummy.day()) + '_'
      				       + fromMinToHoursA(Decimal.valueOf(pomS)).substring(0,2) + fromMinToHoursA(Decimal.valueOf(pomS)).substring(3);
-     	*/
      	appointment.RecordTypeId = appointmentType;
+     	appointment.Description__c = description;
         try {
             upsert appointment;
             submitForApproval(appointment);
             appointment = new DenS_Appointment__c();
-            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.WARNING,'Appointment saved'));
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.CONFIRM,'Appointment saved'));
             /*
             PageReference pageRef = new PageReference('/apex/DenS_AppointmentView');
             pageRef.setRedirect(false);
@@ -241,11 +257,17 @@ public with sharing class DenS_AppointmentController {
     //==========SETTERS========================   
  
     public void setFreeTerms (CalendarDay calendarDay) {  // if there are no configs on this day no color, if there are configs and available terms -green / no available terms - red
-        List<DenS_Appointment__c> appointments = getAppointments ();
+        List<DenS_Appointment__c> appointments = new List<DenS_Appointment__c>();
+        if (isClient) {
+        	appointments = getAppointments ();
+        }
+        else {
+        	appointments = getAppsForViewP1 ();
+        }
         List<List<Decimal>> configTermsInt = new List<List<Decimal>>  ();
         List<List<Decimal>> termsTakenInt = new List<List<Decimal>> ();
         Integer w = 1;
-        if ( calendarday.cDate > date.today() ) {
+        if ( calendarday.cDate > date.today() || isOwner ) {
 	        for ( DenS_Config__c con : sconfigsLocal) {  //getting config terms 
 	            if ( calendarday.cDate == con.date__c ) { 
 	                List<Decimal> term = new List<Decimal> ();
@@ -276,8 +298,14 @@ public with sharing class DenS_AppointmentController {
 	                term.add(appoint.Start_time__c);
 	                term.add(appoint.End_time__c);
 	                termsTakenInt.add(term);
+	                if ( isOwner || isDentist ) {
+        				calendarDay.styleClass = '11';
+        			} 
 	            }
 	        }
+	        if ( isOwner || isDentist ) {
+        		return;
+        	} 
 	        if ( termsTakenInt.isEmpty () ) {
 	            	calendarDay.freeTerms = configTermsInt;
 	        }
@@ -311,11 +339,14 @@ public with sharing class DenS_AppointmentController {
 	        calendarDay.freeTerms = configTermsInt;
 	        if( calendarDay.freeTerms.isEmpty() ) {
 	        	calendarDay.styleClass = '2';
-	        	calendarDay.showAppDetailsAndDayToDisplay = '0'; 
+	        	calendarDay.showAppDetailsAndDayToDisplay = '0';
 	        }
 	        else {
 	        	calendarDay.styleClass = '1';
 	        	calendarDay.showAppDetailsAndDayToDisplay = '1' + ' ' + calendarDay.dayToDisplay;
+	        	if ( isOwner || isDentist ) {
+        			calendarDay.styleClass = '3';
+        		} 
 	        }
         }
         else {
@@ -487,7 +518,7 @@ public with sharing class DenS_AppointmentController {
     }
     public List<DenS_Appointment__c> getAppointments () {   //
         return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, Status__c, whileOwnerApproval__c
-                FROM DenS_Appointment__c WHERE Dentist__c IN :dentistsIds ORDER BY Date__c, Start_time__c];
+                FROM DenS_Appointment__c WHERE Date__c >=: date.Today() AND Dentist__c IN :dentistsIds ORDER BY Date__c, Start_time__c];
     }
     public List<DenS_Appointment__c> getHistoricAppointments () {   //
         return [SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, Status__c, whileOwnerApproval__c
@@ -524,49 +555,71 @@ public with sharing class DenS_AppointmentController {
     	}
     	return options;
     }
-    public List<DenS_Appointment__c> getAppsForView () {   // returns appointments for view on AL (AppointmentList)  on page: apex:outputPanel of Id="pageAL"
-    	String qryString = 'SELECT Id, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId, Status__c, whileOwnerApproval__c	FROM DenS_Appointment__c';
-    	String addition = '';
+    public List<Contact> getContacts () { 
+    	List<Contact> clients = [SELECT Id, Name, Email, Phone from Contact ORDER BY Name];
+    	return clients;
+    }
+    public List<DenS_Appointment__c> getAppsForViewP1 () {   // returns appointments for view on AL (AppointmentList)  on page: apex:outputPanel of Id="pageAL"
+	    if (appView) {
+	    	return [SELECT Id, Name, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId, Status__c, whileOwnerApproval__c, description__c FROM DenS_Appointment__c WHERE Id=:appointmentId];
+	    }
+	    else if (CV) {
+	    	return [SELECT Id, Name, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId, Status__c, whileOwnerApproval__c	FROM DenS_Appointment__c  WHERE Client__c =: searchedId];
+	    }
+	    else {
+	    	Date datetoday =  date.Today();
+	    	String month = ('0' + datetoday.month()).reverse().substring(0,2).reverse();
+			String day = ('0' + datetoday.day()).reverse().substring(0,2).reverse();
+	    	String qryString = 'SELECT Id, Name, Client__c, Date__c, Dentist__c, Start_time__c, End_time__c, RecordTypeId, Status__c, whileOwnerApproval__c	FROM DenS_Appointment__c  WHERE Date__c >= '
+	    		+ datetoday.year() + '-'+ month + '-' + day + ' '; //SOQL date format YYYY-MM-DD	
+	    	String addition = '';
+			if ( showFields[1] ) {
+				if ( appointmentView.Status__c !=null ) {
+					addition = addAnd(addition);
+					addition += 'Status__c = \'' + appointmentView.Status__c + '\' ';
+				}
+			}
+			if ( showFields[2] ) {
+				if ( appointmentView.Client__c !=null ) {
+					addition = addAnd(addition);
+					addition += 'Client__c = \'' + appointmentView.Client__c + '\' ';
+				}
+			}
+			if ( showFields[4] ) {
+				if ( dentistId !=null ) {
+					addition = addAnd(addition);
+					addition += 'Dentist__c = \'' + dentistId + '\' ';
+				}
+			}
+			if ( showFields[5] ) {
+				if ( dentistTypeAl !=null ) {
+					addition = addAnd(addition);
+					addition += 'Dentist__c IN (SELECT Id FROM User WHERE Dentist_type__c =\'' + dentistTypeAl + '\') ';
+				}
+			}
+			if ( showFields[3] ) {
+				if ( appointmentView.RecordTypeId !=null ) {
+					addition = addAnd(addition);
+					addition += 'RecordTypeId = \'' + appointmentView.RecordTypeId + '\' ';
+				}
+			}
+	    	if ( addition != '' ) {
+	    		qryString += ' AND ' + addition;
+	    	}
+	    	qryString += ' ORDER BY Date__c, Start_time__c';
+	    	return Database.query(qryString);
+	    }
+    }
+    public List<DenS_Appointment__c> getAppsForView() {
+    	List<DenS_Appointment__c> appsForView = getAppsForViewP1();	
 		if ( showFields[0] ){
-			String month = ('0' + appointmentView.Date__c.month()).reverse().substring(0,2).reverse();
-			String day = ('0' + appointmentView.Date__c.day()).reverse().substring(0,2).reverse();
-			addition += 'Date__c = ' + appointmentView.Date__c.year() + '-'+ month + '-' + day + ' ';  //SOQL date format YYYY-MM-DD
-		}
-		if ( showFields[1] ) {
-			if ( appointmentView.Status__c !=null ) {
-				addition = addAnd(addition);
-				addition += 'Status__c = \'' + appointmentView.Status__c + '\' ';
+			for ( Integer i=appsForView.size()-1 ; i >=0 ; i-- ) {
+				if ( appsForView[i].Date__c != appointmentView.Date__c ) {
+					appsForView.remove(i);
+				}
 			}
 		}
-		if ( showFields[2] ) {
-			if ( appointmentView.Client__c !=null ) {
-				addition = addAnd(addition);
-				addition += 'Client__c = \'' + appointmentView.Client__c + '\' ';
-			}
-		}
-		if ( showFields[3] ) {
-			if ( appointmentView.Dentist__c !=null ) {
-				addition = addAnd(addition);
-				addition += 'Dentist__c = \'' + appointmentView.Dentist__c + '\' ';
-			}
-		}
-		if ( showFields[4] ) {
-			if ( dentistTypeAl !=null ) {
-				addition = addAnd(addition);
-				addition += 'Dentist__c IN (SELECT Id FROM User WHERE Dentist_type__c =\'' + dentistTypeAl + '\') ';
-			}
-		}
-		if ( showFields[5] ) {
-			if ( appointmentType !=null ) {
-				addition = addAnd(addition);
-				addition += 'RecordTypeId = \'' + appointmentType + '\' ';
-			}
-		}
-    	if ( addition != '' ) {
-    		qryString += ' WHERE ' + addition;
-    	}
-    	qryString += ' ORDER BY Date__c, Start_time__c';
-    	return Database.query(qryString);
+		return appsForView;
     }
     public String addAnd (String addition2) {
     	if ( addition2 != '') {
@@ -574,11 +627,35 @@ public with sharing class DenS_AppointmentController {
 		}
 		return addition2;
     }
-    
+    public void appView () {
+    	appointmentViewV = [SELECT RecordTypeId, description__c, Client__c FROM DenS_Appointment__c WHERE Id=:appointmentId][0];
+    	appView = true;
+    	String treatmentRecordId = [Select Id From RecordType WHERE sobjecttype = 'MBart__DenS_Appointment__c' AND Name = 'Treatment'][0].Id;
+    	if ( appointmentViewV.RecordTypeId == treatmentRecordId ) {
+    		treatment = true;
+    	}
+    	String phone = [SELECT Phone FROM Contact WHERE ID =: appointmentViewV.Client__c ][0].phone;
+    	appointmentView.Description__c = phone;
+    }
+    public void listView () {
+    	appView = false;
+    	AL = true;
+    	C = false;
+    	CV = false;
+    	CL = false;
+    }
     ///=============GETTERS-END========================  
 
     //==========Helpers=============================
-    
+    public void setDentistsIds () {
+    	if ( !isOwner || dentistId!=getDentists().get(0).getValue() ) {
+    		dentistsIds.clear();
+      		dentistsIds.add(dentistId);
+    	} 
+    	else {
+    		dentistsIds = allDentistsIds;
+      	}
+    }
     public Integer getDayOfTheWeek (Date adate) {
     	Datetime adatetime = datetime.newinstance(adate.year(), adate.month(), adate.day());
     	String dayOfTheWeek = adatetime.format('EEE').substring(0,2);
@@ -615,9 +692,42 @@ public with sharing class DenS_AppointmentController {
         }
         return hours + ':00';
     }
-    public void doNothing() {
+    //==========Navigation=============================
+    
+    public void showConfig () {
+    	AL = false;
+    	C = true;
+    	CV = false;
+    }
+    public void showContactView () {
+    	AL = true;
+    	C = false;
+    	CV = true;
+    	CL = false;
+    }
+    public void showClientList () {
+    	CL = true;
+    	AL = false;
+    	CV = false;
     }
     
+    //==========Navigation Helpers=============================
+    public void showContactOrUser () {
+    	if (userOrContactt == 'Contact') {
+    		
+    		
+    	}
+    	contactView = [SELECT Name, FirstName, LastName, Phone, Email FROM Contact WHERE Id=:searchedId][0];
+    	showContactView();
+    }
+    public String getUserOrContactName () {
+    	if (userOrContactt == 'Contact') {
+    		return [SELECT Name FROM Contact WHERE Id=:searchedId][0].Name;
+    	}
+    	else {
+    		return [SELECT Name FROM User WHERE Id=:searchedId][0].Name;
+    	}
+    }
     /*==================================================================================================================
     
     
